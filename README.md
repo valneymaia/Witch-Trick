@@ -38,4 +38,3 @@ pnpm build
 Com `pnpm dev` aberto em outro terminal, `pnpm smoke` verifica criação de sala, mãos privadas, jogada e reconexão.
 
 As regras de referência ficam em `REGRAS.md`. Criaturas ainda não aplicam efeitos nesta fase.
-

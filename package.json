@@ -1,0 +1,17 @@
+{
+  "name": "witch-trick",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @witch-trick/server --filter @witch-trick/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm --filter @witch-trick/engine test",
+    "simulate": "pnpm --filter @witch-trick/engine simulate",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.1",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@11.25.0"
+}
