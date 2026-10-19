@@ -44,4 +44,3 @@ As outras 44 cartas continuam fora do sorteio jogável até que seu texto seja i
 
 - A carta guardada pelo Titereiro para a rodada seguinte já é conhecida pelo dono antes da escolha de Ritual. Definir se isso impede usar um Ritual de olho cortado ou se a restrição vale apenas para as três criaturas novas.
 - Confirmar se os Rituais escolhidos de cada lote são os desejados antes de preparar as artes finais.
-

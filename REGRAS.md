@@ -104,4 +104,3 @@ O baralho oficial terá 48 Rituais. Cada jogador recebe três cartas de Ritual; 
 - "Magia Acelerada" aparece duas vezes com efeitos diferentes. Renomear uma.
 - Padronizar os termos "criatura", "feitiço", "ação", "naipe" (parece ser a Lua) e "partida" no lugar de "rodada" em algumas cartas.
 - 6 e 8 jogadores: definir tamanho da mão e ordem de jogada.
-

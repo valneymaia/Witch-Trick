@@ -42,4 +42,3 @@ Preparar as quatro artes individuais do primeiro lote indicado em `RITUAIS.md`, 
 - O modo de controle dos quatro assentos revela todas as mãos na própria aba e deve ser usado somente para testes. Para testar privacidade e multiplayer, use uma sala normal em quatro abas ou dispositivos.
 - A identidade de uma aba se perde quando ela é encerrada; atualizá-la mantém o assento.
 - Mago e Bruxa dependem das cartas de Ritual, ainda não implementadas. Partidas com 6 ou 8 pessoas também ficam para depois.
-

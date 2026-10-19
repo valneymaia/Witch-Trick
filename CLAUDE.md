@@ -66,4 +66,3 @@ Versão web do jogo de cartas/tabuleiro Witch's Trick, para jogar com amigos (em
 ## Escopo atual
 
 Fase 1, o MVP. Veja a seção "Escopo do MVP" no `REGRAS.md`.
-
