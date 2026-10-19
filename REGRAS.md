@@ -70,8 +70,9 @@ Como cada carta é única, nunca há empate total entre duas cartas.
 - O próximo assento na ordem de jogada responde. Se quem pediu é o último a jogar naquela vaza, responde o primeiro jogador daquela mesma vaza.
 - A sequência de valores é: 1 ponto inicial → **Double Trick** (2) → **Hat Trick** (3) → **Poker Trick** (4). Não há aumento acima de 4.
 - Aceitar eleva o valor da rodada e mantém a vez com quem pediu, que ainda pode escolher sua carta.
+- Em vez de aceitar ou recusar, quem recebe o pedido pode **contra-aumentar imediatamente** para o próximo nível, se ainda existir. Isso aceita o valor pedido e devolve a decisão a quem acabou de pedir. O turno de jogar carta continua pausado até terminar a sequência. Se o novo pedido for recusado, a equipe que contra-aumentou recebe o valor já aceito.
 - Recusar encerra a rodada imediatamente. A equipe de quem pediu ganha o valor **anterior**: 1 ao recusar Double, 2 ao recusar Hat, 3 ao recusar Poker.
-- Depois de um aumento aceito, somente a equipe adversária pode pedir o próximo aumento. O pedido pode vir de qualquer um dos dois jogadores dessa equipe, desde que seja sua vez antes da carta.
+- Depois de um aumento aceito, somente a equipe adversária pode pedir o próximo aumento durante as jogadas. O pedido pode vir de qualquer um dos dois jogadores dessa equipe, desde que seja sua vez antes da carta. O contra-aumento é a resposta imediata ao pedido pendente.
 - A equipe que ganha duas vazas recebe o valor aceito, limitado ao placar alvo de 15. A rodada seguinte recomeça em 1 ponto.
 - A tela mostra três luas na ordem das vazas: âmbar para a Equipe A, verde de poção para a Equipe B. Luas restantes ficam neutras. O resultado da rodada anterior preserva seu histórico de luas.
 

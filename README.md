@@ -11,15 +11,23 @@ pnpm install
 pnpm dev
 ```
 
-Abra `http://localhost:5173`. Para jogar pelo celular na mesma rede, abra `http://IP_DO_COMPUTADOR:5173`. Libere as portas 5173 e 3001 no firewall se necessário. O servidor mantém as salas apenas em memória; reiniciar o processo encerra as partidas em andamento.
+Abra `http://localhost:5173`. O servidor mantém as salas apenas em memória; reiniciar o processo encerra as partidas em andamento.
+
+### Testar com quatro dispositivos ou abas
+
+1. No computador que roda `pnpm dev`, execute `ipconfig` e encontre o endereço IPv4 da rede local (por exemplo, `192.168.0.15`).
+2. Deixe computador, celular e tablet na **mesma rede Wi-Fi**. Em cada dispositivo, abra `http://IP_DO_COMPUTADOR:5173`. No próprio computador, `http://localhost:5173` também funciona. Se a página não abrir, libere a porta **5173** no firewall do computador. O navegador usa essa mesma porta para as jogadas online.
+3. Em uma aba/dispositivo, escolha um nome e clique em **Criar sala**. Nos outros três, abra uma **nova aba pelo endereço** ou use outro dispositivo, escolha nomes distintos e entre com o código de 5 caracteres.
+4. Cada aba agora tem sua própria identidade. Atualizar a mesma aba recupera o assento; uma aba nova representa outro jogador. Evite **Duplicar guia**, pois alguns navegadores copiam a identidade da aba original.
+5. Para esse teste, crie uma sala normal. A opção **Testar sozinho** controla os quatro assentos em uma única tela.
 
 ## Jogar
 
 1. Uma pessoa cria uma sala e compartilha o código de 5 caracteres.
 2. Outras três entram com o código. A partida começa quando os quatro assentos estiverem ocupados.
-3. Na sua vez, antes de tocar numa carta, você pode pedir Double, Hat ou Poker Trick. O próximo jogador aceita ou recusa. Se recusar, a equipe que pediu recebe o valor anterior. Se aceitar, a rodada passa a valer 2, 3 ou 4 pontos. Só a equipe adversária pode fazer o próximo aumento.
+3. Na sua vez, antes de tocar numa carta, você pode pedir Double, Hat ou Poker Trick. O próximo jogador aceita, recusa ou já aumenta para o próximo Trick. Se recusar, a equipe que pediu recebe o valor anterior. Se aceitar, a rodada passa a valer 2, 3 ou 4 pontos. Ao contra-aumentar, o pedido anterior é aceito e quem pediu primeiro passa a responder.
 4. Toque em uma carta da mão para jogar. As três luas no topo mostram quem ganhou cada vaza em ordem: âmbar para a Equipe A, verde de poção para a B.
-5. Se a conexão cair, reabra a página no mesmo navegador. A identidade guardada no `localStorage` recupera o assento.
+5. Se a conexão cair, atualize a mesma aba. A identidade guardada no `sessionStorage` recupera o assento enquanto essa aba existir.
 
 Para testar sozinho, use **Testar sozinho: controlar os 4 assentos**. A tela mostra a mão de quem está na vez. Também é possível criar uma sala comum e usar **Preencher vagas com bots**.
 
@@ -36,6 +44,6 @@ pnpm simulate
 pnpm build
 ```
 
-Com `pnpm dev` aberto em outro terminal, `pnpm smoke` verifica criação de sala, mãos privadas, Trick, jogada e reconexão.
+Com `pnpm dev` aberto em outro terminal, `pnpm smoke` verifica quatro jogadores, mãos privadas, Trick com contra-aumento, jogada e reconexão.
 
 As regras de referência ficam em `REGRAS.md`. Criaturas ainda não aplicam efeitos nesta fase.

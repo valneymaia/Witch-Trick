@@ -46,6 +46,7 @@ export interface GameState {
 export type GameAction =
   | { type: 'play'; playerId: string; cardId: string }
   | { type: 'raise'; playerId: string }
+  | { type: 'counter'; playerId: string }
   | { type: 'respond'; playerId: string; accept: boolean };
 export const TARGET_SCORE = 15;
 export const ROUND_POINTS = 1;
@@ -113,6 +114,21 @@ export function reduce(state: GameState, action: GameAction): GameState {
     return {
       ...state, roundStake: pending.level, lastRaiseTeam: teamOf(pending.challengerSeat),
       pendingChallenge: null,
+    };
+  }
+  if (action.type === 'counter') {
+    const pending = state.pendingChallenge;
+    if (!pending || pending.responderSeat !== seat) throw new Error('Este jogador não pode aumentar o Trick.');
+    if (pending.level >= MAX_TRICK_POINTS) throw new Error('A aposta já está no máximo.');
+    return {
+      ...state,
+      roundStake: pending.level,
+      lastRaiseTeam: teamOf(pending.challengerSeat),
+      pendingChallenge: {
+        level: (pending.level + 1) as TrickLevel,
+        challengerSeat: seat,
+        responderSeat: pending.challengerSeat,
+      },
     };
   }
   if (state.pendingChallenge) throw new Error('Aguarde a resposta ao Trick.');

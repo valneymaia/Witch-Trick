@@ -120,6 +120,27 @@ describe('partida', () => {
   });
 });
 describe('Trick', () => {
+  it('quem recebe o pedido pode contra-aumentar na hora e devolver a decisão', () => {
+    let state = { ...createGame(ids, 7), turn: 0 };
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    expect(() => reduce(state, { type: 'counter', playerId: 'c' })).toThrow('não pode aumentar');
+    state = reduce(state, { type: 'counter', playerId: 'b' });
+    expect(state.roundStake).toBe(2);
+    expect(state.pendingChallenge).toEqual({ level: 3, challengerSeat: 1, responderSeat: 0 });
+    expect(state.turn).toBe(0);
+    expect(() => reduce(state, { type: 'play', playerId: 'a', cardId: state.hands[0]![0]! })).toThrow('Aguarde');
+    const declined = reduce(state, { type: 'respond', playerId: 'a', accept: false });
+    expect(declined.scores).toEqual([0, 2]);
+    expect(declined.lastRound?.points).toBe(2);
+    state = reduce(state, { type: 'counter', playerId: 'a' });
+    expect(state.roundStake).toBe(3);
+    expect(state.pendingChallenge).toEqual({ level: 4, challengerSeat: 0, responderSeat: 1 });
+    expect(() => reduce(state, { type: 'counter', playerId: 'b' })).toThrow('máximo');
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: true });
+    expect(state.roundStake).toBe(4);
+    expect(state.pendingChallenge).toBeNull();
+    expect(state.turn).toBe(0);
+  });
   it('só pode pedir na própria vez, antes de jogar; o próximo assento responde, inclusive após o último', () => {
     let state = createGame(ids, 4);
     state = { ...state, turn: 3, trick: [{ seat: 0, cardId: 'raven-new' }, { seat: 1, cardId: 'wolf-new' }, { seat: 2, cardId: 'fairy-new' }] };

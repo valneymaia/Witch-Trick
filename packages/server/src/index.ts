@@ -170,6 +170,19 @@ io.on('connection', socket => {
       botTurn(room);
     } catch (error) { fail(reply, error instanceof Error ? error.message : 'Resposta inválida.'); }
   });
+  socket.on('room:counter', (request: { seat?: unknown }, reply: Reply) => {
+    const room = rooms.get(socket.data.code);
+    if (!room?.game) return fail(reply, 'A partida ainda não começou.');
+    const ownerControls = room.testMode && socket.data.playerId === room.ownerId;
+    const seat = ownerControls ? Number(request?.seat) : room.seats.findIndex(item => item?.playerId === socket.data.playerId);
+    if (!Number.isInteger(seat) || seat < 0 || seat > 3) return fail(reply, 'Pedido inválido.');
+    try {
+      room.game = reduce(room.game, { type: 'counter', playerId: room.seats[seat]!.playerId });
+      reply({ ok: true, code: room.code });
+      emitRoom(room);
+      botTurn(room);
+    } catch (error) { fail(reply, error instanceof Error ? error.message : 'Pedido inválido.'); }
+  });
   socket.on('room:leave', () => {
     const room = rooms.get(socket.data.code);
     const playerId = socket.data.playerId;

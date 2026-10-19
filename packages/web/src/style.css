@@ -33,3 +33,60 @@
 .trick-raise,.trick-accept{background:#e8ac55;border:1px solid #ffd998;color:#271421}.trick-raise:hover:not(:disabled),.trick-accept:hover:not(:disabled){background:#ffcf7e}
 .trick-raise span{padding-left:7px}.trick-decline{background:#2a1a31;border:1px solid #ad8d9d;color:#ead4de}.trick-decline:hover:not(:disabled){background:#4a2a49}
 @media(max-width:600px){.vaza-progress{padding:12px 10px}.moon-track{gap:17px}.vaza-moon{width:47px;height:47px;font-size:34px}.moon-track-compact{gap:5px}.moon-track-compact .vaza-moon{width:22px;height:22px;font-size:16px}.last-round-note{padding:8px 10px}.last-round-note strong{font-size:10px}.trick-panel{padding:12px;align-items:stretch;flex-direction:column}.trick-actions{flex-wrap:wrap}.trick-panel button{flex:1}}
+
+.trick-counter{background:#365c51;border:1px solid #85d9bb;color:#dcfff0}
+.lobby-tip{font-size:12px!important;color:#d9b5ea!important;margin-top:0}
+.trick-counter:hover:not(:disabled){background:#477b6d}
+.score-row{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:14px}
+.score-row .scoreboard{width:100%;max-width:none;margin:0;grid-template-columns:minmax(0,1fr) 95px minmax(0,1fr);gap:8px}
+.score-row .team-score,.score-row .round-medallion{padding:10px 8px}
+.score-row .team-score strong{font-size:31px;line-height:1}
+.score-row .round-medallion strong{font-size:23px;line-height:1}
+.score-row .team-score span,.score-row .round-medallion span{font-size:8px}
+.score-row .vaza-progress{width:100%;max-width:none;margin:0;padding:9px 12px;gap:4px;justify-content:center}
+.score-row .vaza-heading strong{font-size:12px}
+.score-row .moon-track{gap:14px}
+.score-row .vaza-moon{width:42px;height:42px;font-size:30px}
+.score-row .vaza-progress{flex-direction:row;justify-content:space-around;min-height:72px}
+.score-row .vaza-heading{align-items:flex-start;text-align:left}
+.score-row .team-legend{flex-direction:column;gap:5px}
+.score-row .vaza-moon{width:37px;height:37px;font-size:27px}
+.score-row .moon-track{gap:10px}
+.game-layout{padding-top:12px;padding-bottom:22px}
+.game-topbar{margin-bottom:9px}
+.turn-banner{margin:9px 0 8px;font-size:14px}
+.trick-panel{max-width:1180px;margin-bottom:12px;padding:10px 14px;min-height:62px}
+.trick-panel strong{font-size:19px}
+.trick-panel button{padding:9px 11px}
+.table-area{max-width:1180px;min-height:255px;padding:17px 20px 15px;grid-template-columns:minmax(0,1fr) 220px}
+.played-cards{min-height:195px}
+.played-card .card{width:86px}
+.hand-area{max-width:1180px;margin-top:16px}
+.hand-heading h2{font-size:19px;margin-bottom:0}
+.hand-cards{min-height:0;margin-top:10px;gap:12px}
+.hand-cards .card{width:122px}
+.last-round-note{max-width:1180px;padding:4px 11px;margin-top:5px}
+.last-round-note .eyebrow{font-size:8px}.last-round-note strong{font-size:10px}
+@media(min-width:960px) and (max-height:850px){
+  .site-header{padding-top:10px;padding-bottom:10px}.brand-mark{width:35px;height:35px;font-size:27px}.brand strong{font-size:18px}
+  .table-area{min-height:180px;padding:10px 17px;grid-template-columns:minmax(0,1fr) 210px}
+  .table-area.challenge-open{min-height:155px}.challenge-open .played-cards{min-height:110px}.challenge-open .played-card .card{width:60px}
+  .played-cards{min-height:135px}.played-card .card{width:72px}
+  .empty-trick{font-size:55px}.table-seats{gap:5px}.table-seat{padding:6px}
+  .hand-area{margin-top:9px}.hand-cards{margin-top:5px}.hand-cards .card{width:90px}
+  .app-shell footer{padding:10px}
+}
+@media(max-width:959px){
+  .score-row{display:block}.score-row .scoreboard{max-width:790px;margin:20px auto 10px;grid-template-columns:1fr 110px 1fr}
+  .score-row .vaza-progress{max-width:790px;margin:14px auto 0;padding:12px;gap:8px;flex-direction:column}
+  .score-row .vaza-heading{align-items:center;text-align:center}.score-row .team-legend{flex-direction:row}
+  .table-area{grid-template-columns:1fr;min-height:345px;padding:25px}.played-cards{min-height:170px}
+  .hand-cards .card{width:min(29vw,130px)}
+}
+@media(max-width:600px){
+  .score-row .scoreboard{grid-template-columns:1fr 85px 1fr;gap:7px}
+  .score-row .team-score,.score-row .round-medallion{padding:9px 5px}
+  .score-row .team-score strong{font-size:27px}
+  .trick-panel button{white-space:normal;min-width:116px}
+  .table-area{padding:17px 10px;min-height:355px}
+}

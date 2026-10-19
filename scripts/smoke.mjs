@@ -65,7 +65,22 @@ try {
   await emit(returned, 'room:join', { code, playerId: players[1], name: 'Teste 2' });
   await pause();
   assert.equal(states.get(players[1]).game.seat, 1);
-  console.log('Sala, mãos privadas, Trick, jogada e reconexão: OK.');
+  const activeSockets = [...sockets];
+  activeSockets[1] = returned;
+  const nextTurn = states.get(players[0]).game.turn;
+  const nextResponder = (nextTurn + 1) % 4;
+  await emit(activeSockets[nextTurn], 'room:raise', {});
+  await assert.rejects(emit(activeSockets[(nextTurn + 2) % 4], 'room:counter', {}));
+  await emit(activeSockets[nextResponder], 'room:counter', {});
+  await pause();
+  assert.equal(states.get(players[0]).game.pendingChallenge.level, 3);
+  assert.equal(states.get(players[0]).game.pendingChallenge.responderSeat, nextTurn);
+  assert.equal(states.get(players[0]).game.roundStake, 2);
+  await emit(activeSockets[nextTurn], 'room:respond', { accept: true });
+  await pause();
+  assert.equal(states.get(players[0]).game.roundStake, 3);
+  assert.equal(states.get(players[0]).game.turn, nextTurn);
+  console.log('Quatro jogadores, mãos privadas, Trick com contra-aumento e reconexão: OK.');
 } finally {
   for (const socket of clients) socket.disconnect();
 }
