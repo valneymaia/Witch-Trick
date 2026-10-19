@@ -42,7 +42,7 @@ Versão web do jogo de cartas/tabuleiro Witch's Trick, para jogar com amigos (em
 
 ## Imagens das cartas
 
-- PNG de 800 x 1250 px, todas do mesmo tamanho, com a carta ocupando a página inteira.
+- Criaturas já importadas: PNG de 800 x 1250 px. Novos Rituais: arte individual de 800 x 1248 px, conforme decisão posterior do Valney. Cada carta ocupa a página inteira.
 - Ficam em `packages/web/public/cards/`, com nomes sem acento no formato `<criatura>-<lua>.png`. Exemplos: `bruxa-cheia.png`, `mago-nova.png`, `arcana-crescente.png`, e `verso.png` para o verso.
 - Se os arquivos vierem com o nome da cor em vez da Lua, mapeie: roxa = cheia, amarela = crescente, cinza = minguante, vermelha = nova.
 - Se vierem como zip numerado do Canva, a ordem das Luas dentro de cada criatura é: roxa, amarela, cinza, vermelha. Confirme comigo a ordem das criaturas antes de renomear em massa.
@@ -66,3 +66,4 @@ Versão web do jogo de cartas/tabuleiro Witch's Trick, para jogar com amigos (em
 ## Escopo atual
 
 Fase 1, o MVP. Veja a seção "Escopo do MVP" no `REGRAS.md`.
+

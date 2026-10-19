@@ -25,7 +25,16 @@
 
 ## Próximo passo
 
-Jogar uma partida real entre celular e PC com as habilidades, observar legibilidade e fluxo, e registrar qualquer bug reproduzível como teste antes da correção. Depois implementar os Rituais e ajustar implantação em VPS.
+Preparar as quatro artes individuais do primeiro lote indicado em `RITUAIS.md`, implementar a fase de escolha do Ritual com ocultação das mãos de criaturas, integrar os quatro efeitos e testar cada um no motor e no navegador. Depois continuar em lotes de quatro até completar as 48 cartas.
+
+## Preparação dos Rituais
+
+- [x] Baralho oficial de 48 cartas confirmado; três Rituais privados por jogador.
+- [x] Um Ritual obrigatório por rodada, alternando equipe e jogador responsável.
+- [x] Momento de escolha definido para cartas com ou sem olho cortado.
+- [x] Dimensão das novas artes corrigida para 800 × 1248 px; um arquivo por carta.
+- [x] Primeiro lote e pontos de teste documentados em `RITUAIS.md`.
+- [ ] Fluxo de Rituais no motor, servidor e interface; primeiro lote jogável.
 
 ## Limitações conhecidas
 
@@ -33,3 +42,4 @@ Jogar uma partida real entre celular e PC com as habilidades, observar legibilid
 - O modo de controle dos quatro assentos revela todas as mãos na própria aba e deve ser usado somente para testes. Para testar privacidade e multiplayer, use uma sala normal em quatro abas ou dispositivos.
 - A identidade de uma aba se perde quando ela é encerrada; atualizá-la mantém o assento.
 - Mago e Bruxa dependem das cartas de Ritual, ainda não implementadas. Partidas com 6 ou 8 pessoas também ficam para depois.
+

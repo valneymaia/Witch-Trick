@@ -95,9 +95,13 @@ Valem até o Valney dizer o contrário. Fáceis de trocar, então mantenha isola
 
 1. **Lobo vermelho.** O texto da carta diz "efeitos de Feitiços". Tratar como "efeitos de criaturas".
 
+## Rituais (Fase 2)
+
+O baralho oficial terá 48 Rituais. Cada jogador recebe três cartas de Ritual; uma carta é jogada por rodada pelo responsável, alternando as equipes e avançando pelos quatro assentos. As cartas com olho cortado são escolhidas antes de revelar as novas mãos de criaturas; as demais podem ser escolhidas depois. O Ritual usado vai ao descarte separado. Uma mão de Rituais vazia é reposta com três cartas; o descarte é reembaralhado quando o baralho acaba. A especificação de fases, artes e primeiro lote está em `RITUAIS.md`.
+
 ## Para fases futuras
 
-- O PDF de Rituais tem 48 cartas, mas as regras falam em 32. Definir quais ficam.
 - "Magia Acelerada" aparece duas vezes com efeitos diferentes. Renomear uma.
 - Padronizar os termos "criatura", "feitiço", "ação", "naipe" (parece ser a Lua) e "partida" no lugar de "rodada" em algumas cartas.
 - 6 e 8 jogadores: definir tamanho da mão e ordem de jogada.
+
