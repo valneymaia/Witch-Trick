@@ -120,3 +120,27 @@
 .scenario-panel button:hover:not(:disabled){background:#603678}.scenario-panel small{font-size:10px;color:#a88dba}
 @media(max-width:600px){.scenario-panel{gap:6px}.scenario-panel small{width:100%}}
 .table-seat.skipping-seat{border-color:#db9f69;background:#3d261fa8}.table-seat.skipping-seat small{color:#ffd0a4}
+
+.ritual-panel{max-width:1180px;margin:10px auto;padding:12px 16px;border:1px solid #9b6ec4;border-radius:14px;background:linear-gradient(115deg,#251434,#161022);box-shadow:0 8px 28px #07030e55}
+.ritual-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.ritual-panel h2{font:700 17px 'Cinzel',serif;color:#e8c2ff;margin:3px 0}
+.ritual-panel-heading p{font-size:12px;color:#e3cfed;margin:2px 0;line-height:1.4}
+.ritual-active-mark{border:1px solid #d1ae70;border-radius:999px;padding:5px 9px;color:#ffe0a1;font-size:10px;font-weight:700;white-space:nowrap}
+.ritual-choice-heading{display:flex;justify-content:space-between;gap:12px;margin:12px 0 8px;font-size:12px;color:#f0d9ff}
+.ritual-choice-heading small{color:#bfa7cf}
+.ritual-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}
+.ritual-choice{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-height:165px;padding:13px;border:1px solid #8c58b2;border-radius:11px;background:radial-gradient(circle at top,#43214e,#150e1c 75%)}
+.ritual-choice .ritual-symbol{font-size:24px;line-height:1;color:#cb83f0}
+.ritual-choice strong{font:700 15px 'Cinzel',serif;color:#fff0ff}
+.ritual-choice small{font-size:10px;color:#e0b9fa}
+.ritual-choice p{font-size:12px;line-height:1.4;color:#f5e9fb;margin:2px 0 auto}
+.ritual-choice button,.ritual-discard button{border:1px solid #d6b578;border-radius:8px;background:#875b32;color:#fff6e9;padding:8px 10px;font-size:12px;font-weight:700}
+.ritual-choice button:hover:not(:disabled),.ritual-discard button:hover:not(:disabled){background:#ac7842}
+.ritual-choice-actions{display:flex;gap:6px;flex-wrap:wrap}
+.ritual-reveal{margin-top:10px!important;padding:8px 12px!important;font-size:12px!important}
+.ritual-discard{margin-top:10px;color:#f5dcff;font-size:13px}
+.ritual-discard-options{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px}
+.ritual-discard-options>div{display:flex;align-items:center;gap:5px}
+.ritual-discard-preview{width:31px;height:44px;padding:0!important;overflow:hidden;background:#160e20!important}
+.ritual-discard-preview img{width:100%;height:100%;object-fit:cover}
+@media(max-width:600px){.ritual-panel{padding:11px}.ritual-choice-heading{flex-direction:column;gap:3px}.ritual-choices{grid-template-columns:1fr}.ritual-choice{min-height:0}.ritual-panel-heading{align-items:flex-start}}

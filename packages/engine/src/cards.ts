@@ -26,8 +26,8 @@ export const CREATURE_EFFECTS: Record<CreatureKind, { description: string; avail
   goblin: { description: 'Troque uma criatura sua por uma aleatória de um adversário. Se receber uma carta de valor menor que 5, sua equipe ganha 1 ponto.', available: true },
   griffin: { description: 'No início da próxima vaza, compre uma carta e depois descarte outra da sua mão.', available: true },
   familiar: { description: 'Sua equipe ganha 1 ponto.', available: true },
-  wizard: { description: 'Troque um Ritual seu por um Ritual aleatório de um adversário. Indisponível até os Rituais entrarem no jogo.', available: false },
-  witch: { description: 'Compre um Ritual extra e descarte outro da mão. Indisponível até os Rituais entrarem no jogo.', available: false },
+  wizard: { description: 'Troque um Ritual seu por um Ritual aleatório de um adversário.', available: true },
+  witch: { description: 'Compre um Ritual extra e descarte outro da sua mão de Rituais.', available: true },
 };
 export interface CreatureCard {
   id: string;

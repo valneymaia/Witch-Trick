@@ -1,5 +1,6 @@
-import { CARD_BY_ID, CREATURE_EFFECTS, type CreatureCard } from './cards.js';
-import { puppeteerChoices, teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
+import { CARD_BY_ID, type CreatureCard } from './cards.js';
+import { abilityAvailableFor, puppeteerChoices, teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
+import { ritualFromId, type RitualCard } from './rituals.js';
 
 export interface PlayerView {
   seat: number;
@@ -27,15 +28,25 @@ export interface GameView {
   lastTrickWinner: number | null;
   lastRoundWinner: Team | null;
   winner: Team | null;
+  ritualMode: boolean;
+  ritualPhase: GameState['ritualPhase'];
+  ritualChooser: number;
+  ritualDiscardSeat: number | null;
+  ritualHand: RitualCard[];
+  ritualHandCounts: number[];
+  ritualActive: RitualCard | null;
+  ritualPrediction: '2-0' | '2-1' | null;
+  ritualDiscardOptions: { value: string; card?: CreatureCard }[];
 }
-export interface AbilityOption { value: string; label: string; card?: CreatureCard; seat?: number }
+export interface AbilityOption { value: string; label: string; card?: CreatureCard; ritual?: RitualCard; seat?: number }
 export function abilityOptionsFor(state: GameState, seat: number): AbilityOption[] {
   const pending = state.pendingAbility;
   if (!pending || pending.seat !== seat) return [];
   const cardOption = (id: string): AbilityOption => ({ value: id, label: `${CARD_BY_ID[id]!.name} · Lua ${CARD_BY_ID[id]!.moon}`, card: CARD_BY_ID[id]! });
+  const ritualOption = (id: string): AbilityOption => ({ value: id, label: ritualFromId(id).name, ritual: ritualFromId(id) });
   const skip = { value: 'skip', label: 'Pular habilidade' };
   switch (pending.stage) {
-    case 'source': return [skip, ...state.hands[seat]!.filter(id => CREATURE_EFFECTS[CARD_BY_ID[id]!.kind].available).map(cardOption)];
+    case 'source': return [skip, ...state.hands[seat]!.filter(id => abilityAvailableFor(state, id)).map(cardOption)];
     case 'offer': return [{ value: 'use', label: 'Usar habilidade' }, skip];
     case 'puppet-card': return [skip, ...puppeteerChoices(state).map(cardOption)];
     case 'puppet-exchange': return state.hands[seat]!.filter(id => id !== pending.ownCardId).map(cardOption);
@@ -44,13 +55,26 @@ export function abilityOptionsFor(state: GameState, seat: number): AbilityOption
     case 'fairy-card': return (pending.candidates ?? []).map(cardOption);
     case 'goblin-own': return [skip, ...state.hands[seat]!.map(cardOption)];
     case 'griffin-discard': return state.hands[seat]!.map(cardOption);
+    case 'wizard-own': return [skip, ...state.ritualHands[seat]!.map(ritualOption)];
+    case 'wizard-target': return [skip, ...state.ritualHands.flatMap((hand, target): AbilityOption[] => teamOf(target) !== teamOf(seat) && hand.length ? [{ value: String(target), label: `Jogador ${target + 1}`, seat: target }] : [])];
+    case 'witch-discard': return state.ritualHands[seat]!.map(ritualOption);
   }
 }
 export function viewFor(state: GameState, playerId: string): GameView {
   const seat = state.playerIds.indexOf(playerId);
   if (seat < 0) throw new Error('Jogador não pertence a esta partida.');
+  const creaturesHidden = state.ritualMode && (state.ritualPhase === 'blind' || state.ritualPhase === 'blind-discard');
+  const visibleHand = creaturesHidden
+    ? state.ritualExchange?.seat === seat ? state.hands[seat]!.filter(id => !state.ritualExchange!.newCardIds.includes(id)) : []
+    : state.hands[seat]!;
+  const exchange = state.ritualExchange;
+  const discardOptions = exchange && exchange.seat === seat
+    ? exchange.newCardIds.map((id, index) => state.ritualPhase === 'blind-discard'
+      ? { value: String(index) }
+      : { value: id, card: CARD_BY_ID[id]! })
+    : [];
   return {
-    seat, hand: state.hands[seat]!.map(id => CARD_BY_ID[id]!),
+    seat, hand: visibleHand.map(id => CARD_BY_ID[id]!),
     players: state.hands.map((hand, playerSeat) => ({
       seat: playerSeat, handCount: hand.length,
       skipsNextTrick: state.skipNextTrickSeats.includes(playerSeat),
@@ -72,5 +96,12 @@ export function viewFor(state: GameState, playerId: string): GameView {
     roundStarter: state.roundStarter, turn: state.turn,
     lastTrickWinner: state.lastTrickWinner, lastRoundWinner: state.lastRoundWinner,
     winner: state.winner,
+    ritualMode: state.ritualMode, ritualPhase: state.ritualPhase, ritualChooser: state.ritualChooser,
+    ritualDiscardSeat: state.ritualExchange?.seat ?? null,
+    ritualHand: state.ritualHands[seat]!.map(ritualFromId),
+    ritualHandCounts: state.ritualHands.map(hand => hand.length),
+    ritualActive: state.ritualActiveId ? ritualFromId(state.ritualActiveId) : null,
+    ritualPrediction: state.ritualPrediction,
+    ritualDiscardOptions: discardOptions,
   };
 }

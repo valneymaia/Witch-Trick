@@ -13,10 +13,12 @@ export function createAbilityScenario(playerIds: GameState['playerIds'], kind: C
   const hands: GameState['hands'] = [[], [], [], []];
   for (let seat = 0; seat < 4; seat++) hands[seat]!.push(firstCards[seat]!);
   for (let i = 0; i < 8; i++) hands[i % 4]!.push(remaining.shift()!);
+  const ritualMode = kind === 'wizard' || kind === 'witch';
   let state: GameState = {
-    ...createGame(playerIds, 123), hands, deck: remaining, discard: [], trick: [],
+    ...createGame(playerIds, 123, ritualMode), hands, deck: remaining, discard: [], trick: [],
     trickWins: [0, 0], trickWinners: [], roundStarter: puppetDeclined ? 1 : 0, turn: puppetDeclined ? 1 : 0,
     scores: [0, 3], pendingChallenge: null, pendingAbility: null,
+    ritualPhase: ritualMode ? 'play' : 'off', ritualChooser: 0,
   };
   if (mode === 'declined') {
     if (puppetDeclined) {

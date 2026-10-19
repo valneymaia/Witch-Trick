@@ -1,10 +1,10 @@
-# Rituais: preparação da Fase 2
+# Rituais: primeiro lote jogável
 
-Esta especificação registra as decisões do Valney para o baralho separado de Rituais. As cartas ainda não estão ativas na partida digital. O PDF `cartas ritual oficial.pdf` é referência visual; o texto jogável será mantido também como dados e texto da interface.
+Esta especificação registra as decisões do Valney para o baralho separado de Rituais. Os quatro Rituais abaixo já estão ativos na partida digital com cartas provisórias em texto. O PDF `cartas ritual oficial.pdf` é referência visual; o texto jogável também fica disponível na interface.
 
 ## Baralho e mãos
 
-- O baralho oficial tem 48 Rituais distintos.
+- O baralho oficial terá 48 Rituais distintos. Enquanto as regras restantes são implementadas, o baralho de teste usa quatro cópias de cada um dos quatro Rituais ativos.
 - Cada jogador recebe três Rituais em uma mão privada.
 - Em cada rodada, exatamente um jogador joga um Ritual. O responsável segue a ordem dos assentos: 1 (Equipe A), 2 (Equipe B), 3 (Equipe A), 4 (Equipe B), repetindo. O primeiro responsável acompanha o assento inicial sorteado da partida.
 - O Ritual usado sai da mão e vai ao descarte de Rituais. Quando a mão de Rituais de um jogador acabar, ele compra três novas cartas, ou as que restarem no baralho.
@@ -35,10 +35,10 @@ As outras 44 cartas continuam fora do sorteio jogável até que seu texto seja i
 
 ## Arquivos de arte
 
-- Exportar **uma frente por arquivo**, em **800 × 1248 px**, sem margem externa. Manter o arquivo editável original e enviar PNG ou WebP.
+- Exportar **uma frente por arquivo**, em **800 × 1131 ou 1132 px**, conforme o arredondamento do editor para a altura original de 1131,4 px. Manter a mesma medida em todas as cartas, sem margem externa, e enviar PNG ou WebP junto do arquivo editável.
 - Nomes sugeridos: `mapa-do-destino.png`, `doblete-sombrio.png`, `magia-nula.png`, `silencio-da-bruxa.png`. O verso terá seu próprio arquivo.
 - Reservar o centro para ilustração e deixar título, olho cortado e regra com contraste forte. A regra deve ser legível no tamanho físico de celular, mas a interface também mostrará texto ampliável fora da imagem.
-- O layout renderiza a mesma arte menor em telas pequenas. Não é necessário criar outra resolução menor.
+- O layout exibirá a arte na proporção recebida, sem esticá-la. Não é necessário criar outra resolução menor.
 
 ## Carta guardada pelo Titereiro
 
