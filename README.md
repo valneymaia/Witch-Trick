@@ -34,6 +34,8 @@ Abra `http://localhost:5173`. O servidor mantém as salas apenas em memória; re
 
 Para testar sozinho, use **Testar sozinho: controlar os 4 assentos**. A tela mostra a mão de quem está na vez. Na barra **Testar habilidade**, selecione uma criatura e clique em **Vencer vaza com esta carta** ou **Simular Trick recusado**. Isso reinicia a partida de teste com cartas preparadas, permitindo testar até o Corvo sem depender do sorteio. Também é possível criar uma sala comum e usar **Preencher vagas com bots**.
 
+Para testar o Titereiro após Trick recusado, selecione **O Titereiro** e **Simular Trick recusado**. Arcana, Mago e Fada já estarão na mesa. Escolha o Titereiro da mão, recupere uma dessas cartas e descarte uma das três cartas novas da rodada seguinte.
+
 ## Desenvolvimento
 
 - `packages/engine`: regras puras, baralho, redução de ações e visão privada.

@@ -24,7 +24,7 @@ Na Fase 1 as criaturas são jogadas sem aplicar nenhum efeito.
 |---|---|---|
 | Arcana | sem círculo, maior de todas | sem efeito |
 | Corvo | 1 | A equipe adversária perde 2 pontos. |
-| O Titereiro | 2 | Recupere qualquer carta da pilha de descarte desta rodada, vencedora ou não, exceto outro Titereiro. Troque-a por uma carta da sua mão. Se a rodada acabou, faça a troca no início da próxima. |
+| O Titereiro | 2 | Recupere qualquer carta já jogada nesta rodada, vencedora ou não, exceto outro Titereiro. Se um Trick for recusado no meio de uma vaza, as cartas já postas na mesa também podem ser escolhidas. Troque a carta recuperada por uma da sua mão. Se a rodada acabou, receba três cartas novas junto com a recuperada e descarte uma das três novas. |
 | Lobo | 3 | Até o fim da rodada, a equipe adversária não pode usar os efeitos de criaturas. |
 | Fada | 4 | No início da próxima vaza, veja até 2 cartas da mão de um adversário e escolha uma delas para ser descartada. Esse adversário passa a próxima vaza, mesmo que ainda tenha cartas, e volta a jogar na seguinte, se houver. |
 | Goblin | 5 | Troque uma criatura sua por uma de um adversário, aleatoriamente. Se a recebida valer menos de 5, sua equipe ganha 1 ponto. |

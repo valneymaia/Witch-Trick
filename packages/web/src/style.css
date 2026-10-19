@@ -116,6 +116,7 @@
 .scenario-panel label{font-size:9px;letter-spacing:.14em;color:#cda4e8;font-weight:700;display:flex;align-items:center;gap:8px}
 .scenario-panel select,.scenario-panel button{border:1px solid #8f65a9;border-radius:7px;background:#39214d;color:#f4ddff;padding:6px 9px;font-size:11px}
 .ability-panel .ability-timing{color:#ffd58e;font-weight:700}
+.ability-panel.ability-card-picker{display:block}.ability-card-picker .ability-options{justify-content:flex-start;max-height:195px;overflow:auto;margin-top:9px}
 .scenario-panel button:hover:not(:disabled){background:#603678}.scenario-panel small{font-size:10px;color:#a88dba}
 @media(max-width:600px){.scenario-panel{gap:6px}.scenario-panel small{width:100%}}
 .table-seat.skipping-seat{border-color:#db9f69;background:#3d261fa8}.table-seat.skipping-seat small{color:#ffd0a4}

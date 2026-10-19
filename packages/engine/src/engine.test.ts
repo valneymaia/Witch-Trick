@@ -250,6 +250,13 @@ describe('habilidades de criaturas', () => {
       expect(viewFor(declined, 'a').abilityOptions.some(option => option.value === `${kind}-full`)).toBe(true);
     }
   });
+  it('cenário solo de Trick recusado oferece Arcana, Mago e Fada ao Titereiro', () => {
+    let state = createAbilityScenario(ids, 'puppeteer', 'declined');
+    expect(state.trick.map(play => play.cardId)).toEqual(['arcana-full', 'wizard-full', 'fairy-new']);
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'puppeteer-full' });
+    expect(viewFor(state, 'a').abilityOptions.map(option => option.value))
+      .toEqual(expect.arrayContaining(['arcana-full', 'wizard-full', 'fairy-new']));
+  });
   it('Trick recusado permite descartar um Corvo da mão e tirar dois pontos do rival', () => {
     let state = controlledState([
       ['raven-new', 'arcana-new'], ['witch-new'], ['wolf-new'], ['fairy-new'],
@@ -368,6 +375,39 @@ describe('habilidades de criaturas', () => {
     state = reduce(state, { type: 'ability', playerId: 'a', choice: exchanged });
     expect(state.hands[0]).toHaveLength(3);
     expect(state.discard).toContain(exchanged);
+  });
+  it('Titereiro recupera carta já jogada na vaza interrompida por Trick recusado', () => {
+    let state = controlledState([
+      ['fairy-new', 'raven-new'], ['puppeteer-full', 'familiar-new'],
+      ['arcana-full', 'wolf-new'], ['wizard-full', 'goblin-new'],
+    ], 2);
+    state = reduce(state, { type: 'play', playerId: 'c', cardId: 'arcana-full' });
+    state = reduce(state, { type: 'play', playerId: 'd', cardId: 'wizard-full' });
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: 'fairy-new' });
+    state = reduce(state, { type: 'raise', playerId: 'b' });
+    state = reduce(state, { type: 'respond', playerId: 'c', accept: false });
+    state = reduce(state, { type: 'ability', playerId: 'b', choice: 'puppeteer-full' });
+    expect(state.pendingAbility?.stage).toBe('puppet-card');
+    const options = viewFor(state, 'b').abilityOptions.map(option => option.value);
+    expect(options).toEqual(expect.arrayContaining(['arcana-full', 'wizard-full', 'fairy-new']));
+    expect(() => reduce(state, { type: 'ability', playerId: 'b', choice: 'wolf-new' })).toThrow();
+    state = reduce(state, { type: 'ability', playerId: 'b', choice: 'arcana-full' });
+    expect(state.round).toBe(2);
+    expect(state.scores).toEqual([0, 1]);
+    expect(state.hands[1]).toHaveLength(4);
+    expect(state.hands[1]).toContain('arcana-full');
+    expect(state.deck).not.toContain('arcana-full');
+    const exchangeOptions = viewFor(state, 'b').abilityOptions.map(option => option.value);
+    expect(exchangeOptions).toHaveLength(3);
+    expect(exchangeOptions).not.toContain('arcana-full');
+    const newCard = state.hands[1]!.find(id => id !== 'arcana-full')!;
+    state = reduce(state, { type: 'ability', playerId: 'b', choice: newCard });
+    expect(state.hands[1]).toHaveLength(3);
+    expect(state.hands[1]).toContain('arcana-full');
+    expect(state.discard).toContain(newCard);
+    const all = [...state.deck, ...state.hands.flat(), ...state.discard];
+    expect(all).toHaveLength(40);
+    expect(new Set(all).size).toBe(40);
   });
   it('Fada revela no máximo duas cartas só ao autor e descarta a escolhida', () => {
     let state = controlledState([

@@ -121,6 +121,10 @@ function finishRound(state: GameState, team: Team, reason: RoundResult['reason']
 function abilityBlocked(state: GameState, seat: number): boolean {
   return state.activeEffects.some(effect => effect.key === 'wolf' && teamOf(effect.ownerSeat) !== teamOf(seat));
 }
+export function puppeteerChoices(state: GameState): string[] {
+  return [...state.discard, ...state.trick.map(play => play.cardId)]
+    .filter(id => CARD_BY_ID[id]!.kind !== 'puppeteer');
+}
 function closeAbility(state: GameState): GameState {
   const pending = state.pendingAbility!;
   const clear = { ...state, pendingAbility: null };
@@ -149,7 +153,7 @@ function activateAbility(state: GameState): GameState {
   }
   if (kind === 'puppeteer') {
     if (!pending.endRound && !state.hands[pending.seat]!.length) return closeAbility(state);
-    const choices = state.discard.filter(id => CARD_BY_ID[id]!.kind !== 'puppeteer');
+    const choices = puppeteerChoices(state);
     return choices.length ? { ...state, pendingAbility: { ...pending, stage: 'puppet-card' } } : closeAbility(state);
   }
   if (kind === 'fairy') {
@@ -193,7 +197,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
   }
   if (pending.stage === 'puppet-card') {
     if (choice === 'skip') return closeAbility(state);
-    if (!state.discard.includes(choice) || CARD_BY_ID[choice]!.kind === 'puppeteer') throw new Error('Escolha uma carta válida do descarte.');
+    if (!puppeteerChoices(state).includes(choice)) throw new Error('Escolha uma carta já jogada nesta rodada.');
     if (pending.endRound) {
       const next = finishRound(state, pending.endRound.team, pending.endRound.reason, { seat, cardId: choice });
       return next.winner !== null ? next : { ...next, pendingAbility: { ...pending, stage: 'puppet-exchange', endRound: null, ownCardId: choice } };

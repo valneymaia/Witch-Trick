@@ -18,9 +18,10 @@
 - [x] Trick recusado: quem pediu escolhe e descarta uma carta da mão para usar a habilidade na próxima rodada.
 - [x] Leitura ampliada da carta e do poder no PC e no celular; Mago e Bruxa identificados como indisponíveis até os Rituais.
 - [x] Cenários solo para vencer uma vaza ou simular recusa com qualquer criatura disponível.
-- [x] Titereiro recupera carta vencedora ou perdedora de qualquer vaza já encerrada na rodada, inclusive após Trick recusado; se a rodada terminou, troca uma carta da nova mão pela recuperada.
+- [x] Titereiro recupera carta vencedora ou perdedora já jogada na rodada, inclusive da vaza interrompida por Trick recusado; se a rodada terminou, recebe três cartas novas mais a recuperada e descarta uma das três novas.
+- [x] Cenário solo de Trick recusado com Titereiro deixa Arcana, Mago e Fada na mesa para testar a recuperação sem depender do sorteio.
 - [x] Fada faz o adversário passar a próxima vaza mesmo quando ele ainda tem cartas; o adversário volta a jogar na vaza seguinte, se houver. A mesa indica quem está passando.
-- [x] Validação: 31 testes do motor, 2.000 partidas simuladas e compilação. Interface solo conferida no navegador com vitória e recusa do Corvo; teste de integração com quatro jogadores e contra-aumento realizado na etapa anterior.
+- [x] Validação: 33 testes do motor, 2.000 partidas simuladas e compilação. Interface solo conferida no navegador com Arcana, Mago e Fada elegíveis após Trick recusado, Arcana entrando como quarta carta na nova mão e descarte obrigatório de uma das três novas; teste de integração com quatro jogadores e contra-aumento realizado na etapa anterior.
 
 ## Próximo passo
 

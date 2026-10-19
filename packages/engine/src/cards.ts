@@ -20,7 +20,7 @@ export type CreatureKind = typeof CREATURES[number]['kind'];
 export const CREATURE_EFFECTS: Record<CreatureKind, { description: string; available: boolean }> = {
   arcana: { description: 'A Arcana não possui habilidade.', available: false },
   raven: { description: 'A equipe adversária perde 2 pontos.', available: true },
-  puppeteer: { description: 'Recupere qualquer carta da pilha de descarte desta rodada, exceto outro Titereiro, mesmo que ela tenha perdido a vaza. Troque-a por uma carta da sua mão. Se a rodada terminar, faça a troca no início da próxima.', available: true },
+  puppeteer: { description: 'Recupere qualquer carta já jogada nesta rodada, inclusive da vaza interrompida por um Trick recusado, exceto outro Titereiro. Ela pode ter vencido ou perdido. Troque-a por uma carta da sua mão. Se a rodada terminou, receba três cartas novas junto com a recuperada e descarte uma das três novas.', available: true },
   wolf: { description: 'Até o fim da rodada, a equipe adversária não pode usar habilidades de criaturas.', available: true },
   fairy: { description: 'No início da próxima vaza, veja até 2 cartas da mão de um adversário e escolha uma para descartar. Ele passa essa vaza e volta a jogar na seguinte, se houver.', available: true },
   goblin: { description: 'Troque uma criatura sua por uma aleatória de um adversário. Se receber uma carta de valor menor que 5, sua equipe ganha 1 ponto.', available: true },

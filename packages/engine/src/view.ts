@@ -1,5 +1,5 @@
 import { CARD_BY_ID, CREATURE_EFFECTS, type CreatureCard } from './cards.js';
-import { teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
+import { puppeteerChoices, teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
 
 export interface PlayerView {
   seat: number;
@@ -37,7 +37,7 @@ export function abilityOptionsFor(state: GameState, seat: number): AbilityOption
   switch (pending.stage) {
     case 'source': return [skip, ...state.hands[seat]!.filter(id => CREATURE_EFFECTS[CARD_BY_ID[id]!.kind].available).map(cardOption)];
     case 'offer': return [{ value: 'use', label: 'Usar habilidade' }, skip];
-    case 'puppet-card': return [skip, ...state.discard.filter(id => CARD_BY_ID[id]!.kind !== 'puppeteer').map(cardOption)];
+    case 'puppet-card': return [skip, ...puppeteerChoices(state).map(cardOption)];
     case 'puppet-exchange': return state.hands[seat]!.filter(id => id !== pending.ownCardId).map(cardOption);
     case 'fairy-target':
     case 'goblin-target': return [skip, ...state.hands.flatMap((hand, target): AbilityOption[] => teamOf(target) !== teamOf(seat) && hand.length ? [{ value: String(target), label: `Jogador ${target + 1}`, seat: target }] : [])];
