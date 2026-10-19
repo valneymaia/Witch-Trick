@@ -4,6 +4,7 @@ import { teamOf, type AbilityStage, type GameState, type PendingChallenge, type 
 export interface PlayerView {
   seat: number;
   handCount: number;
+  skipsNextTrick: boolean;
 }
 export interface GameView {
   seat: number;
@@ -50,7 +51,10 @@ export function viewFor(state: GameState, playerId: string): GameView {
   if (seat < 0) throw new Error('Jogador não pertence a esta partida.');
   return {
     seat, hand: state.hands[seat]!.map(id => CARD_BY_ID[id]!),
-    players: state.hands.map((hand, playerSeat) => ({ seat: playerSeat, handCount: hand.length })),
+    players: state.hands.map((hand, playerSeat) => ({
+      seat: playerSeat, handCount: hand.length,
+      skipsNextTrick: state.skipNextTrickSeats.includes(playerSeat),
+    })),
     trick: state.trick.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
     trickWins: [...state.trickWins], trickWinners: [...state.trickWinners],
     scores: [...state.scores], roundStake: state.roundStake,

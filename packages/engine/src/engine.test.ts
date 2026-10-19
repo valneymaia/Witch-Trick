@@ -350,6 +350,25 @@ describe('habilidades de criaturas', () => {
     expect(all).toHaveLength(40);
     expect(new Set(all).size).toBe(40);
   });
+  it('Titereiro recupera uma carta perdedora da vaza anterior após um Trick recusado', () => {
+    let state = controlledState([
+      ['arcana-full', 'puppeteer-full'], ['witch-new', 'raven-waning'],
+      ['raven-new', 'wolf-waning'], ['wizard-new', 'fairy-waning'],
+    ]);
+    state = playTrick(state, ['arcana-full', 'witch-new', 'raven-new', 'wizard-new']);
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'puppeteer-full' });
+    expect(viewFor(state, 'a').abilityOptions.map(option => option.value)).toContain('witch-new');
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'witch-new' });
+    expect(state.round).toBe(2);
+    expect(state.hands[0]).toContain('witch-new');
+    expect(state.hands[0]).toHaveLength(4);
+    const exchanged = state.hands[0]!.find(id => id !== 'witch-new')!;
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: exchanged });
+    expect(state.hands[0]).toHaveLength(3);
+    expect(state.discard).toContain(exchanged);
+  });
   it('Fada revela no máximo duas cartas só ao autor e descarta a escolhida', () => {
     let state = controlledState([
       ['fairy-full', 'arcana-new'], ['raven-new', 'wizard-new', 'witch-waning'],
@@ -365,7 +384,8 @@ describe('habilidades de criaturas', () => {
     state = reduce(state, { type: 'ability', playerId: 'a', choice: choices[0]! });
     expect(state.hands[1]).toHaveLength(1);
     state = reduce(state, { type: 'play', playerId: 'a', cardId: 'arcana-new' });
-    expect(state.turn).toBe(1);
+    expect(state.turn).toBe(2);
+    expect(state.hands[1]).toHaveLength(1);
   });
   it('se a Fada deixar o adversário sem cartas, ele passa a vez', () => {
     let state = controlledState([
@@ -379,6 +399,31 @@ describe('habilidades de criaturas', () => {
     state = reduce(state, { type: 'play', playerId: 'a', cardId: 'arcana-new' });
     expect(state.turn).toBe(2);
     expect(() => reduce(state, { type: 'play', playerId: 'b', cardId: 'wizard-new' })).toThrow();
+  });
+  it('a Fada faz o adversário pular a próxima vaza mesmo com carta, mas ele volta na seguinte', () => {
+    let state = controlledState([
+      ['fairy-full', 'raven-waning', 'wolf-waning'], ['raven-new', 'arcana-full', 'wizard-new'],
+      ['wolf-new', 'goblin-new', 'witch-waning'], ['puppeteer-new', 'arcana-new', 'raven-full'],
+    ]);
+    state = playTrick(state, ['fairy-full', 'raven-new', 'wolf-new', 'puppeteer-new']);
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'use' });
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: '1' });
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'wizard-new' });
+    expect(state.hands[1]).toEqual(['arcana-full']);
+    expect(viewFor(state, 'a').players[1]?.skipsNextTrick).toBe(true);
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: 'raven-waning' });
+    expect(state.turn).toBe(2);
+    expect(() => reduce(state, { type: 'play', playerId: 'b', cardId: 'arcana-full' })).toThrow();
+    state = reduce(state, { type: 'play', playerId: 'c', cardId: 'goblin-new' });
+    state = reduce(state, { type: 'play', playerId: 'd', cardId: 'arcana-new' });
+    expect(state.trickWinners).toEqual([0, 1]);
+    expect(state.hands[1]).toEqual(['arcana-full']);
+    expect(viewFor(state, 'a').players[1]?.skipsNextTrick).toBe(false);
+    state = reduce(state, { type: 'play', playerId: 'd', cardId: 'raven-full' });
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: 'wolf-waning' });
+    expect(state.turn).toBe(1);
+    state = reduce(state, { type: 'play', playerId: 'b', cardId: 'arcana-full' });
+    expect(state.turn).toBe(2);
   });
   it('Mago e Bruxa aguardam os Rituais e não podem ser ativados', () => {
     let state = controlledState([['witch-full'], ['raven-new'], ['wolf-new'], ['fairy-new']]);

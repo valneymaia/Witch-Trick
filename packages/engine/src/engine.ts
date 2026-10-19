@@ -40,6 +40,7 @@ export interface GameState {
   trick: PlayedCard[];
   trickWins: [number, number];
   trickWinners: Team[];
+  skipNextTrickSeats: number[];
   scores: [number, number];
   roundStake: number;
   lastRaiseTeam: Team | null;
@@ -87,7 +88,7 @@ function deal(state: GameState, reserved?: { seat: number; cardId: string }): Ga
   if (reserved) hands[reserved.seat]!.push(reserved.cardId);
   return {
     ...state, hands, deck: cards, discard: [], trick: [], trickWins: [0, 0],
-    trickWinners: [], roundStake: ROUND_POINTS, lastRaiseTeam: null,
+    trickWinners: [], skipNextTrickSeats: [], roundStake: ROUND_POINTS, lastRaiseTeam: null,
     pendingChallenge: null, pendingAbility: null, turn: state.roundStarter, rng: seed, activeEffects: [],
   };
 }
@@ -96,7 +97,7 @@ export function createGame(playerIds: [string, string, string, string], seed: nu
   const rng = nextRandom(seed || 0x9e3779b9);
   const state: GameState = {
     playerIds: [...playerIds], hands: [[], [], [], []], deck: [], discard: [], trick: [],
-    trickWins: [0, 0], trickWinners: [], scores: [0, 0], roundStake: ROUND_POINTS,
+    trickWins: [0, 0], trickWinners: [], skipNextTrickSeats: [], scores: [0, 0], roundStake: ROUND_POINTS,
     lastRaiseTeam: null, pendingChallenge: null, pendingAbility: null, lastRound: null,
     round: 1, roundStarter: rng % 4,
     turn: rng % 4, lastTrickWinner: null, lastRoundWinner: null, winner: null,
@@ -221,12 +222,11 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     if (!pending.candidates?.includes(choice) || pending.targetSeat === undefined) throw new Error('Escolha uma das cartas reveladas.');
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
     hands[pending.targetSeat] = hands[pending.targetSeat]!.filter(id => id !== choice);
-    let turn = state.turn;
-    if (!hands[turn]!.length && !state.trick.some(play => play.seat === turn)) {
-      turn = [1, 2, 3].map(offset => (turn + offset) % 4)
-        .find(candidate => !state.trick.some(play => play.seat === candidate) && hands[candidate]!.length) ?? turn;
-    }
-    return closeAbility({ ...state, hands, discard: [...state.discard, choice], turn });
+    const skipNextTrickSeats = [...new Set([...state.skipNextTrickSeats, pending.targetSeat])];
+    const turn = [0, 1, 2, 3].map(offset => (state.turn + offset) % 4)
+      .find(candidate => !state.trick.some(play => play.seat === candidate)
+        && !skipNextTrickSeats.includes(candidate) && hands[candidate]!.length) ?? state.turn;
+    return closeAbility({ ...state, hands, discard: [...state.discard, choice], skipNextTrickSeats, turn });
   }
   if (pending.stage === 'goblin-own') {
     if (choice === 'skip') return closeAbility(state);
@@ -311,9 +311,12 @@ export function reduce(state: GameState, action: GameAction): GameState {
     };
   }
   if (!state.hands[seat]!.includes(action.cardId)) throw new Error('Esta carta não está na sua mão.');
+  if (state.skipNextTrickSeats.includes(seat)) throw new Error('Este jogador deve passar esta vaza.');
   const hands = state.hands.map((hand, i) => i === seat ? hand.filter(id => id !== action.cardId) : [...hand]) as GameState['hands'];
   const trick = [...state.trick, { seat, cardId: action.cardId }];
-  const nextSeat = [1, 2, 3].map(offset => (seat + offset) % 4).find(candidate => !trick.some(play => play.seat === candidate) && hands[candidate]!.length);
+  const nextSeat = [1, 2, 3].map(offset => (seat + offset) % 4)
+    .find(candidate => !trick.some(play => play.seat === candidate)
+      && !state.skipNextTrickSeats.includes(candidate) && hands[candidate]!.length);
   if (nextSeat !== undefined) return { ...state, hands, trick, turn: nextSeat };
 
   const winningPlay = trick.reduce((best, play) =>
@@ -324,7 +327,7 @@ export function reduce(state: GameState, action: GameAction): GameState {
   trickWins[team]++;
   const discard = [...state.discard, ...trick.map(play => play.cardId)];
   const completed: GameState = {
-    ...state, hands, trick: [], discard, trickWins, turn: winningPlay.seat,
+    ...state, hands, trick: [], discard, trickWins, skipNextTrickSeats: [], turn: winningPlay.seat,
     lastTrickWinner: winningPlay.seat, trickWinners: [...state.trickWinners, team],
   };
   const roundEnds = trickWins[team] >= 2;

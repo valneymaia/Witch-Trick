@@ -24,9 +24,9 @@ Na Fase 1 as criaturas são jogadas sem aplicar nenhum efeito.
 |---|---|---|
 | Arcana | sem círculo, maior de todas | sem efeito |
 | Corvo | 1 | A equipe adversária perde 2 pontos. |
-| O Titereiro | 2 | Escolha uma carta da pilha de descarte, exceto "O Titereiro", e no início da próxima vaza adicione-a à sua mão. |
+| O Titereiro | 2 | Recupere qualquer carta da pilha de descarte desta rodada, vencedora ou não, exceto outro Titereiro. Troque-a por uma carta da sua mão. Se a rodada acabou, faça a troca no início da próxima. |
 | Lobo | 3 | Até o fim da rodada, a equipe adversária não pode usar os efeitos de criaturas. |
-| Fada | 4 | No início da próxima vaza, veja até 2 cartas da mão de um adversário e escolha uma delas para ser descartada. |
+| Fada | 4 | No início da próxima vaza, veja até 2 cartas da mão de um adversário e escolha uma delas para ser descartada. Esse adversário passa a próxima vaza, mesmo que ainda tenha cartas, e volta a jogar na seguinte, se houver. |
 | Goblin | 5 | Troque uma criatura sua por uma de um adversário, aleatoriamente. Se a recebida valer menos de 5, sua equipe ganha 1 ponto. |
 | Grifo | 6 | No início da próxima vaza, compre uma carta e depois coloque uma carta da sua mão na pilha de descarte. |
 | Familiar | 7 | Sua equipe ganha 1 ponto. |
@@ -93,8 +93,7 @@ Valem até o Valney dizer o contrário. Fáceis de trocar, então mantenha isola
 
 ## Pendências (perguntar antes de implementar)
 
-1. **Titereiro.** "No início da próxima" significa a próxima vaza? Confirmar na Fase 2.
-2. **Lobo vermelho.** O texto da carta diz "efeitos de Feitiços". Tratar como "efeitos de criaturas".
+1. **Lobo vermelho.** O texto da carta diz "efeitos de Feitiços". Tratar como "efeitos de criaturas".
 
 ## Para fases futuras
 

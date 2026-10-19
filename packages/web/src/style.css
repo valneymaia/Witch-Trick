@@ -118,3 +118,4 @@
 .ability-panel .ability-timing{color:#ffd58e;font-weight:700}
 .scenario-panel button:hover:not(:disabled){background:#603678}.scenario-panel small{font-size:10px;color:#a88dba}
 @media(max-width:600px){.scenario-panel{gap:6px}.scenario-panel small{width:100%}}
+.table-seat.skipping-seat{border-color:#db9f69;background:#3d261fa8}.table-seat.skipping-seat small{color:#ffd0a4}
