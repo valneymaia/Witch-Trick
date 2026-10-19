@@ -34,6 +34,8 @@ Preparar as quatro artes individuais do primeiro lote indicado em `RITUAIS.md`, 
 - [x] Momento de escolha definido para cartas com ou sem olho cortado.
 - [x] Dimensão das novas artes corrigida para 800 × 1248 px; um arquivo por carta.
 - [x] Primeiro lote e pontos de teste documentados em `RITUAIS.md`.
+- [x] Primeiro lote confirmado por Valney: Mapa do Destino, Doblete Sombrio, Magia Nula e Silêncio da Bruxa.
+- [x] Titereiro com Ritual de olho cortado: carta guardada conhecida; descarte cego de uma das três criaturas novas antes de revelá-las.
 - [ ] Fluxo de Rituais no motor, servidor e interface; primeiro lote jogável.
 
 ## Limitações conhecidas

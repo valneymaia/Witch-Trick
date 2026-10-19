@@ -22,7 +22,7 @@ O símbolo do olho cortado deve vir acompanhado do texto “Antes de ver as cria
 
 ## Primeiro lote de implementação
 
-Quatro Rituais, para exercitar os principais momentos sem ativar uma carta ainda sem regra:
+Primeiro lote confirmado pelo Valney: quatro Rituais para exercitar os principais momentos sem ativar uma carta ainda sem regra:
 
 | Ritual | Momento | Regra impressa | Teste principal |
 |---|---|---|---|
@@ -31,7 +31,7 @@ Quatro Rituais, para exercitar os principais momentos sem ativar uma carta ainda
 | Magia Nula | Depois de ver as criaturas | As habilidades das criaturas são desativadas nesta rodada. | Bloqueia poderes de vaza e de Trick recusado durante a rodada. |
 | Silêncio da Bruxa | Depois de ver as criaturas | Os adversários não podem pedir Trick nesta rodada. | Bloqueia pedido e contra-aumento da equipe adversária; a equipe que jogou o Ritual pode pedir. |
 
-As outras 44 cartas continuam fora do sorteio jogável até que seu texto seja implementado e testado. Essa seleção de quatro é uma proposta para o primeiro ciclo de testes; o baralho completo entra em jogo quando suas regras estiverem prontas.
+As outras 44 cartas continuam fora do sorteio jogável até que seu texto seja implementado e testado. O baralho completo entra em jogo quando suas regras estiverem prontas.
 
 ## Arquivos de arte
 
@@ -40,7 +40,8 @@ As outras 44 cartas continuam fora do sorteio jogável até que seu texto seja i
 - Reservar o centro para ilustração e deixar título, olho cortado e regra com contraste forte. A regra deve ser legível no tamanho físico de celular, mas a interface também mostrará texto ampliável fora da imagem.
 - O layout renderiza a mesma arte menor em telas pequenas. Não é necessário criar outra resolução menor.
 
-## Decisões ainda necessárias ao integrar efeitos
+## Carta guardada pelo Titereiro
 
-- A carta guardada pelo Titereiro para a rodada seguinte já é conhecida pelo dono antes da escolha de Ritual. Definir se isso impede usar um Ritual de olho cortado ou se a restrição vale apenas para as três criaturas novas.
-- Confirmar se os Rituais escolhidos de cada lote são os desejados antes de preparar as artes finais.
+- O dono pode escolher um Ritual de olho cortado mesmo conhecendo a criatura que guardou da rodada anterior. A restrição de visão vale para **as três criaturas novas**.
+- Se escolher um Ritual de olho cortado, ele seleciona **uma das três cartas novas pelo verso** para descartar, sem saber qual é. Só então as duas novas restantes são reveladas, junto com a carta guardada.
+- Se escolher ver as criaturas e depois jogar um Ritual sem olho cortado, ele pode ver as três novas e escolher qual delas descartar. A carta guardada pelo Titereiro permanece na mão.
