@@ -9,7 +9,9 @@
 - [x] Simulador de partidas com verificação de invariantes.
 - [x] Salas por código, quatro assentos, servidor autoritativo e reconexão por identidade local.
 - [x] Lobby, mesa, mão, placar, preenchimento com bots e controle dos quatro assentos em uma aba.
-- [x] Validação: 12 testes do motor, 2.000 partidas simuladas, compilação e teste de integração da sala.
+- [x] Três luas sequenciais no topo, com âmbar para a Equipe A e verde de poção para a B; histórico da rodada anterior.
+- [x] Double Trick, Hat Trick e Poker Trick: pedir antes da carta, resposta do próximo assento, aceite/recusa, aumento alternado e pontuação até 4.
+- [x] Validação: 16 testes do motor, 2.000 partidas simuladas, compilação e teste de integração da sala com Trick.
 
 ## Próximo passo
 
@@ -19,4 +21,4 @@ Jogar uma partida real entre celular e PC, observar legibilidade e fluxo, e regi
 
 - Salas e placares são perdidos se o servidor reiniciar.
 - O modo de controle dos quatro assentos revela todas as mãos na própria aba e deve ser usado somente para testes.
-- Efeitos de criaturas, Rituais, Trick e partidas com 6 ou 8 pessoas pertencem às fases seguintes.
+- Efeitos de criaturas, Rituais e partidas com 6 ou 8 pessoas pertencem às fases seguintes.

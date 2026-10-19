@@ -94,11 +94,15 @@ describe('partida', () => {
       ['fairy-new', 'fairy-waning', 'fairy-waxing'],
     ]);
     state = playTrick(state, ['arcana-full', 'raven-full', 'wolf-new', 'fairy-new']);
+    expect(state.trickWinners).toEqual([0]);
     state = playTrick(state, ['raven-new', 'arcana-new', 'wolf-waning', 'fairy-waning']);
     expect(state.trickWins).toEqual([1, 1]);
+    expect(state.trickWinners).toEqual([0, 1]);
     expect(state.round).toBe(1);
     state = playTrick(state, ['wizard-full', 'wolf-waxing', 'fairy-waxing', 'witch-full']);
     expect(state.round).toBe(2);
+    expect(state.trickWinners).toEqual([]);
+    expect(state.lastRound?.trickWinners).toEqual([0, 1, 0]);
   });
   it('encerra em 15 pontos', () => {
     let state = controlledState([['arcana-full'], ['witch-full'], ['raven-full'], ['wizard-full']]);
@@ -113,6 +117,89 @@ describe('partida', () => {
     const next = playTrick(state, ['raven-full', 'raven-new', 'wolf-new', 'fairy-new']);
     expect(next.scores).toEqual([0, 0]);
     expect(next.activeEffects).toEqual([]);
+  });
+});
+describe('Trick', () => {
+  it('só pode pedir na própria vez, antes de jogar; o próximo assento responde, inclusive após o último', () => {
+    let state = createGame(ids, 4);
+    state = { ...state, turn: 3, trick: [{ seat: 0, cardId: 'raven-new' }, { seat: 1, cardId: 'wolf-new' }, { seat: 2, cardId: 'fairy-new' }] };
+    expect(() => reduce(state, { type: 'raise', playerId: 'a' })).toThrow('Não é a vez');
+    state = reduce(state, { type: 'raise', playerId: 'd' });
+    expect(state.pendingChallenge).toEqual({ level: 2, challengerSeat: 3, responderSeat: 0 });
+    expect(state.turn).toBe(3);
+    expect(() => reduce(state, { type: 'play', playerId: 'd', cardId: state.hands[3]![0]! })).toThrow('Aguarde');
+    expect(() => reduce(state, { type: 'respond', playerId: 'b', accept: true })).toThrow('não pode responder');
+    state = reduce(state, { type: 'respond', playerId: 'a', accept: true });
+    expect(state.roundStake).toBe(2);
+    expect(state.turn).toBe(3);
+    expect(state.pendingChallenge).toBeNull();
+  });
+  it('Double, Hat e Poker Trick sobem de 1 a 4 e alternam as equipes', () => {
+    let state = { ...createGame(ids, 5), turn: 0 };
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: true });
+    expect(state.roundStake).toBe(2);
+    expect(() => reduce(state, { type: 'raise', playerId: 'a' })).toThrow('equipe adversária');
+    let partnerTurn = reduce(state, { type: 'play', playerId: 'a', cardId: state.hands[0]![0]! });
+    partnerTurn = reduce(partnerTurn, { type: 'play', playerId: 'b', cardId: partnerTurn.hands[1]![0]! });
+    expect(() => reduce(partnerTurn, { type: 'raise', playerId: 'c' })).toThrow('equipe adversária');
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: state.hands[0]![0]! });
+    state = reduce(state, { type: 'raise', playerId: 'b' });
+    expect(state.pendingChallenge?.level).toBe(3);
+    state = reduce(state, { type: 'respond', playerId: 'c', accept: true });
+    expect(state.roundStake).toBe(3);
+    state = reduce(state, { type: 'play', playerId: 'b', cardId: state.hands[1]![0]! });
+    state = reduce(state, { type: 'raise', playerId: 'c' });
+    expect(state.pendingChallenge?.level).toBe(4);
+    const declined = reduce(state, { type: 'respond', playerId: 'd', accept: false });
+    expect(declined.scores).toEqual([3, 0]);
+    expect(declined.lastRound?.points).toBe(3);
+    state = reduce(state, { type: 'respond', playerId: 'd', accept: true });
+    expect(state.roundStake).toBe(4);
+    expect(() => reduce(state, { type: 'raise', playerId: 'c' })).toThrow('máximo');
+  });
+  it('recusar entrega imediatamente à equipe que pediu a aposta anterior, sem consumir cartas', () => {
+    let state = { ...createGame(ids, 6), turn: 0, scores: [2, 4] as [number, number] };
+    const hands = state.hands.map(hand => [...hand]);
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    expect(state.roundStake).toBe(1);
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    expect(state.scores).toEqual([3, 4]);
+    expect(state.lastRound).toEqual({ winner: 0, points: 1, reason: 'declined', trickWinners: [] });
+    expect(state.round).toBe(2);
+    expect(state.roundStake).toBe(1);
+    expect(state.lastRaiseTeam).toBeNull();
+    expect(hands.map(hand => hand.length)).toEqual([3, 3, 3, 3]);
+
+    state = { ...state, turn: 0 };
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: true });
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: state.hands[0]![0]! });
+    state = reduce(state, { type: 'raise', playerId: 'b' });
+    state = reduce(state, { type: 'respond', playerId: 'c', accept: false });
+    expect(state.scores).toEqual([3, 6]);
+    expect(state.lastRound?.points).toBe(2);
+    expect(state.lastRound?.winner).toBe(1);
+  });
+  it('vitória por duas vazas entrega o valor aceito e encerra ao chegar a 15', () => {
+    let state = controlledState([
+      ['arcana-full', 'arcana-waxing'], ['witch-full', 'witch-waxing'],
+      ['raven-full', 'raven-waxing'], ['wizard-full', 'wizard-waxing'],
+    ]);
+    state = { ...state, scores: [12, 2] };
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: true });
+    state = playTrick(state, ['arcana-full', 'witch-full', 'raven-full', 'wizard-full']);
+    state = playTrick(state, ['arcana-waxing', 'witch-waxing', 'raven-waxing', 'wizard-waxing']);
+    expect(state.scores).toEqual([14, 2]);
+    expect(state.lastRound).toEqual({ winner: 0, points: 2, reason: 'tricks', trickWinners: [0, 0] });
+    expect(state.winner).toBeNull();
+    state = { ...state, scores: [14, 2], roundStake: 4, trickWins: [1, 0], trickWinners: [0], turn: 0,
+      hands: [['arcana-full'], ['witch-full'], ['raven-full'], ['wizard-full']] };
+    state = playTrick(state, ['arcana-full', 'witch-full', 'raven-full', 'wizard-full']);
+    expect(state.scores).toEqual([15, 2]);
+    expect(state.winner).toBe(0);
+    expect(state.lastRound?.points).toBe(4);
   });
 });
 describe('privacidade', () => {

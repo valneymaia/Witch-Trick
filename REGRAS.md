@@ -4,9 +4,9 @@ Fonte da verdade do projeto. Baseado no PDF de regras do jogo físico e nas deci
 
 ## Escopo do MVP (Fase 1)
 
-**Dentro:** sala online, 4 jogadores em 2 equipes de 2, baralho de 40 criaturas, 3 cartas por jogador, vazas, melhor de 3, desempate pelas Luas, placar até 15, fim de partida e reconexão.
+**Dentro:** sala online, 4 jogadores em 2 equipes de 2, baralho de 40 criaturas, 3 cartas por jogador, vazas, melhor de 3, desempate pelas Luas, Trick até Poker Trick, placar até 15, fim de partida e reconexão.
 
-**Fora (fases seguintes):** efeitos das criaturas, Trick/Double Trick/Hat Trick, feitiços (Rituais), 6 e 8 jogadores, animações e menus finais.
+**Fora (fases seguintes):** efeitos das criaturas, feitiços (Rituais), 6 e 8 jogadores, animações e menus finais.
 
 Na Fase 1 as criaturas são jogadas sem aplicar nenhum efeito.
 
@@ -59,17 +59,28 @@ Como cada carta é única, nunca há empate total entre duas cartas.
 1. Embaralhar as 40 criaturas e dar 3 a cada jogador.
 2. **Vaza:** o jogador inicial joga uma carta e os demais jogam em ordem. A maior carta vence (ver "Comparar duas cartas"). As cartas da vaza vão para a pilha de descarte.
 3. Quem venceu a vaza inicia a próxima.
-4. A primeira equipe a vencer 2 vazas vence a rodada. Cada rodada tem 2 ou 3 vazas. A equipe vencedora marca os pontos da rodada (no MVP, 1 ponto).
+4. A primeira equipe a vencer 2 vazas vence a rodada. Cada rodada tem 2 ou 3 vazas. A equipe vencedora marca o valor aceito para a rodada, inicialmente 1 ponto.
 5. Próxima rodada: juntar todas as cartas, embaralhar de novo e iniciar com o jogador seguinte ao que iniciou a rodada anterior.
 
 **Fim da partida:** a primeira equipe a chegar a 15 pontos vence.
+
+## Pedido de Trick
+
+- O jogador da vez pode pedir um Trick **antes de jogar sua carta**, em qualquer momento da rodada. Enquanto o pedido está pendente, ninguém joga carta.
+- O próximo assento na ordem de jogada responde. Se quem pediu é o último a jogar naquela vaza, responde o primeiro jogador daquela mesma vaza.
+- A sequência de valores é: 1 ponto inicial → **Double Trick** (2) → **Hat Trick** (3) → **Poker Trick** (4). Não há aumento acima de 4.
+- Aceitar eleva o valor da rodada e mantém a vez com quem pediu, que ainda pode escolher sua carta.
+- Recusar encerra a rodada imediatamente. A equipe de quem pediu ganha o valor **anterior**: 1 ao recusar Double, 2 ao recusar Hat, 3 ao recusar Poker.
+- Depois de um aumento aceito, somente a equipe adversária pode pedir o próximo aumento. O pedido pode vir de qualquer um dos dois jogadores dessa equipe, desde que seja sua vez antes da carta.
+- A equipe que ganha duas vazas recebe o valor aceito, limitado ao placar alvo de 15. A rodada seguinte recomeça em 1 ponto.
+- A tela mostra três luas na ordem das vazas: âmbar para a Equipe A, verde de poção para a Equipe B. Luas restantes ficam neutras. O resultado da rodada anterior preserva seu histórico de luas.
 
 ## Decisões assumidas para o MVP
 
 Valem até o Valney dizer o contrário. Fáceis de trocar, então mantenha isoladas em constantes ou funções pequenas.
 
 1. **Início da próxima rodada.** O PDF diz "o jogador imediatamente à esquerda de quem iniciou a rodada anterior". Assumido: é o próximo na ordem de jogada (assento + 1).
-2. **Pontos por rodada.** 1 ponto. O Trick eleva isso depois, até 4.
+2. **Pontos por rodada.** Começa em 1 ponto; um Trick aceito eleva até 4.
 3. **Carta que sobra.** Se a rodada acaba em 2 vazas, a terceira carta de cada jogador volta ao baralho sem efeito.
 
 ## Efeitos das criaturas (referência para a Fase 2)
@@ -89,5 +100,4 @@ Valem até o Valney dizer o contrário. Fáceis de trocar, então mantenha isola
 - O PDF de Rituais tem 48 cartas, mas as regras falam em 32. Definir quais ficam.
 - "Magia Acelerada" aparece duas vezes com efeitos diferentes. Renomear uma.
 - Padronizar os termos "criatura", "feitiço", "ação", "naipe" (parece ser a Lua) e "partida" no lugar de "rodada" em algumas cartas.
-- Trick: o desafio é lançado "ao jogador à sua esquerda". Usar a mesma definição da decisão assumida 1.
 - 6 e 8 jogadores: definir tamanho da mão e ordem de jogada.

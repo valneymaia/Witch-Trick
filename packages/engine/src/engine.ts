@@ -2,6 +2,18 @@ import { CARD_BY_ID, CARDS, compareCards } from './cards.js';
 
 export type Team = 0 | 1;
 export interface PlayedCard { seat: number; cardId: string }
+export type TrickLevel = 2 | 3 | 4;
+export interface PendingChallenge {
+  level: TrickLevel;
+  challengerSeat: number;
+  responderSeat: number;
+}
+export interface RoundResult {
+  winner: Team;
+  points: number;
+  reason: 'tricks' | 'declined';
+  trickWinners: Team[];
+}
 export interface ActiveEffect {
   key: string;
   ownerSeat: number;
@@ -16,7 +28,12 @@ export interface GameState {
   discard: string[];
   trick: PlayedCard[];
   trickWins: [number, number];
+  trickWinners: Team[];
   scores: [number, number];
+  roundStake: number;
+  lastRaiseTeam: Team | null;
+  pendingChallenge: PendingChallenge | null;
+  lastRound: RoundResult | null;
   round: number;
   roundStarter: number;
   turn: number;
@@ -26,9 +43,13 @@ export interface GameState {
   rng: number;
   activeEffects: ActiveEffect[];
 }
-export type GameAction = { type: 'play'; playerId: string; cardId: string };
+export type GameAction =
+  | { type: 'play'; playerId: string; cardId: string }
+  | { type: 'raise'; playerId: string }
+  | { type: 'respond'; playerId: string; accept: boolean };
 export const TARGET_SCORE = 15;
 export const ROUND_POINTS = 1;
+export const MAX_TRICK_POINTS = 4;
 export const teamOf = (seat: number): Team => (seat % 2) as Team;
 
 function nextRandom(seed: number): number {
@@ -51,7 +72,8 @@ function deal(state: GameState): GameState {
   for (let i = 0; i < 12; i++) hands[i % 4]!.push(cards.pop()!);
   return {
     ...state, hands, deck: cards, discard: [], trick: [], trickWins: [0, 0],
-    turn: state.roundStarter, rng: seed, activeEffects: [],
+    trickWinners: [], roundStake: ROUND_POINTS, lastRaiseTeam: null,
+    pendingChallenge: null, turn: state.roundStarter, rng: seed, activeEffects: [],
   };
 }
 export function createGame(playerIds: [string, string, string, string], seed: number): GameState {
@@ -59,17 +81,54 @@ export function createGame(playerIds: [string, string, string, string], seed: nu
   const rng = nextRandom(seed || 0x9e3779b9);
   const state: GameState = {
     playerIds: [...playerIds], hands: [[], [], [], []], deck: [], discard: [], trick: [],
-    trickWins: [0, 0], scores: [0, 0], round: 1, roundStarter: rng % 4,
+    trickWins: [0, 0], trickWinners: [], scores: [0, 0], roundStake: ROUND_POINTS,
+    lastRaiseTeam: null, pendingChallenge: null, lastRound: null,
+    round: 1, roundStarter: rng % 4,
     turn: rng % 4, lastTrickWinner: null, lastRoundWinner: null, winner: null,
     rng, activeEffects: [],
   };
   return deal(state);
 }
+function finishRound(state: GameState, team: Team, reason: RoundResult['reason']): GameState {
+  const scores = [...state.scores] as GameState['scores'];
+  scores[team] = Math.min(TARGET_SCORE, scores[team] + state.roundStake);
+  const result: RoundResult = {
+    winner: team, points: state.roundStake, reason,
+    trickWinners: [...state.trickWinners],
+  };
+  const completed: GameState = {
+    ...state, scores, lastRoundWinner: team, lastRound: result, pendingChallenge: null,
+  };
+  if (scores[team] >= TARGET_SCORE) return { ...completed, winner: team };
+  return deal({ ...completed, round: state.round + 1, roundStarter: (state.roundStarter + 1) % 4 });
+}
 export function reduce(state: GameState, action: GameAction): GameState {
   if (state.winner !== null) throw new Error('A partida terminou.');
-  if (action.type !== 'play') throw new Error('Ação desconhecida.');
   const seat = state.playerIds.indexOf(action.playerId);
-  if (seat < 0 || seat !== state.turn) throw new Error('Não é a vez desse jogador.');
+  if (seat < 0) throw new Error('Jogador não pertence à partida.');
+  if (action.type === 'respond') {
+    const pending = state.pendingChallenge;
+    if (!pending || pending.responderSeat !== seat) throw new Error('Este jogador não pode responder ao Trick.');
+    if (!action.accept) return finishRound({ ...state, pendingChallenge: null }, teamOf(pending.challengerSeat), 'declined');
+    return {
+      ...state, roundStake: pending.level, lastRaiseTeam: teamOf(pending.challengerSeat),
+      pendingChallenge: null,
+    };
+  }
+  if (state.pendingChallenge) throw new Error('Aguarde a resposta ao Trick.');
+  if (seat !== state.turn) throw new Error('Não é a vez desse jogador.');
+  if (action.type === 'raise') {
+    if (state.roundStake >= MAX_TRICK_POINTS) throw new Error('A aposta já está no máximo.');
+    if (state.lastRaiseTeam === teamOf(seat)) throw new Error('Só a equipe adversária pode aumentar a aposta.');
+    return {
+      ...state,
+      pendingChallenge: {
+        level: (state.roundStake + 1) as TrickLevel,
+        challengerSeat: seat,
+        responderSeat: (seat + 1) % 4,
+      },
+    };
+  }
   if (!state.hands[seat]!.includes(action.cardId)) throw new Error('Esta carta não está na sua mão.');
   const hands = state.hands.map((hand, i) => i === seat ? hand.filter(id => id !== action.cardId) : [...hand]) as GameState['hands'];
   const trick = [...state.trick, { seat, cardId: action.cardId }];
@@ -84,13 +143,8 @@ export function reduce(state: GameState, action: GameAction): GameState {
   const discard = [...state.discard, ...trick.map(play => play.cardId)];
   const completed: GameState = {
     ...state, hands, trick: [], discard, trickWins, turn: winningPlay.seat,
-    lastTrickWinner: winningPlay.seat,
+    lastTrickWinner: winningPlay.seat, trickWinners: [...state.trickWinners, team],
   };
   if (trickWins[team] < 2) return completed;
-
-  const scores = [...state.scores] as GameState['scores'];
-  scores[team] += ROUND_POINTS;
-  const afterRound: GameState = { ...completed, scores, lastRoundWinner: team };
-  if (scores[team] >= TARGET_SCORE) return { ...afterRound, winner: team };
-  return deal({ ...afterRound, round: state.round + 1, roundStarter: (state.roundStarter + 1) % 4 });
+  return finishRound(completed, team, 'tricks');
 }

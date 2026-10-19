@@ -29,7 +29,7 @@ Versão web do jogo de cartas/tabuleiro Witch's Trick, para jogar com amigos (em
 1. **Motor puro e determinístico.** Cada jogada é uma função do tipo `reduce(state, action) => state`. A aleatoriedade (embaralhar, sorteio) vem de um gerador com seed injetado, para os testes serem reproduzíveis.
 2. **O servidor manda.** Ele valida cada ação com o motor antes de atualizar o estado. O cliente nunca calcula o resultado.
 3. **Informação privada.** O cliente só recebe a própria mão e a quantidade de cartas dos outros. Deve existir uma função `viewFor(state, playerId)` com testes que garantam isso.
-4. **Preparar para o futuro, sem implementar ainda.** Efeitos temporários, modificadores de força, habilidades "no início da próxima vaza" ou "até o fim da rodada" e as ações de Trick vão entrar depois. Modele isso como dados no estado (lista de efeitos ativos com escopo e gatilho), nunca como ifs espalhados.
+4. **Preparar para o futuro.** Efeitos temporários, modificadores de força e habilidades "no início da próxima vaza" ou "até o fim da rodada" entram depois. As ações de Trick já estão no motor. Modele efeitos futuros como dados no estado (lista de efeitos ativos com escopo e gatilho), nunca como ifs espalhados.
 5. **Reconexão.** Cada jogador tem um `playerId` guardado no localStorage. Se cair e voltar, reassume o mesmo assento na mesma sala.
 6. **Dados das cartas num único lugar.** Um arquivo com id, tipo, valor, Lua, caminho da imagem e chave de efeito. Os efeitos ficam em módulos separados, um por criatura.
 

@@ -1,6 +1,6 @@
 # Witch's Trick
 
-Primeira versão jogável do jogo de vazas para 4 jogadores, em duas equipes. A equipe A ocupa os assentos 1 e 3; a B, 2 e 4. Cada pessoa recebe 3 criaturas por rodada. A equipe que vence 2 vazas marca 1 ponto; vence a partida quem chega a 15.
+Versão jogável do jogo de vazas para 4 jogadores, em duas equipes. A equipe A ocupa os assentos 1 e 3; a B, 2 e 4. Cada pessoa recebe 3 criaturas por rodada. A equipe que vence 2 vazas marca o valor da rodada, inicialmente 1 ponto; vence a partida quem chega a 15.
 
 ## Rodar
 
@@ -17,8 +17,9 @@ Abra `http://localhost:5173`. Para jogar pelo celular na mesma rede, abra `http:
 
 1. Uma pessoa cria uma sala e compartilha o código de 5 caracteres.
 2. Outras três entram com o código. A partida começa quando os quatro assentos estiverem ocupados.
-3. Na sua vez, toque em uma carta da mão. O servidor verifica a jogada e distribui o estado atualizado.
-4. Se a conexão cair, reabra a página no mesmo navegador. A identidade guardada no `localStorage` recupera o assento.
+3. Na sua vez, antes de tocar numa carta, você pode pedir Double, Hat ou Poker Trick. O próximo jogador aceita ou recusa. Se recusar, a equipe que pediu recebe o valor anterior. Se aceitar, a rodada passa a valer 2, 3 ou 4 pontos. Só a equipe adversária pode fazer o próximo aumento.
+4. Toque em uma carta da mão para jogar. As três luas no topo mostram quem ganhou cada vaza em ordem: âmbar para a Equipe A, verde de poção para a B.
+5. Se a conexão cair, reabra a página no mesmo navegador. A identidade guardada no `localStorage` recupera o assento.
 
 Para testar sozinho, use **Testar sozinho: controlar os 4 assentos**. A tela mostra a mão de quem está na vez. Também é possível criar uma sala comum e usar **Preencher vagas com bots**.
 
@@ -35,6 +36,6 @@ pnpm simulate
 pnpm build
 ```
 
-Com `pnpm dev` aberto em outro terminal, `pnpm smoke` verifica criação de sala, mãos privadas, jogada e reconexão.
+Com `pnpm dev` aberto em outro terminal, `pnpm smoke` verifica criação de sala, mãos privadas, Trick, jogada e reconexão.
 
 As regras de referência ficam em `REGRAS.md`. Criaturas ainda não aplicam efeitos nesta fase.

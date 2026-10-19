@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { randomBytes, randomInt } from 'node:crypto';
 import { Server, type Socket } from 'socket.io';
-import { CARD_BY_ID, createGame, reduce, viewFor, type GameState } from '@witch-trick/engine';
+import { CARD_BY_ID, createGame, reduce, viewFor, type GameState } from '../../engine/src/index.js';
 
 type Reply = (result: { ok: true; code: string } | { ok: false; error: string }) => void;
 interface Seat { playerId: string; name: string; bot: boolean }
@@ -11,6 +11,7 @@ interface Room {
   ownerId: string;
   testMode: boolean;
   game: GameState | null;
+  botTimer: ReturnType<typeof setTimeout> | null;
 }
 const rooms = new Map<string, Room>();
 const httpServer = createServer((_request, response) => {
@@ -64,13 +65,20 @@ function assign(socket: Socket, room: Room, playerId: string) {
   socket.join(room.code);
 }
 function botTurn(room: Room) {
-  if (!room.game || room.game.winner !== null) return;
-  const seat = room.game.turn;
+  if (!room.game || room.game.winner !== null || room.botTimer) return;
+  const seat = room.game.pendingChallenge?.responderSeat ?? room.game.turn;
   if (!room.seats[seat]?.bot) return;
-  setTimeout(() => {
-    if (!room.game || room.game.winner !== null || room.game.turn !== seat) return;
-    const cardId = room.game.hands[seat]![randomInt(room.game.hands[seat]!.length)]!;
-    room.game = reduce(room.game, { type: 'play', playerId: room.seats[seat]!.playerId, cardId });
+  room.botTimer = setTimeout(() => {
+    room.botTimer = null;
+    if (!room.game || room.game.winner !== null) return;
+    const actingSeat = room.game.pendingChallenge?.responderSeat ?? room.game.turn;
+    if (actingSeat !== seat || !room.seats[seat]?.bot) { botTurn(room); return; }
+    if (room.game.pendingChallenge) {
+      room.game = reduce(room.game, { type: 'respond', playerId: room.seats[seat]!.playerId, accept: true });
+    } else {
+      const cardId = room.game.hands[seat]![randomInt(room.game.hands[seat]!.length)]!;
+      room.game = reduce(room.game, { type: 'play', playerId: room.seats[seat]!.playerId, cardId });
+    }
     emitRoom(room);
     botTurn(room);
   }, 550);
@@ -80,7 +88,7 @@ io.on('connection', socket => {
   socket.on('room:create', (request: { playerId?: unknown; name?: unknown; testMode?: boolean }, reply: Reply) => {
     if (!validId(request?.playerId)) return fail(reply, 'Identidade do jogador inválida.');
     const code = roomCode();
-    const room: Room = { code, seats: [null, null, null, null], ownerId: request.playerId, testMode: !!request.testMode, game: null };
+    const room: Room = { code, seats: [null, null, null, null], ownerId: request.playerId, testMode: !!request.testMode, game: null, botTimer: null };
     if (room.testMode) {
       room.seats = Array.from({ length: 4 }, (_, seat) => ({
         playerId: seat === 0 ? request.playerId as string : `${request.playerId}-seat-${seat}`,
@@ -135,6 +143,32 @@ io.on('connection', socket => {
       emitRoom(room);
       botTurn(room);
     } catch (error) { fail(reply, error instanceof Error ? error.message : 'Jogada inválida.'); }
+  });
+  socket.on('room:raise', (request: { seat?: unknown }, reply: Reply) => {
+    const room = rooms.get(socket.data.code);
+    if (!room?.game) return fail(reply, 'A partida ainda não começou.');
+    const ownerControls = room.testMode && socket.data.playerId === room.ownerId;
+    const seat = ownerControls ? Number(request?.seat) : room.seats.findIndex(item => item?.playerId === socket.data.playerId);
+    if (!Number.isInteger(seat) || seat < 0 || seat > 3) return fail(reply, 'Pedido inválido.');
+    try {
+      room.game = reduce(room.game, { type: 'raise', playerId: room.seats[seat]!.playerId });
+      reply({ ok: true, code: room.code });
+      emitRoom(room);
+      botTurn(room);
+    } catch (error) { fail(reply, error instanceof Error ? error.message : 'Pedido inválido.'); }
+  });
+  socket.on('room:respond', (request: { accept?: unknown; seat?: unknown }, reply: Reply) => {
+    const room = rooms.get(socket.data.code);
+    if (!room?.game) return fail(reply, 'A partida ainda não começou.');
+    const ownerControls = room.testMode && socket.data.playerId === room.ownerId;
+    const seat = ownerControls ? Number(request?.seat) : room.seats.findIndex(item => item?.playerId === socket.data.playerId);
+    if (!Number.isInteger(seat) || seat < 0 || seat > 3 || typeof request?.accept !== 'boolean') return fail(reply, 'Resposta inválida.');
+    try {
+      room.game = reduce(room.game, { type: 'respond', playerId: room.seats[seat]!.playerId, accept: request.accept });
+      reply({ ok: true, code: room.code });
+      emitRoom(room);
+      botTurn(room);
+    } catch (error) { fail(reply, error instanceof Error ? error.message : 'Resposta inválida.'); }
   });
   socket.on('room:leave', () => {
     const room = rooms.get(socket.data.code);

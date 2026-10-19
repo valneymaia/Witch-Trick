@@ -1,5 +1,5 @@
 import { CARD_BY_ID, type CreatureCard } from './cards.js';
-import type { GameState, Team } from './engine.js';
+import type { GameState, PendingChallenge, RoundResult, Team } from './engine.js';
 
 export interface PlayerView {
   seat: number;
@@ -11,7 +11,12 @@ export interface GameView {
   players: PlayerView[];
   trick: { seat: number; card: CreatureCard }[];
   trickWins: [number, number];
+  trickWinners: Team[];
   scores: [number, number];
+  roundStake: number;
+  lastRaiseTeam: Team | null;
+  pendingChallenge: PendingChallenge | null;
+  lastRound: RoundResult | null;
   round: number;
   roundStarter: number;
   turn: number;
@@ -26,7 +31,12 @@ export function viewFor(state: GameState, playerId: string): GameView {
     seat, hand: state.hands[seat]!.map(id => CARD_BY_ID[id]!),
     players: state.hands.map((hand, playerSeat) => ({ seat: playerSeat, handCount: hand.length })),
     trick: state.trick.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
-    trickWins: [...state.trickWins], scores: [...state.scores], round: state.round,
+    trickWins: [...state.trickWins], trickWinners: [...state.trickWinners],
+    scores: [...state.scores], roundStake: state.roundStake,
+    lastRaiseTeam: state.lastRaiseTeam,
+    pendingChallenge: state.pendingChallenge && { ...state.pendingChallenge },
+    lastRound: state.lastRound && { ...state.lastRound, trickWinners: [...state.lastRound.trickWinners] },
+    round: state.round,
     roundStarter: state.roundStarter, turn: state.turn,
     lastTrickWinner: state.lastTrickWinner, lastRoundWinner: state.lastRoundWinner,
     winner: state.winner,
