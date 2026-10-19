@@ -90,3 +90,31 @@
   .trick-panel button{white-space:normal;min-width:116px}
   .table-area{padding:17px 10px;min-height:355px}
 }
+
+.hand-card{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
+.card-read{border:1px solid #9d73b7;border-radius:8px;background:#2c193e;color:#f5dfff;padding:5px 10px;font-size:12px;font-weight:700;white-space:nowrap}
+.card-read:hover,.card-read:focus-visible{background:#583276;outline:2px solid #d6a7ef;outline-offset:2px}
+.played-card .card-read{font-size:10px;padding:3px 7px}
+.card-dialog-backdrop{position:fixed;inset:0;z-index:20;background:#090412de;display:grid;place-items:center;padding:18px}
+.card-dialog{position:relative;width:min(770px,100%);max-height:min(90vh,750px);overflow:auto;display:grid;grid-template-columns:minmax(170px,280px) minmax(0,1fr);gap:25px;align-items:center;padding:25px;border:1px solid #ac7ccd;border-radius:18px;background:#241432;box-shadow:0 25px 80px #000b}
+.card-dialog img{width:100%;height:auto;border-radius:10px;border:1px solid #9973ad}
+.card-dialog-text h2{font:700 30px 'Cinzel',serif;margin:12px 0 22px}
+.card-dialog-text h3{font:700 17px 'Cinzel',serif;color:#efc379;margin:0 0 8px}
+.card-dialog-text p{font-size:18px;line-height:1.55;color:#fff1fc;margin:0 0 22px}
+.card-dialog-text strong{display:block;color:#ffc494;margin-bottom:20px}
+.card-dialog-text .secondary-button{margin:20px 0 0}
+.card-dialog-close{position:absolute;right:9px;top:7px;border:0;background:transparent;color:#f1dbff;font-size:30px;width:40px;height:40px}
+@media(max-width:600px){.card-dialog{grid-template-columns:1fr;gap:12px;padding:17px}.card-dialog img{width:min(45vw,190px);margin:auto}.card-dialog-text h2{font-size:24px;margin:6px 0 12px}.card-dialog-text p{font-size:16px;margin-bottom:12px}.card-dialog-text .secondary-button{min-height:40px;margin-top:10px}.hand-card .card-read{font-size:11px;padding:5px}}
+.ability-panel{max-width:1180px;margin:0 auto 12px;padding:12px 16px;border:1px solid #dbb86d;border-radius:13px;background:linear-gradient(120deg,#463029,#25152d);display:flex;align-items:center;justify-content:space-between;gap:18px}
+.ability-panel>div:first-child{min-width:180px}.ability-panel strong{display:block;margin:4px 0;color:#ffdfa0;font:600 15px 'Cinzel',serif}.ability-panel p{font-size:12px;line-height:1.45;margin:4px 0;color:#f3e5f9}
+.ability-options{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px;max-height:160px;overflow:auto}
+.ability-option{display:flex;align-items:center;gap:4px}.ability-select{border:1px solid #ddc08b;border-radius:8px;background:#80562d;color:#fff4e3;padding:9px 11px;font-size:12px;font-weight:700}.ability-select:hover:not(:disabled),.ability-select:focus-visible{background:#a67539;outline:2px solid #ffe4a4;outline-offset:1px}
+.ability-preview{height:38px;width:28px;border:1px solid #bf9bcc;border-radius:4px;padding:0;overflow:hidden;background:#130a1c}.ability-preview img{display:block;width:100%;height:100%;object-fit:cover}
+@media(max-width:700px){.ability-panel{flex-direction:column;align-items:stretch;padding:12px}.ability-options{justify-content:flex-start;max-height:190px}.ability-select{white-space:normal;text-align:left}}
+.wolf-notice{max-width:1180px;margin:8px auto;padding:8px 12px;border:1px solid #8ac6ad;border-radius:9px;background:#1c3b32;color:#d9fff1;text-align:center;font-size:12px;font-weight:700}
+.scenario-panel{max-width:1180px;margin:0 auto 10px;padding:7px 10px;border:1px solid #765591;border-radius:10px;background:#1d122aa8;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.scenario-panel label{font-size:9px;letter-spacing:.14em;color:#cda4e8;font-weight:700;display:flex;align-items:center;gap:8px}
+.scenario-panel select,.scenario-panel button{border:1px solid #8f65a9;border-radius:7px;background:#39214d;color:#f4ddff;padding:6px 9px;font-size:11px}
+.ability-panel .ability-timing{color:#ffd58e;font-weight:700}
+.scenario-panel button:hover:not(:disabled){background:#603678}.scenario-panel small{font-size:10px;color:#a88dba}
+@media(max-width:600px){.scenario-panel{gap:6px}.scenario-panel small{width:100%}}

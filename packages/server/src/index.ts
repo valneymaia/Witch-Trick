@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { randomBytes, randomInt } from 'node:crypto';
 import { Server, type Socket } from 'socket.io';
-import { CARD_BY_ID, createGame, reduce, viewFor, type GameState } from '../../engine/src/index.js';
+import { CARD_BY_ID, CREATURE_EFFECTS, abilityOptionsFor, createAbilityScenario, createGame, reduce, viewFor, type CreatureKind, type GameState } from '../../engine/src/index.js';
 
 type Reply = (result: { ok: true; code: string } | { ok: false; error: string }) => void;
 interface Seat { playerId: string; name: string; bot: boolean }
@@ -48,6 +48,9 @@ function emitRoom(room: Room) {
       seat: index, name: item.name, bot: item.bot, online: room.testMode || item.bot || connected(room, item.playerId),
     }));
     const game = room.game ? viewFor(room.game, playerId) : null;
+    if (game && room.testMode && room.ownerId === playerId && room.game?.pendingAbility) {
+      game.abilityOptions = abilityOptionsFor(room.game, room.game.pendingAbility.seat);
+    }
     const allHands = room.testMode && room.ownerId === playerId && room.game
       ? room.game.hands.map(hand => hand.map(id => CARD_BY_ID[id]!))
       : undefined;
@@ -66,14 +69,19 @@ function assign(socket: Socket, room: Room, playerId: string) {
 }
 function botTurn(room: Room) {
   if (!room.game || room.game.winner !== null || room.botTimer) return;
-  const seat = room.game.pendingChallenge?.responderSeat ?? room.game.turn;
+  const seat = room.game.pendingAbility?.seat ?? room.game.pendingChallenge?.responderSeat ?? room.game.turn;
   if (!room.seats[seat]?.bot) return;
   room.botTimer = setTimeout(() => {
     room.botTimer = null;
     if (!room.game || room.game.winner !== null) return;
-    const actingSeat = room.game.pendingChallenge?.responderSeat ?? room.game.turn;
+    const actingSeat = room.game.pendingAbility?.seat ?? room.game.pendingChallenge?.responderSeat ?? room.game.turn;
     if (actingSeat !== seat || !room.seats[seat]?.bot) { botTurn(room); return; }
-    if (room.game.pendingChallenge) {
+    if (room.game.pendingAbility) {
+      const choices = abilityOptionsFor(room.game, seat);
+      const choice = choices.find(option => option.value === 'skip')?.value ?? choices[0]?.value;
+      if (!choice) return;
+      room.game = reduce(room.game, { type: 'ability', playerId: room.seats[seat]!.playerId, choice });
+    } else if (room.game.pendingChallenge) {
       room.game = reduce(room.game, { type: 'respond', playerId: room.seats[seat]!.playerId, accept: true });
     } else {
       const cardId = room.game.hands[seat]![randomInt(room.game.hands[seat]!.length)]!;
@@ -182,6 +190,29 @@ io.on('connection', socket => {
       emitRoom(room);
       botTurn(room);
     } catch (error) { fail(reply, error instanceof Error ? error.message : 'Pedido inválido.'); }
+  });
+  socket.on('room:ability', (request: { choice?: unknown; seat?: unknown }, reply: Reply) => {
+    const room = rooms.get(socket.data.code);
+    if (!room?.game) return fail(reply, 'A partida ainda não começou.');
+    const ownerControls = room.testMode && socket.data.playerId === room.ownerId;
+    const seat = ownerControls ? Number(request?.seat) : room.seats.findIndex(item => item?.playerId === socket.data.playerId);
+    if (!Number.isInteger(seat) || seat < 0 || seat > 3 || typeof request?.choice !== 'string') return fail(reply, 'Escolha inválida.');
+    try {
+      room.game = reduce(room.game, { type: 'ability', playerId: room.seats[seat]!.playerId, choice: request.choice });
+      reply({ ok: true, code: room.code });
+      emitRoom(room);
+      botTurn(room);
+    } catch (error) { fail(reply, error instanceof Error ? error.message : 'Escolha inválida.'); }
+  });
+  socket.on('room:testAbility', (request: { kind?: unknown; mode?: unknown }, reply: Reply) => {
+    const room = rooms.get(socket.data.code);
+    if (!room?.game || !room.testMode || socket.data.playerId !== room.ownerId) return fail(reply, 'Cenários disponíveis apenas no teste solo.');
+    if (typeof request?.kind !== 'string' || !(request.kind in CREATURE_EFFECTS) || (request.mode !== 'trick' && request.mode !== 'declined')) return fail(reply, 'Cenário inválido.');
+    try {
+      room.game = createAbilityScenario(room.seats.map(seat => seat!.playerId) as GameState['playerIds'], request.kind as CreatureKind, request.mode);
+      reply({ ok: true, code: room.code });
+      emitRoom(room);
+    } catch (error) { fail(reply, error instanceof Error ? error.message : 'Cenário inválido.'); }
   });
   socket.on('room:leave', () => {
     const room = rooms.get(socket.data.code);

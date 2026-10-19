@@ -27,9 +27,12 @@ Abra `http://localhost:5173`. O servidor mantém as salas apenas em memória; re
 2. Outras três entram com o código. A partida começa quando os quatro assentos estiverem ocupados.
 3. Na sua vez, antes de tocar numa carta, você pode pedir Double, Hat ou Poker Trick. O próximo jogador aceita, recusa ou já aumenta para o próximo Trick. Se recusar, a equipe que pediu recebe o valor anterior. Se aceitar, a rodada passa a valer 2, 3 ou 4 pontos. Ao contra-aumentar, o pedido anterior é aceito e quem pediu primeiro passa a responder.
 4. Toque em uma carta da mão para jogar. As três luas no topo mostram quem ganhou cada vaza em ordem: âmbar para a Equipe A, verde de poção para a B.
-5. Se a conexão cair, atualize a mesma aba. A identidade guardada no `sessionStorage` recupera o assento enquanto essa aba existir.
+5. Ao vencer uma vaza com uma criatura que possui habilidade, escolha **Usar habilidade** ou **Pular habilidade**. O efeito entra antes da vaza seguinte. Se a vaza encerrou a rodada, a decisão é feita agora e o efeito entra na rodada seguinte.
+6. Quando um Trick é recusado, quem pediu escolhe uma carta da própria mão, descarta essa carta e ativa a habilidade na rodada seguinte. Também pode pular.
+7. Use **Ler carta** para ampliar a arte e ver o texto da habilidade em fonte legível no PC ou celular. Mago e Bruxa aguardam os Rituais; Arcana não possui habilidade.
+8. Se a conexão cair, atualize a mesma aba. A identidade guardada no `sessionStorage` recupera o assento enquanto essa aba existir.
 
-Para testar sozinho, use **Testar sozinho: controlar os 4 assentos**. A tela mostra a mão de quem está na vez. Também é possível criar uma sala comum e usar **Preencher vagas com bots**.
+Para testar sozinho, use **Testar sozinho: controlar os 4 assentos**. A tela mostra a mão de quem está na vez. Na barra **Testar habilidade**, selecione uma criatura e clique em **Vencer vaza com esta carta** ou **Simular Trick recusado**. Isso reinicia a partida de teste com cartas preparadas, permitindo testar até o Corvo sem depender do sorteio. Também é possível criar uma sala comum e usar **Preencher vagas com bots**.
 
 ## Desenvolvimento
 
@@ -46,4 +49,4 @@ pnpm build
 
 Com `pnpm dev` aberto em outro terminal, `pnpm smoke` verifica quatro jogadores, mãos privadas, Trick com contra-aumento, jogada e reconexão.
 
-As regras de referência ficam em `REGRAS.md`. Criaturas ainda não aplicam efeitos nesta fase.
+As regras de referência ficam em `REGRAS.md`. Estão ativos os poderes de Corvo, Titereiro, Lobo, Fada, Goblin, Grifo e Familiar. Arcana não tem poder; Mago e Bruxa entram quando os Rituais forem implementados.

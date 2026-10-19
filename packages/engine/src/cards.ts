@@ -17,6 +17,18 @@ export const CREATURES = [
   { kind: 'witch', name: 'A Bruxa', value: 9, effectKey: 'witch' },
 ] as const;
 export type CreatureKind = typeof CREATURES[number]['kind'];
+export const CREATURE_EFFECTS: Record<CreatureKind, { description: string; available: boolean }> = {
+  arcana: { description: 'A Arcana não possui habilidade.', available: false },
+  raven: { description: 'A equipe adversária perde 2 pontos.', available: true },
+  puppeteer: { description: 'Escolha uma carta da pilha de descarte, exceto O Titereiro. No início da próxima vaza, adicione-a à sua mão.', available: true },
+  wolf: { description: 'Até o fim da rodada, a equipe adversária não pode usar habilidades de criaturas.', available: true },
+  fairy: { description: 'No início da próxima vaza, veja até 2 cartas da mão de um adversário e escolha uma para descartar.', available: true },
+  goblin: { description: 'Troque uma criatura sua por uma aleatória de um adversário. Se receber uma carta de valor menor que 5, sua equipe ganha 1 ponto.', available: true },
+  griffin: { description: 'No início da próxima vaza, compre uma carta e depois descarte outra da sua mão.', available: true },
+  familiar: { description: 'Sua equipe ganha 1 ponto.', available: true },
+  wizard: { description: 'Troque um Ritual seu por um Ritual aleatório de um adversário. Indisponível até os Rituais entrarem no jogo.', available: false },
+  witch: { description: 'Compre um Ritual extra e descarte outro da mão. Indisponível até os Rituais entrarem no jogo.', available: false },
+};
 export interface CreatureCard {
   id: string;
   kind: CreatureKind;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { io } from 'socket.io-client';
-import { MOON_NAMES, type CreatureCard, type GameView, type Team } from '../../engine/src/index.js';
+import { CREATURES, CREATURE_EFFECTS, MOON_NAMES, type CreatureCard, type CreatureKind, type GameView, type Team } from '../../engine/src/index.js';
 import './style.css';
 
 interface SeatInfo { seat: number; name: string; bot: boolean; online: boolean }
@@ -45,6 +45,15 @@ function App() {
   const [error, setError] = React.useState('');
   const [busy, setBusy] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
+  const [inspectedCard, setInspectedCard] = React.useState<CreatureCard | null>(null);
+  const [scenarioKind, setScenarioKind] = React.useState<CreatureKind>('raven');
+
+  React.useEffect(() => {
+    if (!inspectedCard) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setInspectedCard(null); };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [inspectedCard]);
 
   React.useEffect(() => {
     function onConnect() {
@@ -122,14 +131,26 @@ function App() {
     if (!room?.game?.pendingChallenge) return;
     send('room:counter', { seat: room.testMode ? room.game.pendingChallenge.responderSeat : undefined });
   }
+  function chooseAbility(choice: string) {
+    if (!room?.game?.pendingAbility) return;
+    send('room:ability', { choice, seat: room.testMode ? room.game.pendingAbility.seat : undefined });
+  }
 
   const game = room?.game;
-  const controlledSeat = room?.testMode ? game?.pendingChallenge?.responderSeat ?? game?.turn : game?.seat;
-  const handSeat = game?.pendingChallenge?.responderSeat ?? game?.turn;
+  const controlledSeat = room?.testMode ? game?.pendingAbility?.seat ?? game?.pendingChallenge?.responderSeat ?? game?.turn : game?.seat;
+  const handSeat = game?.pendingAbility?.seat ?? game?.pendingChallenge?.responderSeat ?? game?.turn;
   const hand = room?.testMode && handSeat !== undefined ? room.allHands?.[handSeat] ?? [] : game?.hand ?? [];
-  const myTurn = !!game && game.winner === null && game.pendingChallenge === null && (room?.testMode || game.turn === game.seat);
+  const myTurn = !!game && game.winner === null && game.pendingChallenge === null && game.pendingAbility === null && (room?.testMode || game.turn === game.seat);
   const canRaise = myTurn && game!.roundStake < 4 && game!.lastRaiseTeam !== (game!.turn % 2);
   const canRespond = !!game?.pendingChallenge && game.winner === null && (room?.testMode || game.pendingChallenge.responderSeat === game.seat);
+  const canAbility = !!game?.pendingAbility && game.winner === null && (room?.testMode || game.pendingAbility.seat === game.seat);
+  const abilityStageText: Record<string, string> = {
+    source: 'Escolha uma carta da sua mão para ativar e descartar', offer: 'Quer usar a habilidade da carta vencedora?',
+    'puppet-card': 'Escolha uma carta do descarte para recuperar', 'puppet-exchange': 'Escolha uma carta sua para trocar',
+    'fairy-target': 'Escolha um adversário', 'fairy-card': 'Escolha uma das cartas reveladas para descartar',
+    'goblin-own': 'Escolha uma carta sua para trocar', 'goblin-target': 'Escolha um adversário para a troca aleatória',
+    'griffin-discard': 'Você comprou uma carta. Escolha uma para descartar',
+  };
   return <div className="app-shell">
     <header className="site-header">
       <div className="brand-mark">☾</div>
@@ -156,21 +177,25 @@ function App() {
       </section>
     </main> : <main className="game-layout">
       <div className="game-topbar"><div><span className="eyebrow">SALA <strong>{room.code}</strong></span><button className="copy-button" onClick={copyCode}>{copied ? 'Copiado ✓' : 'Copiar código'}</button></div><button className="text-button" onClick={leave}>Sair da sala</button></div>
+      {room.testMode && game && <section className="scenario-panel"><label>TESTAR HABILIDADE <select value={scenarioKind} onChange={event => setScenarioKind(event.target.value as CreatureKind)}>{CREATURES.filter(creature => CREATURE_EFFECTS[creature.kind].available).map(creature => <option value={creature.kind} key={creature.kind}>{creature.name}</option>)}</select></label><button disabled={busy} onClick={() => send('room:testAbility', { kind: scenarioKind, mode: 'trick' })}>Vencer vaza com esta carta</button><button disabled={busy} onClick={() => send('room:testAbility', { kind: scenarioKind, mode: 'declined' })}>Simular Trick recusado</button><small>Reinicia a partida de teste com cartas preparadas.</small></section>}
       {!game ? <section className="waiting-panel"><div className="waiting-symbol">☽</div><span className="eyebrow">O CÍRCULO SE FORMA</span><h1>Aguardando jogadores</h1><p>Compartilhe o código <strong>{room.code}</strong> para reunir quatro pessoas.</p><p className="lobby-tip">Em outro dispositivo ou nova aba, abra o jogo, escolha outro nome e entre com este código. No celular, use o IP do computador na mesma rede Wi-Fi.</p><div className="waiting-seats">{room.seats.map((seat, index) => <div key={index} className={`waiting-seat ${seat ? 'occupied' : ''}`}><span>{seat ? '✦' : '○'}</span><div><strong>{seat?.name || `Assento ${index + 1}`}</strong><small>Equipe {index % 2 === 0 ? 'A' : 'B'} · {seat ? 'pronto' : 'aguardando'}</small></div></div>)}</div><button className="secondary-button" onClick={() => send('room:fillBots', undefined)} disabled={busy}>Preencher vagas com bots</button></section> : <>
         <div className="score-row"><section className="scoreboard"><div className="team-score"><span>EQUIPE A · ASSENTOS 1 E 3</span><strong>{game.scores[0]}</strong><small>✦ Âmbar</small></div><div className="round-medallion"><span>RODADA</span><strong>{game.round}</strong><small>até 15 pontos</small></div><div className="team-score team-b"><span>EQUIPE B · ASSENTOS 2 E 4</span><strong>{game.scores[1]}</strong><small>✦ Verde de poção</small></div></section>
         <section className="vaza-progress" aria-label="Histórico de vazas desta rodada"><div className="vaza-heading"><span className="eyebrow">LUAS DA RODADA</span><strong>Quem venceu cada vaza</strong></div><MoonTrack winners={game.trickWinners} /><div className="team-legend"><span><i className="legend-a" />Equipe A</span><span><i className="legend-b" />Equipe B</span></div></section>
         </div>
         {game.lastRound && <div className={`last-round-note last-round-team-${game.lastRound.winner}`}><div><span className="eyebrow">RODADA ANTERIOR</span><strong>Equipe {game.lastRound.winner === 0 ? 'A' : 'B'} +{game.lastRound.points} {game.lastRound.points === 1 ? 'ponto' : 'pontos'} {game.lastRound.reason === 'declined' ? '· Trick recusado' : '· Duas vazas'}</strong></div><MoonTrack winners={game.lastRound.trickWinners} compact /></div>}
+        {game.wolfTeam !== null && <div className="wolf-notice">🐺 Lobo ativo: a Equipe {game.wolfTeam === 0 ? 'B' : 'A'} não pode usar habilidades nesta rodada.</div>}
         {game.winner !== null && <div className="winner-banner">✦ A Equipe {game.winner === 0 ? 'A' : 'B'} venceu a partida! ✦</div>}
-        <div className="turn-banner">{game.winner !== null ? 'Partida encerrada' : game.pendingChallenge ? canRespond ? `Sua decisão: ${trickNames[game.pendingChallenge.level]}` : `Aguardando ${room.seats[game.pendingChallenge.responderSeat]?.name} responder ao ${trickNames[game.pendingChallenge.level]}` : room.testMode ? `Sua vez de controlar ${room.seats[game.turn]?.name}` : myTurn ? 'Sua vez de jogar' : `Vez de ${room.seats[game.turn]?.name}`}{game.lastTrickWinner !== null && <small>Última vaza: {room.seats[game.lastTrickWinner]?.name}</small>}</div>
+        <div className="turn-banner">{game.winner !== null ? 'Partida encerrada' : game.pendingAbility ? canAbility ? `Habilidade: ${abilityStageText[game.pendingAbility.stage]}` : `Aguardando ${room.seats[game.pendingAbility.seat]?.name} decidir a habilidade` : game.pendingChallenge ? canRespond ? `Sua decisão: ${trickNames[game.pendingChallenge.level]}` : `Aguardando ${room.seats[game.pendingChallenge.responderSeat]?.name} responder ao ${trickNames[game.pendingChallenge.level]}` : room.testMode ? `Sua vez de controlar ${room.seats[game.turn]?.name}` : myTurn ? 'Sua vez de jogar' : `Vez de ${room.seats[game.turn]?.name}`}{game.lastTrickWinner !== null && <small>Última vaza: {room.seats[game.lastTrickWinner]?.name}</small>}</div>
+        {game.pendingAbility && <section className="ability-panel"><div><span className="eyebrow">PODER DE CRIATURA</span><strong>{room.seats[game.pendingAbility.seat]?.name}: {abilityStageText[game.pendingAbility.stage]}</strong>{game.pendingAbility.card && <p>{game.pendingAbility.card.name}: {CREATURE_EFFECTS[game.pendingAbility.card.kind].description}</p>}<p className="ability-timing">{game.pendingAbility.appliesNextRound ? 'A decisão é agora. O efeito entra no início da próxima rodada.' : 'O efeito entra antes da próxima vaza.'}</p></div>{canAbility && <div className="ability-options">{game.abilityOptions.map(option => <div className="ability-option" key={option.value}>{option.card && <button className="ability-preview" onClick={() => setInspectedCard(option.card!)} aria-label={`Ler ${option.card.name}`}><img src={option.card.image} alt="" /></button>}<button className="ability-select" disabled={busy} onClick={() => chooseAbility(option.value)}>{option.seat !== undefined ? room.seats[option.seat]?.name : option.card ? `Escolher ${option.card.name} · ${MOON_NAMES[option.card.moon]}` : option.label}</button></div>)}</div>}</section>}
         <section className="trick-panel"><div><span className="eyebrow">APOSTA DA RODADA</span><strong>{game.roundStake} {game.roundStake === 1 ? 'ponto' : 'pontos'}</strong>{game.pendingChallenge && <small>{room.seats[game.pendingChallenge.challengerSeat]?.name} pediu {trickNames[game.pendingChallenge.level]} · partida por {game.pendingChallenge.level} pontos se aceitar</small>}</div>{game.pendingChallenge ? <div className="trick-actions"><button className="trick-accept" disabled={!canRespond || busy} onClick={() => respond(true)}>Aceitar · partida {game.pendingChallenge.level} pontos</button><button className="trick-decline" disabled={!canRespond || busy} onClick={() => respond(false)}>Recusar · rival ganha {game.roundStake}</button>{game.pendingChallenge.level < 4 && <button className="trick-counter" disabled={!canRespond || busy} onClick={counter}>{trickNames[(game.pendingChallenge.level + 1) as 3 | 4]}</button>}</div> : game.roundStake < 4 && <button className="trick-raise" disabled={!canRaise || busy} onClick={raise}>{trickNames[(game.roundStake + 1) as 2 | 3 | 4]}</button>}</section>
-        <section className={`table-area ${game.pendingChallenge ? 'challenge-open' : ''}`}><div className="table-glow" /><div className="table-center"><div className="table-title">A VAZA</div><div className="played-cards">{game.trick.length ? game.trick.map(play => <div className="played-card" key={play.seat}><Card card={play.card} /><small>{room.seats[play.seat]?.name}</small></div>) : <div className="empty-trick">☽<span>A próxima carta inicia a vaza</span></div>}</div></div>
-          <div className="table-seats">{room.seats.map((seat, index) => <div className={`table-seat ${(game.pendingChallenge?.responderSeat ?? game.turn) === index && game.winner === null ? 'active-seat' : ''} ${controlledSeat === index ? 'own-seat' : ''}`} key={index}><div className="seat-token">{seat?.name.charAt(0).toUpperCase() || '?'}</div><div><strong>{seat?.name}</strong><small>Equipe {index % 2 === 0 ? 'A' : 'B'} · {game.players[index]?.handCount} cartas {seat?.online ? '' : '· offline'}</small></div></div>)}</div>
+        <section className={`table-area ${game.pendingChallenge ? 'challenge-open' : ''}`}><div className="table-glow" /><div className="table-center"><div className="table-title">A VAZA</div><div className="played-cards">{game.trick.length ? game.trick.map(play => <div className="played-card" key={play.seat}><Card card={play.card} /><small>{room.seats[play.seat]?.name}</small><button className="card-read" onClick={() => setInspectedCard(play.card)}>Ler carta</button></div>) : <div className="empty-trick">☽<span>A próxima carta inicia a vaza</span></div>}</div></div>
+          <div className="table-seats">{room.seats.map((seat, index) => <div className={`table-seat ${(game.pendingAbility?.seat ?? game.pendingChallenge?.responderSeat ?? game.turn) === index && game.winner === null ? 'active-seat' : ''} ${controlledSeat === index ? 'own-seat' : ''}`} key={index}><div className="seat-token">{seat?.name.charAt(0).toUpperCase() || '?'}</div><div><strong>{seat?.name}</strong><small>Equipe {index % 2 === 0 ? 'A' : 'B'} · {game.players[index]?.handCount} cartas {seat?.online ? '' : '· offline'}</small></div></div>)}</div>
         </section>
-        <section className="hand-area"><div className="hand-heading"><div><span className="eyebrow">{room.testMode ? `MÃO DE ${room.seats[handSeat ?? 0]?.name?.toUpperCase()}` : 'SUAS CARTAS'}</span><h2>{game.pendingChallenge ? 'Decida o Trick' : 'Escolha sua criatura'}</h2></div><span className="hand-hint">{game.pendingChallenge ? room.testMode ? `Agora quem responde é ${room.seats[game.pendingChallenge.responderSeat]?.name}` : canRespond ? 'Escolha aceitar, recusar ou aumentar' : 'Aguarde a resposta ao Trick' : myTurn ? 'Toque em uma carta para jogar' : 'Aguarde sua vez'}</span></div><div className="hand-cards">{hand.map(card => <Card key={card.id} card={card} onClick={myTurn ? () => play(card.id) : undefined} disabled={busy} />)}</div></section>
+        <section className="hand-area"><div className="hand-heading"><div><span className="eyebrow">{room.testMode ? `MÃO DE ${room.seats[handSeat ?? 0]?.name?.toUpperCase()}` : 'SUAS CARTAS'}</span><h2>{game.pendingAbility ? 'Decida a habilidade' : game.pendingChallenge ? 'Decida o Trick' : 'Escolha sua criatura'}</h2></div><span className="hand-hint">{game.pendingAbility ? canAbility ? 'Escolha uma das opções acima; suas cartas podem ser ampliadas abaixo' : 'Aguarde a decisão' : game.pendingChallenge ? room.testMode ? `Agora quem responde é ${room.seats[game.pendingChallenge.responderSeat]?.name}` : canRespond ? 'Escolha aceitar, recusar ou aumentar' : 'Aguarde a resposta ao Trick' : myTurn ? 'Toque em uma carta para jogar' : 'Aguarde sua vez'}</span></div><div className="hand-cards">{hand.map(card => <div className="hand-card" key={card.id}><Card card={card} onClick={myTurn ? () => play(card.id) : undefined} disabled={busy} /><button className="card-read" onClick={() => setInspectedCard(card)}>Ler carta</button></div>)}</div></section>
       </>}
       {error && <p className="error game-error" role="alert">{error}</p>}
     </main>}
+    {inspectedCard && <div className="card-dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setInspectedCard(null); }}><section className="card-dialog" role="dialog" aria-modal="true" aria-label={`Detalhes de ${inspectedCard.name}`}><button className="card-dialog-close" aria-label="Fechar detalhes da carta" onClick={() => setInspectedCard(null)}>×</button><img src={inspectedCard.image} alt={`${inspectedCard.name}, Lua ${MOON_NAMES[inspectedCard.moon]}`} /><div className="card-dialog-text"><span className="eyebrow">LUA {MOON_NAMES[inspectedCard.moon].toUpperCase()} · VALOR {inspectedCard.value}</span><h2>{inspectedCard.name}</h2><h3>Habilidade</h3><p>{CREATURE_EFFECTS[inspectedCard.kind].description}</p>{!CREATURE_EFFECTS[inspectedCard.kind].available && inspectedCard.kind !== 'arcana' && <strong>Indisponível nesta versão</strong>}<button className="secondary-button" onClick={() => setInspectedCard(null)}>Voltar ao jogo</button></div></section></div>}
     <footer>WITCH'S TRICK <span>✦</span> LUA CHEIA &amp; BOAS VAZAS</footer>
   </div>;
 }

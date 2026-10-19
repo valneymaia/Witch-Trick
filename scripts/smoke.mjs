@@ -5,7 +5,7 @@ const players = Array.from({ length: 4 }, (_, i) => `smoke-player-${i}`);
 const clients = [];
 const states = new Map();
 function connect(player) {
-  const socket = io('http://localhost:3001', { transports: ['websocket'] });
+  const socket = io(process.env.SMOKE_URL || 'http://localhost:3001', { transports: ['websocket'] });
   clients.push(socket);
   socket.on('room:state', state => states.set(player, state));
   return new Promise((resolve, reject) => {
@@ -57,6 +57,11 @@ try {
   assert.equal(states.get(players[0]).game.pendingChallenge.level, 3);
   await emit(sockets[(responder + 1) % 4], 'room:respond', { accept: false });
   await pause();
+  if (states.get(players[0]).game.pendingAbility) {
+    await assert.rejects(emit(sockets[(responder + 1) % 4], 'room:ability', { choice: 'skip' }));
+    await emit(sockets[responder], 'room:ability', { choice: 'skip' });
+    await pause();
+  }
   assert.equal(states.get(players[0]).game.lastRound.points, 2);
   assert.equal(states.get(players[0]).game.lastRound.reason, 'declined');
   assert.equal(states.get(players[0]).game.scores[responder % 2], 2);
