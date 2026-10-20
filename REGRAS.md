@@ -30,7 +30,7 @@ Na Fase 1 as criaturas são jogadas sem aplicar nenhum efeito.
 | Goblin | 5 | Troque uma criatura sua por uma de um adversário, aleatoriamente. Se a recebida valer menos de 5, sua equipe ganha 1 ponto. |
 | Grifo | 6 | No início da próxima vaza, compre uma carta e depois coloque uma carta da sua mão na pilha de descarte. |
 | Familiar | 7 | Sua equipe ganha 1 ponto. |
-| O Mago | 8 | Troque uma carta de Ritual sua por uma aleatória de um adversário. Depende dos Rituais (Fase 2). |
+| O Mago | 8 | Revele uma carta de Ritual aleatória de um adversário. Depois escolha se mantém sua mão ou troca uma carta de Ritual sua pela revelada. |
 | A Bruxa | 9 | Compre 1 carta extra de ritual e descarte outra da sua mão. Depende dos Rituais (Fase 2). |
 
 ## Luas

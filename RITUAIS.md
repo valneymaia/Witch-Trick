@@ -13,7 +13,7 @@ Esta especificação registra as decisões do Valney para o baralho separado de 
 
 ## Escolha antes ou depois das criaturas
 
-1. No começo da rodada, as novas mãos de criaturas ficam ocultas para todos.
+1. No começo da rodada, as novas mãos de criaturas ficam ocultas. Habilidades de criatura guardadas da rodada anterior são resolvidas antes da escolha do Ritual. O Titereiro é uma exceção: sua troca da carta guardada é resolvida depois da escolha do Ritual para determinar se o descarte será cego.
 2. O responsável pode jogar um Ritual marcado com **olho cortado** nesse momento. A escolha e os parâmetros do Ritual são confirmados antes de revelar as novas criaturas.
 3. Se preferir ver sua mão de criaturas, o responsável abre a distribuição para todos. Depois disso, só pode escolher um Ritual **sem** olho cortado.
 4. Após a escolha, todos recebem a visão privada normal da própria mão de criaturas e a rodada de vazas começa.
@@ -45,3 +45,4 @@ Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa 
 - O dono pode escolher um Ritual de olho cortado mesmo conhecendo a criatura que guardou da rodada anterior. A restrição de visão vale para **as três criaturas novas**.
 - Se escolher um Ritual de olho cortado, ele seleciona **uma das três cartas novas pelo verso** para descartar, sem saber qual é. Só então as duas novas restantes são reveladas, junto com a carta guardada.
 - Se escolher ver as criaturas e depois jogar um Ritual sem olho cortado, ele pode ver as três novas e escolher qual delas descartar. A carta guardada pelo Titereiro permanece na mão.
+- Grifo resolve antes da escolha do Ritual. Ver as criaturas durante essa habilidade não elimina a opção de escolher um Ritual de olho cortado.

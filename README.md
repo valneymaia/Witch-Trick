@@ -29,7 +29,7 @@ Abra `http://localhost:5173`. O servidor mantém as salas apenas em memória; re
 4. Toque em uma carta da mão para jogar. As três luas no topo mostram quem ganhou cada vaza em ordem: âmbar para a Equipe A, verde de poção para a B.
 5. Ao vencer uma vaza com uma criatura que possui habilidade, escolha **Usar habilidade** ou **Pular habilidade**. O efeito entra antes da vaza seguinte. Se a vaza encerrou a rodada, a decisão é feita agora e o efeito entra na rodada seguinte.
 6. Quando um Trick é recusado, quem pediu escolhe uma carta da própria mão, descarta essa carta e ativa a habilidade na rodada seguinte. Também pode pular.
-7. Use **Ler carta** para ampliar a arte e ver o texto da habilidade em fonte legível no PC ou celular. Mago troca um Ritual da mão por um Ritual aleatório de um adversário; Bruxa compra um Ritual e descarta um. Arcana não possui habilidade.
+7. Use **Ler carta** para ampliar a arte e ver o texto da habilidade em fonte legível no PC ou celular. Mago revela um Ritual aleatório de um adversário e permite escolher se deseja trocar por um da própria mão; Bruxa compra um Ritual e descarta um. Arcana não possui habilidade.
 8. Se a conexão cair, atualize a mesma aba. A identidade guardada no `sessionStorage` recupera o assento enquanto essa aba existir.
 
 Para testar sozinho, use **Testar sozinho: controlar os 4 assentos**. A tela mostra a mão de quem está na vez. Na barra **Testar habilidade**, selecione uma criatura e clique em **Vencer vaza com esta carta** ou **Simular Trick recusado**. Isso reinicia a partida de teste com cartas preparadas, permitindo testar até o Corvo sem depender do sorteio. Também é possível criar uma sala comum e usar **Preencher vagas com bots**.

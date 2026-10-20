@@ -58,8 +58,12 @@ export function abilityOptionsFor(state: GameState, seat: number): AbilityOption
     case 'fairy-card': return (pending.candidates ?? []).map(cardOption);
     case 'goblin-own': return [skip, ...state.hands[seat]!.map(cardOption)];
     case 'griffin-discard': return state.hands[seat]!.map(cardOption);
-    case 'wizard-own': return [skip, ...state.ritualHands[seat]!.map(ritualOption)];
     case 'wizard-target': return [skip, ...state.ritualHands.flatMap((hand, target): AbilityOption[] => teamOf(target) !== teamOf(seat) && hand.length ? [{ value: String(target), label: `Jogador ${target + 1}`, seat: target }] : [])];
+    case 'wizard-decision': return pending.targetRitualId ? [
+      { value: 'keep', label: 'Manter seus Rituais; não trocar' },
+      { value: 'swap', label: `Trocar pelo ${ritualFromId(pending.targetRitualId).name}`, ritual: ritualFromId(pending.targetRitualId) },
+    ] : [];
+    case 'wizard-own': return state.ritualHands[seat]!.map(ritualOption);
     case 'witch-discard': return state.ritualHands[seat]!.map(ritualOption);
   }
 }
@@ -68,7 +72,9 @@ export function viewFor(state: GameState, playerId: string): GameView {
   if (seat < 0) throw new Error('Jogador não pertence a esta partida.');
   const creaturesHidden = state.ritualMode && (state.ritualPhase === 'blind' || state.ritualPhase === 'blind-discard');
   const visibleHand = creaturesHidden
-    ? state.ritualExchange?.seat === seat ? state.hands[seat]!.filter(id => !state.ritualExchange!.newCardIds.includes(id)) : []
+    ? state.ritualExchange?.seat === seat ? state.hands[seat]!.filter(id => !state.ritualExchange!.newCardIds.includes(id))
+      : state.pendingAbility?.seat === seat && ['goblin-own', 'griffin-discard'].includes(state.pendingAbility.stage) ? state.hands[seat]!
+      : []
     : state.hands[seat]!;
   const exchange = state.ritualExchange;
   const discardOptions = exchange && exchange.seat === seat

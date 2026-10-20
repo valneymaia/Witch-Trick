@@ -23,7 +23,7 @@ export interface ActiveEffect {
   expires: 'trick' | 'round';
   data: Record<string, unknown>;
 }
-export type AbilityStage = 'source' | 'offer' | 'puppet-card' | 'puppet-exchange' | 'fairy-target' | 'fairy-card' | 'goblin-own' | 'goblin-target' | 'griffin-discard' | 'wizard-own' | 'wizard-target' | 'witch-discard';
+export type AbilityStage = 'source' | 'offer' | 'puppet-card' | 'puppet-exchange' | 'fairy-target' | 'fairy-card' | 'goblin-own' | 'goblin-target' | 'griffin-discard' | 'wizard-target' | 'wizard-decision' | 'wizard-own' | 'witch-discard';
 export interface PendingAbility {
   seat: number;
   source: 'declined' | 'trick';
@@ -31,6 +31,7 @@ export interface PendingAbility {
   cardId: string | null;
   endRound: { team: Team; reason: RoundResult['reason'] } | null;
   targetSeat?: number;
+  targetRitualId?: string;
   ownCardId?: string;
   candidates?: string[];
 }
@@ -69,7 +70,6 @@ export interface GameState {
   ritualPrediction: '2-0' | '2-1' | null;
   ritualEmpoweredKind: CreatureKind | null;
   ritualExchange: { seat: number; newCardIds: string[] } | null;
-  deferredAbility: PendingAbility | null;
 }
 export type GameAction =
   | { type: 'play'; playerId: string; cardId: string }
@@ -121,7 +121,6 @@ function deal(state: GameState, reserved?: { seat: number; cardId: string }): Ga
     pendingChallenge: null, pendingAbility: null, turn: state.roundStarter, rng: seed, activeEffects: [],
     ritualPhase: state.ritualMode ? 'blind' : 'off', ritualChooser: state.roundStarter,
     ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualExchange: null,
-    deferredAbility: null,
   };
 }
 export function createGame(playerIds: [string, string, string, string], seed: number, ritualMode = false): GameState {
@@ -138,7 +137,6 @@ export function createGame(playerIds: [string, string, string, string], seed: nu
     ritualMode, ritualHands: [[], [], [], []], ritualDeck: [], ritualDiscard: [],
     ritualPhase: ritualMode ? 'blind' : 'off', ritualChooser: rng % 4,
     ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualExchange: null,
-    deferredAbility: null,
   };
   if (ritualMode) {
     const ritualCards = shuffleIds(RITUAL_TEST_DECK, rng);
@@ -243,7 +241,7 @@ function activateAbility(state: GameState): GameState {
   if (kind === 'wizard') {
     const targets = state.ritualHands.some((hand, seat) => teamOf(seat) !== team && hand.length);
     return state.ritualHands[pending.seat]!.length && targets
-      ? { ...state, pendingAbility: { ...pending, stage: 'wizard-own' } } : closeAbility(state);
+      ? { ...state, pendingAbility: { ...pending, stage: 'wizard-target' } } : closeAbility(state);
   }
   if (kind === 'witch') {
     let deck = [...state.ritualDeck];
@@ -265,13 +263,10 @@ function activateInNextRound(state: GameState): GameState {
   if (!pending.endRound) return activateAbility(state);
   const next = finishRound(state, pending.endRound.team, pending.endRound.reason);
   if (next.winner !== null) return next;
-  if (next.ritualMode) return { ...next, deferredAbility: { ...pending, endRound: null } };
   return activateAbility({ ...next, pendingAbility: { ...pending, endRound: null } });
 }
 function completeRitualPhase(state: GameState): GameState {
-  const next = { ...state, ritualPhase: 'play' as const, deferredAbility: null };
-  if (!state.deferredAbility || abilityBlocked(next, state.deferredAbility.seat)) return next;
-  return activateAbility({ ...next, pendingAbility: state.deferredAbility });
+  return { ...state, ritualPhase: 'play' };
 }
 function chooseAbility(state: GameState, seat: number, choice: string): GameState {
   const pending = state.pendingAbility;
@@ -355,23 +350,30 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     hands[seat] = hands[seat]!.filter(id => id !== choice);
     return closeAbility({ ...state, hands, discard: [...state.discard, choice] });
   }
-  if (pending.stage === 'wizard-own') {
-    if (choice === 'skip') return closeAbility(state);
-    if (!state.ritualHands[seat]!.includes(choice)) throw new Error('Escolha um Ritual da sua mão.');
-    return { ...state, pendingAbility: { ...pending, stage: 'wizard-target', ownCardId: choice } };
-  }
   if (pending.stage === 'wizard-target') {
     if (choice === 'skip') return closeAbility(state);
     const target = Number(choice);
     if (!Number.isInteger(target) || target < 0 || target > 3 || teamOf(target) === teamOf(seat) || !state.ritualHands[target]!.length) throw new Error('Escolha um adversário com Rituais.');
     const rng = nextRandom(state.rng);
     const otherId = state.ritualHands[target]![rng % state.ritualHands[target]!.length]!;
+    return { ...state, rng, pendingAbility: { ...pending, stage: 'wizard-decision', targetSeat: target, targetRitualId: otherId } };
+  }
+  if (pending.stage === 'wizard-decision') {
+    if (choice === 'keep') return closeAbility(state);
+    if (choice !== 'swap') throw new Error('Escolha trocar ou manter os Rituais.');
+    return { ...state, pendingAbility: { ...pending, stage: 'wizard-own' } };
+  }
+  if (pending.stage === 'wizard-own') {
+    if (!state.ritualHands[seat]!.includes(choice)) throw new Error('Escolha um Ritual da sua mão.');
+    const target = pending.targetSeat;
+    const otherId = pending.targetRitualId;
+    if (target === undefined || !otherId || !state.ritualHands[target]!.includes(otherId)) throw new Error('O Ritual revelado não está disponível.');
     const ritualHands = state.ritualHands.map(hand => [...hand]) as GameState['ritualHands'];
-    ritualHands[seat] = ritualHands[seat]!.filter(id => id !== pending.ownCardId);
+    ritualHands[seat] = ritualHands[seat]!.filter(id => id !== choice);
     ritualHands[target] = ritualHands[target]!.filter(id => id !== otherId);
     ritualHands[seat]!.push(otherId);
-    ritualHands[target]!.push(pending.ownCardId!);
-    return closeAbility({ ...state, rng, ritualHands });
+    ritualHands[target]!.push(choice);
+    return closeAbility({ ...state, ritualHands });
   }
   if (pending.stage === 'witch-discard') {
     if (!state.ritualHands[seat]!.includes(choice)) throw new Error('Escolha um Ritual da sua mão para descartar.');

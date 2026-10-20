@@ -37,7 +37,9 @@ Validar no navegador e com jogadores em dispositivos separados as quatro artes e
 - [x] Primeiro protótipo: Mapa do Destino, Doblete Sombrio, Magia Nula e Silêncio da Bruxa. Mapa e Silêncio continuam testáveis no código, mas saíram do sorteio do lote atual.
 - [x] Titereiro com Ritual de olho cortado: carta guardada conhecida; descarte cego de uma das três criaturas novas antes de revelá-las.
 - [x] Fluxo de Rituais no motor, servidor e interface; primeiro lote jogável com arte provisória em texto.
-- [x] Mago troca um Ritual da mão por um Ritual aleatório de um adversário; Bruxa compra e descarta um Ritual.
+- [x] Mago revela um Ritual aleatório de um adversário e permite decidir se troca ou mantém a mão; Bruxa compra e descarta um Ritual.
+- [x] Habilidades de criatura pendentes da rodada anterior são resolvidas antes da escolha do próximo Ritual. A troca do Titereiro permanece após a escolha para respeitar o descarte cego do olho cortado.
+- [x] Validação desta correção: 48 testes do motor, compilação dos três pacotes e 500 partidas simuladas com Rituais.
 - [x] Segundo lote com arte recebida em 800 × 1132 px: Runa da Vontade, Magia Nula, Trick Explosivo e Doblete Sombrio. Arte ampliável e regra textual na interface.
 - [x] Runa fortalece as quatro Luas da criatura escolhida acima de todas as demais, inclusive Arcana; Magia Nula bloqueia habilidades de criaturas somente na rodada atual.
 - [x] Doblete e Trick Explosivo mantêm o valor inicial e aceitam a sequência completa Double → Hat → Poker. Valores aceitos: 4/5/6 com Doblete e 5/6/7 com Trick Explosivo; recusa entrega o último valor aceito.
