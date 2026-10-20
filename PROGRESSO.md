@@ -56,6 +56,7 @@ Validar no navegador e com jogadores em dispositivos separados os oito Rituais a
 - [x] Goblin ganha 1 ponto se a criatura recebida valer 5 ou menos, inclusive outro Goblin; regra, texto e teste atualizados.
 - [x] Menu solo permite escolher um dos oito Rituais ativos e reiniciar com ele na mão do Jogador 1 para testar seu efeito.
 - [x] Validação desta etapa: 61 testes do motor, 1.000 partidas simuladas com Rituais, compilação e teste de sala com quatro conexões e seletor de Ritual.
+- [x] Proxy do Vite aceita WebSocket do Socket.IO. Túnel temporário Cloudflare abriu a página e passou o teste de sala com quatro clientes, mãos privadas, Trick e reconexão por uma URL pública.
 - [ ] Validação visual no navegador e partida em quatro dispositivos separados.
 
 ## Limitações conhecidas
