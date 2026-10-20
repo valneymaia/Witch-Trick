@@ -1,10 +1,10 @@
-# Rituais: oito cartas jogáveis
+# Rituais: doze cartas jogáveis
 
-Esta especificação registra as decisões do Valney para o baralho separado de Rituais. Dois lotes de quatro cartas receberam artes individuais de `ritual (1).zip`. O texto jogável também fica disponível na interface.
+Esta especificação registra as decisões do Valney para o baralho separado de Rituais. Doze cartas receberam artes individuais. O texto jogável também fica disponível na interface.
 
 ## Baralho e mãos
 
-- O baralho oficial terá 48 Rituais distintos. Enquanto as regras restantes são implementadas, o baralho de teste usa quatro cópias de cada um dos oito Rituais com arte e regras completas.
+- O baralho oficial terá 48 Rituais distintos. Enquanto as regras restantes são implementadas, o baralho de teste usa quatro cópias de cada um dos doze Rituais com arte e regras completas.
 - Cada jogador recebe três Rituais em uma mão privada.
 - Em cada rodada, exatamente um jogador joga um Ritual. O responsável segue a ordem dos assentos: 1 (Equipe A), 2 (Equipe B), 3 (Equipe A), 4 (Equipe B), repetindo. O primeiro responsável acompanha o assento inicial sorteado da partida.
 - O Ritual usado sai da mão e vai ao descarte de Rituais. Quando a mão de Rituais de um jogador acabar, ele compra três novas cartas, ou as que restarem no baralho.
@@ -36,8 +36,8 @@ Primeiro lote do novo conjunto enviado pelo Valney:
 | Ritual | Momento | Regra implementada |
 |---|---|---|
 | Maldição da Derrota | Depois de ver as criaturas | Ao fim da rodada, a equipe derrotada perde até 3 pontos, sem ficar abaixo de zero. Também vale se o Trick for recusado. |
-| Escolha da Anciã | Depois de ver as criaturas | Cada um dos dois jogadores da equipe que jogou o Ritual compra 3 criaturas extras e escolhe 3 criaturas da própria mão para descartar. A primeira vaza só começa após os dois terminarem. |
-| Véu da Incerteza | Antes de ver as criaturas | Os quatro jogadores escolhem posições de cartas pelo verso nas três vazas da rodada. A carta jogada se revela na mesa. |
+| Escolha da Anciã | Depois de ver as criaturas | Cada jogador da equipe que jogou o Ritual compra 3 criaturas extras e escolhe 3 criaturas da própria mão para descartar. A primeira vaza só começa após todos terminarem. |
+| Véu da Incerteza | Antes de ver as criaturas | Todos escolhem posições de cartas pelo verso nas três vazas da rodada. A carta jogada se revela na mesa. |
 | Mão Cega | Antes de ver as criaturas | Quem jogou o Ritual escolhe um adversário. Só esse jogador escolhe cartas pelo verso nas três vazas da rodada. |
 
 ## Terceiro lote de implementação
@@ -46,8 +46,8 @@ Primeiro lote do novo conjunto enviado pelo Valney:
 |---|---|---|
 | Roubo Arcano | Depois de ver as criaturas | Quem jogou escolhe um adversário e vê, em privado, todas as criaturas que ele tinha na mão naquele momento. A informação fica consultável até o fim da rodada. |
 | Espelho Enfeitiçado | Depois de ver as criaturas | Cada parceiro decide separadamente se troca toda a própria mão com a de um adversário. O jogador que jogou o Ritual decide primeiro. Cada adversário só pode ser escolhido uma vez. Jogadores sem cartas passam a vez automaticamente. |
-| Olho da Verdade | Depois de ver as criaturas | Quem jogou escolhe um adversário. A mão atual desse jogador fica visível aos quatro participantes durante a rodada e acompanha cartas jogadas ou trocadas. |
-| Acordo de Sangue | Depois de ver as criaturas | Os dois parceiros veem as mãos um do outro. Ambos precisam aceitar para a rodada começar valendo 3 pontos; Double, Hat e Poker aceitos levam a 5, 6 e 7. Se um desistir, a equipe adversária recebe 1 ponto e uma nova rodada é distribuída. Para futuras partidas de 6 ou 8 jogadores, a decisão será por maioria. |
+| Olho da Verdade | Depois de ver as criaturas | Quem jogou escolhe um adversário. A mão atual desse jogador fica visível a todos durante a rodada e acompanha cartas jogadas ou trocadas. |
+| Acordo de Sangue | Depois de ver as criaturas | Os membros da equipe veem as mãos dos parceiros e votam. Com maioria favorável, a rodada começa valendo 3 pontos; Double, Hat e Poker aceitos levam a 5, 6 e 7. Se a maioria não for mais possível, a equipe adversária recebe 1 ponto e uma nova rodada é distribuída. Em quatro jogadores, os dois parceiros precisam concordar. |
 
 O botão **Ver meus Rituais** mostra a própria mão em tamanho maior, inclusive durante a decisão do Mago. No modo de teste solo, mostra a mão do assento atualmente controlado.
 

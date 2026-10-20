@@ -25,7 +25,7 @@
 
 ## Próximo passo
 
-Validar no navegador e com jogadores em dispositivos separados os doze Rituais ativos. Depois continuar em lotes de quatro até completar as 48 cartas.
+Validar com amigos em dispositivos e redes separados uma partida de 6 ou 8 pessoas até 25 pontos. Depois continuar os Rituais em lotes de quatro até completar as 48 cartas.
 
 ## Preparação dos Rituais
 
@@ -61,11 +61,14 @@ Validar no navegador e com jogadores em dispositivos separados os doze Rituais a
 - [x] 65 testes do motor, 1.000 partidas simuladas com Rituais e teste de sala com quatro conexões. O Espelho faz passar automaticamente jogadores que ficaram sem cartas.
 - [x] Validação visual no navegador local: Espelho impede escolher o mesmo adversário duas vezes; Acordo exige os dois votos e inicia com 3 pontos, permitindo Double Trick por 5.
 - [x] Escolha de Ritual mostra as três cartas juntas. Antes de revelar as criaturas, só Rituais com olhinho podem ser jogados; depois da revelação, eles seguem visíveis para consulta e só os demais ficam jogáveis. Layout conferido no navegador local.
-- [ ] Partida em quatro dispositivos separados.
+- [x] Nome do criador Valney Maia Neto na abertura; criação de sala com 4, 6 ou 8 pessoas e alvo de 15 ou 25 pontos.
+- [x] Motor e servidor usam quantidade dinâmica de assentos. Anciã e Espelho percorrem todos os parceiros; Acordo de Sangue exige maioria da equipe. A interface e a documentação mostram as opções escolhidas.
+- [x] 74 testes do motor, 500 partidas simuladas para cada tamanho de sala (incluindo alvo 25), compilação e teste Socket.IO com salas de 4, 6 e 8 conexões; abertura e mesa de 8 conferidas no navegador local.
+- [ ] Partida completa com amigos em dispositivos e redes separados.
 
 ## Limitações conhecidas
 
 - Salas e placares são perdidos se o servidor reiniciar.
-- O modo de controle dos quatro assentos revela todas as mãos na própria aba e deve ser usado somente para testes. Para testar privacidade e multiplayer, use uma sala normal em quatro abas ou dispositivos.
+- O modo de controle de todos os assentos revela todas as mãos na própria aba e deve ser usado somente para testes. Para testar privacidade e multiplayer, use uma sala normal em abas ou dispositivos separados.
 - A identidade de uma aba se perde quando ela é encerrada; atualizá-la mantém o assento.
-- O baralho de teste usa quatro cópias de cada um dos doze efeitos com arte. Os demais Rituais aguardam implementação em lotes de quatro. Partidas com 6 ou 8 pessoas também ficam para depois.
+- O baralho de teste usa quatro cópias de cada um dos doze efeitos com arte. Os demais Rituais aguardam implementação em lotes de quatro.

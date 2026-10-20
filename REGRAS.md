@@ -4,17 +4,17 @@ Fonte da verdade do projeto. Baseado no PDF de regras do jogo físico e nas deci
 
 ## Escopo do MVP (Fase 1)
 
-**Dentro:** sala online, 4 jogadores em 2 equipes de 2, baralho de 40 criaturas, 3 cartas por jogador, vazas, melhor de 3, desempate pelas Luas, Trick até Poker Trick, placar até 15, fim de partida e reconexão.
+**Dentro:** sala online, 4, 6 ou 8 jogadores em 2 equipes, baralho de 40 criaturas, 3 cartas por jogador, vazas, melhor de 3, desempate pelas Luas, Trick até Poker Trick, placar até 15 ou 25, fim de partida e reconexão.
 
-**Fora (fases seguintes):** efeitos das criaturas, feitiços (Rituais), 6 e 8 jogadores, animações e menus finais.
+**Fora (fases seguintes):** os Rituais ainda sem arte e efeito implementado, animações e menus finais.
 
 Na Fase 1 as criaturas são jogadas sem aplicar nenhum efeito.
 
 ## Mesa
 
-- 4 assentos numerados de 0 a 3, em sentido anti-horário.
-- Assentos 0 e 2 formam a Equipe A. Assentos 1 e 3 formam a Equipe B (posições alternadas).
-- Ordem de jogada: anti-horária, do assento n para o assento (n + 1) mod 4.
+- A sala tem 4, 6 ou 8 assentos numerados a partir de 0, em sentido anti-horário.
+- Assentos pares formam a Equipe A; assentos ímpares, a Equipe B.
+- Ordem de jogada: anti-horária, do assento n para o assento (n + 1) módulo o número de jogadores.
 
 ## Baralho de criaturas
 
@@ -64,7 +64,7 @@ Como cada carta é única, nunca há empate total entre duas cartas.
 4. A primeira equipe a vencer 2 vazas vence a rodada. Cada rodada tem 2 ou 3 vazas. A equipe vencedora marca o valor aceito para a rodada, inicialmente 1 ponto.
 5. Próxima rodada: juntar todas as cartas, embaralhar de novo e iniciar com o jogador seguinte ao que iniciou a rodada anterior.
 
-**Fim da partida:** a primeira equipe a chegar a 15 pontos vence.
+**Fim da partida:** a primeira equipe a chegar ao alvo de 15 ou 25 pontos escolhido na criação da sala vence.
 
 ## Pedido de Trick
 
@@ -75,8 +75,8 @@ Como cada carta é única, nunca há empate total entre duas cartas.
 - Aceitar eleva o valor da rodada e mantém a vez com quem pediu, que ainda pode escolher sua carta.
 - Em vez de aceitar ou recusar, quem recebe o pedido pode **contra-aumentar imediatamente** para o próximo nível, se ainda existir. Isso aceita o valor pedido e devolve a decisão a quem acabou de pedir. O turno de jogar carta continua pausado até terminar a sequência. Se o novo pedido for recusado, a equipe que contra-aumentou recebe o valor já aceito.
 - Recusar encerra a rodada imediatamente. A equipe de quem pediu ganha o valor **anterior já aceito**. Na rodada comum: 1 ao recusar Double, 2 ao recusar Hat, 3 ao recusar Poker. Em rodada com Doblete ou Trick Explosivo, usa-se o valor inicial ou a soma do último Trick aceito.
-- Depois de um aumento aceito, somente a equipe adversária pode pedir o próximo aumento durante as jogadas. O pedido pode vir de qualquer um dos dois jogadores dessa equipe, desde que seja sua vez antes da carta. O contra-aumento é a resposta imediata ao pedido pendente.
-- A equipe que ganha duas vazas recebe o valor aceito, limitado ao placar alvo de 15. A rodada seguinte recomeça em 1 ponto.
+- Depois de um aumento aceito, somente a equipe adversária pode pedir o próximo aumento durante as jogadas. O pedido pode vir de qualquer jogador dessa equipe, desde que seja sua vez antes da carta. O contra-aumento é a resposta imediata ao pedido pendente.
+- A equipe que ganha duas vazas recebe o valor aceito, limitado ao placar alvo escolhido. A rodada seguinte recomeça em 1 ponto.
 - A tela mostra três luas na ordem das vazas: âmbar para a Equipe A, verde de poção para a Equipe B. Luas restantes ficam neutras. O resultado da rodada anterior preserva seu histórico de luas.
 
 ## Decisões assumidas para o MVP
@@ -100,10 +100,10 @@ Valem até o Valney dizer o contrário. Fáceis de trocar, então mantenha isola
 
 ## Rituais (Fase 2)
 
-O baralho oficial terá 48 Rituais. Cada jogador recebe três cartas de Ritual; uma carta é jogada por rodada pelo responsável, alternando as equipes e avançando pelos quatro assentos. As cartas com olho cortado são escolhidas antes de revelar as novas mãos de criaturas; as demais podem ser escolhidas depois. O Ritual usado vai ao descarte separado. Uma mão de Rituais vazia é reposta com três cartas; o descarte é reembaralhado quando o baralho acaba. A especificação de fases, artes e primeiro lote está em `RITUAIS.md`.
+O baralho oficial terá 48 Rituais. Cada jogador recebe três cartas de Ritual; uma carta é jogada por rodada pelo responsável, alternando as equipes e avançando um assento por rodada. As cartas com olho cortado são escolhidas antes de revelar as novas mãos de criaturas; as demais podem ser escolhidas depois. O Ritual usado vai ao descarte separado. Uma mão de Rituais vazia é reposta com três cartas; o descarte é reembaralhado quando o baralho acaba. A especificação de fases, artes e primeiro lote está em `RITUAIS.md`.
 
 ## Para fases futuras
 
 - "Magia Acelerada" aparece duas vezes com efeitos diferentes. Renomear uma.
 - Padronizar os termos "criatura", "feitiço", "ação", "naipe" (parece ser a Lua) e "partida" no lugar de "rodada" em algumas cartas.
-- 6 e 8 jogadores: definir tamanho da mão e ordem de jogada.
+- Para 6 e 8 jogadores, cada pessoa continua com três criaturas e três Rituais. A ordem circular alterna as duas equipes, e o responsável pelo Ritual avança um assento a cada rodada.

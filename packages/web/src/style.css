@@ -170,6 +170,15 @@
 .ritual-info-cards{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px}
 .ritual-info-card{width:63px;aspect-ratio:800/1250;padding:0;border:1px solid #b686d1;border-radius:6px;background:#09050c;overflow:hidden}
 .ritual-info-card img{display:block;width:100%;height:100%;object-fit:contain}
+.creator-credit{margin-top:18px!important;color:#d6b7ed!important;font-size:13px!important;letter-spacing:.04em}
+.creator-credit strong{color:#f5ddff}
+.room-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 22px}
+.entry-panel .room-options label{margin:0;color:#c99be9;font-size:11px;letter-spacing:.12em;font-weight:700}
+.room-options select{display:block;width:100%;height:45px;margin-top:8px;padding:0 10px;border:1px solid #714b8f;border-radius:9px;background:#120a1f;color:#fff}
+.table-area.players-6 .played-card .card,.table-area.players-8 .played-card .card{width:68px}
+.table-area.players-6 .played-cards,.table-area.players-8 .played-cards{gap:7px;flex-wrap:wrap}
+.table-area.players-8 .table-seat{padding:7px}
+@media(max-width:600px){.room-options{gap:8px}.table-area.players-6 .table-seats,.table-area.players-8 .table-seats{grid-template-columns:repeat(2,minmax(0,1fr))}.table-area.players-6 .played-card .card,.table-area.players-8 .played-card .card{width:min(13vw,54px)}}
 @media(max-width:850px){.ritual-choices{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.ritual-panel{padding:11px}.ritual-choice-heading{flex-direction:column;gap:3px}.ritual-choices{grid-template-columns:1fr}.ritual-choice{min-height:0}.ritual-panel-heading{align-items:flex-start}}
 .ritual-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}

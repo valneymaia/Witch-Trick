@@ -51,7 +51,7 @@ try {
     await emit(sockets[chooser], 'room:ritual', { type: 'reveal' });
     await pause();
     assert.equal(states.get(players[chooser]).game.hand.length, 3);
-    await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: regular.id, ...(regular.kind === 'runa-da-vontade' ? { creatureKind: 'raven' } : {}) });
+    await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: regular.id, creatureKind: 'raven', targetSeat: (chooser + 1) % 4 });
   } else {
     const blind = chooserRituals[0];
     await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: blind.id, prediction: '2-0', targetSeat: (chooser + 1) % 4 });
@@ -103,10 +103,11 @@ try {
 
   const soloId = 'smoke-solo';
   const solo = await connect(soloId);
-  await emit(solo, 'room:create', { playerId: soloId, name: 'Teste solo', testMode: true });
+  await emit(solo, 'room:create', { playerId: soloId, name: 'Teste solo', testMode: true, targetScore: 25 });
   await emit(solo, 'room:testRitual', { kind: 'veu-da-incerteza' });
   await pause();
   const soloState = states.get(soloId);
+  assert.equal(soloState.game.targetScore, 25);
   assert.equal(soloState.game.ritualChooser, 0);
   assert.ok(soloState.allRitualHands[0].some(card => card.kind === 'veu-da-incerteza'));
   await assert.rejects(emit(solo, 'room:testRitual', { kind: 'ritual-inexistente' }));
@@ -134,7 +135,51 @@ try {
   await emit(solo, 'room:ritual', { type: 'blood', seat: 2, play: false });
   await pause();
   assert.deepEqual(states.get(soloId).game.scores, [0, 1]);
-  console.log('Quatro jogadores, mãos privadas, Trick, reconexão, Espelho e Acordo: OK.');
+
+  for (const count of [6, 8]) {
+    const ids = Array.from({ length: count }, (_, seat) => `smoke-${count}-${seat}`);
+    const seats = [];
+    for (const id of ids) seats.push(await connect(id));
+    const { code: largerCode } = await emit(seats[0], 'room:create', { playerId: ids[0], name: 'Criador', playerCount: count, targetScore: 25 });
+    for (let seat = 1; seat < count; seat++) await emit(seats[seat], 'room:join', { code: largerCode, playerId: ids[seat], name: `Amigo ${seat}` });
+    await pause();
+    for (let seat = 0; seat < count; seat++) {
+      const state = states.get(ids[seat]);
+      assert.equal(state.seats.length, count);
+      assert.equal(state.targetScore, 25);
+      assert.equal(state.game.targetScore, 25);
+      assert.equal(state.game.seat, seat);
+      assert.equal(state.game.ritualHand.length, 3);
+      assert.equal(state.game.hand.length, 0);
+      assert.equal(state.allHands, undefined);
+    }
+    const chooser = states.get(ids[0]).game.ritualChooser;
+    const choices = states.get(ids[chooser]).game.ritualHand;
+    const ordinary = choices.find(card => !card.blind);
+    if (ordinary) await emit(seats[chooser], 'room:ritual', { type: 'reveal' });
+    const chosen = ordinary ?? choices[0];
+    await emit(seats[chooser], 'room:ritual', {
+      type: 'play', ritualId: chosen.id, prediction: '2-0', creatureKind: 'raven', targetSeat: (chooser + 1) % count,
+    });
+    await pause();
+    while (['ancient-discard', 'mirror', 'blood-vote'].includes(states.get(ids[0]).game.ritualPhase)) {
+      const current = states.get(ids[0]).game;
+      const actor = current.ritualDecisionSeat;
+      const phase = current.ritualPhase;
+      if (phase === 'ancient-discard') await emit(seats[actor], 'room:ritual', { type: 'ancient-discard', cardId: states.get(ids[actor]).game.hand[0].id });
+      else if (phase === 'mirror') await emit(seats[actor], 'room:ritual', { type: 'mirror' });
+      else await emit(seats[actor], 'room:ritual', { type: 'blood', play: true });
+      await pause();
+    }
+    const current = states.get(ids[0]).game;
+    assert.equal(current.ritualPhase, 'play');
+    const turn = current.turn;
+    await emit(seats[turn], 'room:raise', {});
+    await pause();
+    assert.equal(states.get(ids[0]).game.pendingChallenge.responderSeat, (turn + 1) % count);
+    await emit(seats[(turn + 1) % count], 'room:respond', { accept: true });
+  }
+  console.log('Salas de 4, 6 e 8 jogadores, placar 25, mãos privadas, Trick, reconexão, Espelho e Acordo: OK.');
 } finally {
   for (const socket of clients) socket.disconnect();
 }

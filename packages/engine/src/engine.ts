@@ -42,8 +42,8 @@ export type CreatureReveal =
   | { reason: 'goblin'; round: number; seat: number; targetSeat: number; cardId: string; tradedCardId: string; pointAwarded: boolean }
   | { reason: 'blind-discard'; source: 'griffin' | 'puppeteer'; round: number; seat: number; cardId: string };
 export interface GameState {
-  playerIds: [string, string, string, string];
-  hands: [string[], string[], string[], string[]];
+  playerIds: string[];
+  hands: string[][];
   deck: string[];
   discard: string[];
   trick: PlayedCard[];
@@ -51,6 +51,7 @@ export interface GameState {
   trickWinners: Team[];
   skipNextTrickSeats: number[];
   scores: [number, number];
+  targetScore: 15 | 25;
   roundBaseStake: number;
   roundStake: number;
   acceptedTrickLevel: 0 | TrickLevel;
@@ -68,7 +69,7 @@ export interface GameState {
   rng: number;
   activeEffects: ActiveEffect[];
   ritualMode: boolean;
-  ritualHands: [string[], string[], string[], string[]];
+  ritualHands: string[][];
   ritualDeck: string[];
   ritualDiscard: string[];
   ritualPhase: 'off' | 'mode' | 'blind' | 'revealed' | 'blind-discard' | 'revealed-discard' | 'ancient-discard' | 'mirror' | 'blood-vote' | 'play';
@@ -80,8 +81,9 @@ export interface GameState {
   ritualTargetSeat: number | null;
   ritualPeek: { targetSeat: number; cardIds: string[] } | null;
   ritualTeamDecisions: number[];
+  ritualBloodApprovals: number[];
   ritualMirrorTargets: number[];
-  ancientDiscardsLeft: [number, number, number, number];
+  ancientDiscardsLeft: number[];
   ritualExchange: { seat: number; newCardIds: string[] } | null;
   lastCreatureReveal: CreatureReveal | null;
 }
@@ -102,6 +104,11 @@ export const TARGET_SCORE = 15;
 export const ROUND_POINTS = 1;
 export const MAX_TRICK_POINTS = 4;
 export const teamOf = (seat: number): Team => (seat % 2) as Team;
+export const teamSeats = (state: GameState, team: Team): number[] =>
+  state.playerIds.map((_, seat) => seat).filter(seat => teamOf(seat) === team);
+const ritualTeamSeats = (state: GameState): number[] =>
+  Array.from({ length: state.playerIds.length / 2 }, (_, index) =>
+    (state.ritualChooser + index * 2) % state.playerIds.length);
 export function isBlindToCreatures(state: GameState, seat: number): boolean {
   if (!state.ritualActiveId) return false;
   const kind = ritualFromId(state.ritualActiveId).kind;
@@ -111,7 +118,7 @@ export function mustChooseCreatureBlind(state: GameState, seat: number, pending:
   return (pending.fromPreviousRound === true && state.ritualPhase === 'blind') || isBlindToCreatures(state, seat);
 }
 export function ancientDiscardSeat(state: GameState): number | null {
-  for (const seat of [state.ritualChooser, (state.ritualChooser + 2) % 4]) {
+  for (const seat of ritualTeamSeats(state)) {
     if (state.ancientDiscardsLeft[seat]! > 0) return seat;
   }
   return null;
@@ -120,7 +127,7 @@ export function ritualDecisionSeat(state: GameState): number | null {
   if (state.ritualPhase === 'ancient-discard') return ancientDiscardSeat(state);
   if (state.ritualPhase === 'blind-discard' || state.ritualPhase === 'revealed-discard') return state.ritualExchange?.seat ?? null;
   if (state.ritualPhase === 'mirror' || state.ritualPhase === 'blood-vote') {
-    return [state.ritualChooser, (state.ritualChooser + 2) % 4].find(seat => !state.ritualTeamDecisions.includes(seat)) ?? null;
+    return ritualTeamSeats(state).find(seat => !state.ritualTeamDecisions.includes(seat)) ?? null;
   }
   return state.ritualChooser;
 }
@@ -157,8 +164,8 @@ function shuffled(seed: number, reservedCardId?: string): { cards: string[]; see
 }
 function deal(state: GameState, reserved?: { seat: number; cardId: string }): GameState {
   const { cards, seed } = shuffled(state.rng, reserved?.cardId);
-  const hands: GameState['hands'] = [[], [], [], []];
-  for (let i = 0; i < 12; i++) hands[i % 4]!.push(cards.pop()!);
+  const hands: GameState['hands'] = Array.from({ length: state.playerIds.length }, () => []);
+  for (let i = 0; i < state.playerIds.length * 3; i++) hands[i % state.playerIds.length]!.push(cards.pop()!);
   if (reserved) hands[reserved.seat]!.push(reserved.cardId);
   return {
     ...state, hands, deck: cards, discard: [], trick: [], trickWins: [0, 0],
@@ -167,33 +174,34 @@ function deal(state: GameState, reserved?: { seat: number; cardId: string }): Ga
     pendingChallenge: null, pendingAbility: null, pendingRoundAbility: null, turn: state.roundStarter, rng: seed, activeEffects: [],
     ritualPhase: state.ritualMode ? 'blind' : 'off', ritualModeLocked: false, ritualChooser: state.roundStarter,
     ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualTargetSeat: null,
-    ritualPeek: null, ritualTeamDecisions: [], ritualMirrorTargets: [],
-    ancientDiscardsLeft: [0, 0, 0, 0], ritualExchange: null,
+    ritualPeek: null, ritualTeamDecisions: [], ritualBloodApprovals: [], ritualMirrorTargets: [],
+    ancientDiscardsLeft: state.playerIds.map(() => 0), ritualExchange: null,
   };
 }
-export function createGame(playerIds: [string, string, string, string], seed: number, ritualMode = false): GameState {
-  if (new Set(playerIds).size !== 4 || playerIds.some(id => !id)) throw new Error('Quatro jogadores distintos são necessários.');
+export function createGame(playerIds: string[], seed: number, ritualMode = false, targetScore: 15 | 25 = 15): GameState {
+  if (![4, 6, 8].includes(playerIds.length) || new Set(playerIds).size !== playerIds.length || playerIds.some(id => !id)) throw new Error('São necessários 4, 6 ou 8 jogadores distintos.');
+  if (targetScore !== 15 && targetScore !== 25) throw new Error('Escolha 15 ou 25 pontos.');
   const rng = nextRandom(seed || 0x9e3779b9);
   const state: GameState = {
-    playerIds: [...playerIds], hands: [[], [], [], []], deck: [], discard: [], trick: [],
-    trickWins: [0, 0], trickWinners: [], skipNextTrickSeats: [], scores: [0, 0],
+    playerIds: [...playerIds], hands: playerIds.map(() => []), deck: [], discard: [], trick: [],
+    trickWins: [0, 0], trickWinners: [], skipNextTrickSeats: [], scores: [0, 0], targetScore,
     roundBaseStake: ROUND_POINTS, roundStake: ROUND_POINTS, acceptedTrickLevel: 0,
     lastRaiseTeam: null, pendingChallenge: null, pendingAbility: null, pendingRoundAbility: null, lastRound: null,
-    round: 1, roundStarter: rng % 4,
-    turn: rng % 4, lastTrickWinner: null, lastRoundWinner: null, winner: null,
+    round: 1, roundStarter: rng % playerIds.length,
+    turn: rng % playerIds.length, lastTrickWinner: null, lastRoundWinner: null, winner: null,
     rng, activeEffects: [],
-    ritualMode, ritualHands: [[], [], [], []], ritualDeck: [], ritualDiscard: [],
-    ritualPhase: ritualMode ? 'blind' : 'off', ritualModeLocked: false, ritualChooser: rng % 4,
+    ritualMode, ritualHands: playerIds.map(() => []), ritualDeck: [], ritualDiscard: [],
+    ritualPhase: ritualMode ? 'blind' : 'off', ritualModeLocked: false, ritualChooser: rng % playerIds.length,
     ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualTargetSeat: null,
-    ritualPeek: null, ritualTeamDecisions: [], ritualMirrorTargets: [],
-    ancientDiscardsLeft: [0, 0, 0, 0], ritualExchange: null,
+    ritualPeek: null, ritualTeamDecisions: [], ritualBloodApprovals: [], ritualMirrorTargets: [],
+    ancientDiscardsLeft: playerIds.map(() => 0), ritualExchange: null,
     lastCreatureReveal: null,
   };
   if (ritualMode) {
     const ritualCards = shuffleIds(RITUAL_TEST_DECK, rng);
     state.rng = ritualCards.seed;
     state.ritualDeck = ritualCards.cards;
-    for (let i = 0; i < 12; i++) state.ritualHands[i % 4]!.push(state.ritualDeck.pop()!);
+    for (let i = 0; i < playerIds.length * 3; i++) state.ritualHands[i % playerIds.length]!.push(state.ritualDeck.pop()!);
   }
   return deal(state);
 }
@@ -215,7 +223,7 @@ function refillRitualHand(state: GameState, seat: number): GameState {
 }
 function finishRound(state: GameState, team: Team, reason: RoundResult['reason'], reserved?: { seat: number; cardId: string }): GameState {
   const scores = [...state.scores] as GameState['scores'];
-  scores[team] = Math.min(TARGET_SCORE, scores[team] + state.roundStake);
+  scores[team] = Math.min(state.targetScore, scores[team] + state.roundStake);
   const loser = (1 - team) as Team;
   const curse = state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'maldicao-da-derrota';
   const loserPenalty = curse ? Math.min(3, scores[loser]) : 0;
@@ -224,7 +232,7 @@ function finishRound(state: GameState, team: Team, reason: RoundResult['reason']
   if (state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'mapa-do-destino'
     && team === teamOf(state.ritualChooser) && reason === 'tricks'
     && state.ritualPrediction === (state.trickWins[1 - team] === 0 ? '2-0' : '2-1')) {
-    scores[team] = Math.min(TARGET_SCORE, scores[team] + 1);
+    scores[team] = Math.min(state.targetScore, scores[team] + 1);
     bonusPoints = 1;
   }
   const result: RoundResult = {
@@ -237,8 +245,8 @@ function finishRound(state: GameState, team: Team, reason: RoundResult['reason']
     ritualActiveId: null, ritualEmpoweredKind: null,
   };
   completed = refillRitualHand(completed, state.ritualChooser);
-  if (scores[team] >= TARGET_SCORE) return { ...completed, winner: team, ritualPhase: 'off' };
-  return deal({ ...completed, round: state.round + 1, roundStarter: (state.roundStarter + 1) % 4 }, reserved);
+  if (scores[team] >= state.targetScore) return { ...completed, winner: team, ritualPhase: 'off' };
+  return deal({ ...completed, round: state.round + 1, roundStarter: (state.roundStarter + 1) % state.playerIds.length }, reserved);
 }
 function abilityBlocked(state: GameState, seat: number): boolean {
   return (state.ritualActiveId !== null && ritualFromId(state.ritualActiveId).kind === 'magia-nula')
@@ -255,7 +263,7 @@ function closeAbility(state: GameState): GameState {
     : clear.ritualPhase === 'play' || !clear.ritualMode ? withAvailableTurn(clear) : clear;
 }
 function withAvailableTurn(state: GameState): GameState {
-  const turn = [0, 1, 2, 3].map(offset => (state.turn + offset) % 4)
+  const turn = state.playerIds.map((_, offset) => (state.turn + offset) % state.playerIds.length)
     .find(seat => state.hands[seat]!.length > 0 && !state.skipNextTrickSeats.includes(seat));
   return turn === undefined ? state : { ...state, turn };
 }
@@ -271,9 +279,9 @@ function activateAbility(state: GameState): GameState {
   }
   if (kind === 'familiar') {
     const scores = [...state.scores] as GameState['scores'];
-    scores[team] = Math.min(TARGET_SCORE, scores[team] + 1);
+    scores[team] = Math.min(state.targetScore, scores[team] + 1);
     const next = closeAbility({ ...state, scores });
-    return scores[team] >= TARGET_SCORE ? { ...next, winner: team } : next;
+    return scores[team] >= state.targetScore ? { ...next, winner: team } : next;
   }
   if (kind === 'wolf') {
     return closeAbility({ ...state, activeEffects: [...state.activeEffects, {
@@ -377,7 +385,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
   if (pending.stage === 'fairy-target') {
     if (choice === 'skip') return closeAbility(state);
     const targetSeat = Number(choice);
-    if (!Number.isInteger(targetSeat) || targetSeat < 0 || targetSeat > 3 || teamOf(targetSeat) === teamOf(seat) || !state.hands[targetSeat]!.length) throw new Error('Escolha um adversário com cartas.');
+    if (!Number.isInteger(targetSeat) || targetSeat < 0 || targetSeat >= state.playerIds.length || teamOf(targetSeat) === teamOf(seat) || !state.hands[targetSeat]!.length) throw new Error('Escolha um adversário com cartas.');
     const seed = nextRandom(state.rng);
     const hand = state.hands[targetSeat]!;
     const first = seed % hand.length;
@@ -389,7 +397,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
     hands[pending.targetSeat] = hands[pending.targetSeat]!.filter(id => id !== choice);
     const skipNextTrickSeats = [...new Set([...state.skipNextTrickSeats, pending.targetSeat])];
-    const turn = [0, 1, 2, 3].map(offset => (state.turn + offset) % 4)
+    const turn = state.playerIds.map((_, offset) => (state.turn + offset) % state.playerIds.length)
       .find(candidate => !state.trick.some(play => play.seat === candidate)
         && !skipNextTrickSeats.includes(candidate) && hands[candidate]!.length) ?? state.turn;
     return closeAbility({ ...state, hands, discard: [...state.discard, choice], skipNextTrickSeats, turn });
@@ -406,7 +414,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
   if (pending.stage === 'goblin-target') {
     if (choice === 'skip') return closeAbility(state);
     const targetSeat = Number(choice);
-    if (!Number.isInteger(targetSeat) || targetSeat < 0 || targetSeat > 3 || teamOf(targetSeat) === teamOf(seat) || !state.hands[targetSeat]!.length) throw new Error('Escolha um adversário com cartas.');
+    if (!Number.isInteger(targetSeat) || targetSeat < 0 || targetSeat >= state.playerIds.length || teamOf(targetSeat) === teamOf(seat) || !state.hands[targetSeat]!.length) throw new Error('Escolha um adversário com cartas.');
     const rng = nextRandom(state.rng);
     const received = state.hands[targetSeat]![rng % state.hands[targetSeat]!.length]!;
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
@@ -416,9 +424,9 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     hands[targetSeat]!.push(pending.ownCardId!);
     const scores = [...state.scores] as GameState['scores'];
     const pointAwarded = CARD_BY_ID[received]!.value <= 5;
-    if (pointAwarded) scores[teamOf(seat)] = Math.min(TARGET_SCORE, scores[teamOf(seat)] + 1);
+    if (pointAwarded) scores[teamOf(seat)] = Math.min(state.targetScore, scores[teamOf(seat)] + 1);
     const next = closeAbility({ ...state, rng, hands, scores, lastCreatureReveal: { reason: 'goblin', round: state.round, seat, targetSeat, cardId: received, tradedCardId: pending.ownCardId!, pointAwarded } });
-    return scores[teamOf(seat)] >= TARGET_SCORE ? { ...next, winner: teamOf(seat) } : next;
+    return scores[teamOf(seat)] >= state.targetScore ? { ...next, winner: teamOf(seat) } : next;
   }
   if (pending.stage === 'griffin-discard') {
     const blind = mustChooseCreatureBlind(state, seat, pending);
@@ -434,7 +442,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
   if (pending.stage === 'wizard-target') {
     if (choice === 'skip') return closeAbility(state);
     const target = Number(choice);
-    if (!Number.isInteger(target) || target < 0 || target > 3 || teamOf(target) === teamOf(seat) || !state.ritualHands[target]!.length) throw new Error('Escolha um adversário com Rituais.');
+    if (!Number.isInteger(target) || target < 0 || target >= state.playerIds.length || teamOf(target) === teamOf(seat) || !state.ritualHands[target]!.length) throw new Error('Escolha um adversário com Rituais.');
     const rng = nextRandom(state.rng);
     const otherId = state.ritualHands[target]![rng % state.ritualHands[target]!.length]!;
     return { ...state, rng, pendingAbility: { ...pending, stage: 'wizard-decision', targetSeat: target, targetRitualId: otherId } };
@@ -495,7 +503,7 @@ export function reduce(state: GameState, action: GameAction): GameState {
     if (ritual.kind === 'mapa-do-destino' && action.prediction !== '2-0' && action.prediction !== '2-1') throw new Error('Escolha o placar previsto: 2–0 ou 2–1.');
     if (ritual.kind === 'runa-da-vontade' && !CREATURES.some(creature => creature.kind === action.creatureKind)) throw new Error('Escolha uma criatura para fortalecer nas quatro Luas.');
     if (['mao-cega', 'roubo-arcano', 'olho-da-verdade'].includes(ritual.kind)
-      && (!Number.isInteger(action.targetSeat) || action.targetSeat! < 0 || action.targetSeat! > 3 || teamOf(action.targetSeat!) === teamOf(seat))) {
+      && (!Number.isInteger(action.targetSeat) || action.targetSeat! < 0 || action.targetSeat! >= state.playerIds.length || teamOf(action.targetSeat!) === teamOf(seat))) {
       throw new Error('Escolha um adversário para este Ritual.');
     }
     const ritualHands = state.ritualHands.map(hand => [...hand]) as GameState['ritualHands'];
@@ -506,7 +514,7 @@ export function reduce(state: GameState, action: GameAction): GameState {
       ritualEmpoweredKind: ritual.kind === 'runa-da-vontade' ? action.creatureKind! : null,
       ritualTargetSeat: ['mao-cega', 'roubo-arcano', 'olho-da-verdade'].includes(ritual.kind) ? action.targetSeat! : null,
       ritualPeek: ritual.kind === 'roubo-arcano' ? { targetSeat: action.targetSeat!, cardIds: [...state.hands[action.targetSeat!]!] } : null,
-      ritualTeamDecisions: [], ritualMirrorTargets: [],
+      ritualTeamDecisions: [], ritualBloodApprovals: [], ritualMirrorTargets: [],
       roundBaseStake: ritual.kind === 'doblete-sombrio' ? 2 : ritual.kind === 'trick-explosivo' ? 3 : state.roundBaseStake,
       roundStake: ritual.kind === 'doblete-sombrio' ? 2 : ritual.kind === 'trick-explosivo' ? 3 : state.roundStake,
       ritualPhase: ritual.kind === 'escolha-da-ancia' ? 'ancient-discard'
@@ -514,19 +522,19 @@ export function reduce(state: GameState, action: GameAction): GameState {
           : ritual.kind === 'acordo-de-sangue' ? 'blood-vote' : 'play',
     }, seat);
     if (ritual.kind === 'escolha-da-ancia') {
-      if (selected.deck.length < 6) throw new Error('Não há criaturas suficientes no baralho para a Escolha da Anciã.');
+      const members = ritualTeamSeats(selected);
+      if (selected.deck.length < members.length * 3) throw new Error('Não há criaturas suficientes no baralho para a Escolha da Anciã.');
       const hands = selected.hands.map(hand => [...hand]) as GameState['hands'];
       const deck = [...selected.deck];
-      const teammate = (seat + 2) % 4;
-      for (const member of [seat, teammate]) for (let i = 0; i < 3; i++) hands[member]!.push(deck.pop()!);
-      return { ...selected, hands, deck, ancientDiscardsLeft: [0, 0, 0, 0].map((_, index) => index === seat || index === teammate ? 3 : 0) as GameState['ancientDiscardsLeft'] };
+      for (const member of members) for (let i = 0; i < 3; i++) hands[member]!.push(deck.pop()!);
+      return { ...selected, hands, deck, ancientDiscardsLeft: selected.playerIds.map((_, index) => members.includes(index) ? 3 : 0) };
     }
     return ['espelho-enfeiticado', 'acordo-de-sangue'].includes(ritual.kind) ? selected : completeRitualPhase(selected);
   }
   if (action.type === 'ritual-mirror') {
     if (state.ritualPhase !== 'mirror' || seat !== ritualDecisionSeat(state)) throw new Error('Não é sua vez de decidir o Espelho.');
     const target = action.targetSeat;
-    if (target !== undefined && (!Number.isInteger(target) || target < 0 || target > 3 || teamOf(target) === teamOf(seat))) {
+    if (target !== undefined && (!Number.isInteger(target) || target < 0 || target >= state.playerIds.length || teamOf(target) === teamOf(seat))) {
       throw new Error('Escolha um adversário ou passe a troca.');
     }
     if (target !== undefined && state.ritualMirrorTargets.includes(target)) throw new Error('Este adversário já foi escolhido no Espelho.');
@@ -535,15 +543,19 @@ export function reduce(state: GameState, action: GameAction): GameState {
     const ritualTeamDecisions = [...state.ritualTeamDecisions, seat];
     const next = { ...state, hands, ritualTeamDecisions,
       ritualMirrorTargets: target === undefined ? state.ritualMirrorTargets : [...state.ritualMirrorTargets, target] };
-    return ritualTeamDecisions.length === 2 ? completeRitualPhase(next) : next;
+    return ritualTeamDecisions.length === teamSeats(state, teamOf(seat)).length ? completeRitualPhase(next) : next;
   }
   if (action.type === 'ritual-blood') {
     if (state.ritualPhase !== 'blood-vote' || seat !== ritualDecisionSeat(state)) throw new Error('Não é sua vez de decidir o Acordo.');
-    if (!action.play) return finishRound(state, (1 - teamOf(seat)) as Team, 'blood-withdrawal');
     const ritualTeamDecisions = [...state.ritualTeamDecisions, seat];
-    const next = { ...state, ritualTeamDecisions };
-    return ritualTeamDecisions.length === 2
-      ? completeRitualPhase({ ...next, roundBaseStake: 3, roundStake: 3 }) : next;
+    const ritualBloodApprovals = action.play ? [...state.ritualBloodApprovals, seat] : state.ritualBloodApprovals;
+    const next = { ...state, ritualTeamDecisions, ritualBloodApprovals };
+    const teamSize = teamSeats(state, teamOf(seat)).length;
+    const needed = Math.floor(teamSize / 2) + 1;
+    if (ritualBloodApprovals.length >= needed) return completeRitualPhase({ ...next, roundBaseStake: 3, roundStake: 3 });
+    if (ritualBloodApprovals.length + teamSize - ritualTeamDecisions.length < needed)
+      return finishRound(next, (1 - teamOf(seat)) as Team, 'blood-withdrawal');
+    return next;
   }
   if (action.type === 'ritual-ancient-discard') {
     if (state.ritualPhase !== 'ancient-discard' || seat !== ancientDiscardSeat(state)) throw new Error('Não é sua vez de descartar pela Anciã.');
@@ -619,7 +631,7 @@ export function reduce(state: GameState, action: GameAction): GameState {
       pendingChallenge: {
         level: (state.acceptedTrickLevel === 0 ? 2 : state.acceptedTrickLevel + 1) as TrickLevel,
         challengerSeat: seat,
-        responderSeat: (seat + 1) % 4,
+        responderSeat: (seat + 1) % state.playerIds.length,
       },
     };
   }
@@ -631,7 +643,7 @@ export function reduce(state: GameState, action: GameAction): GameState {
   if (state.skipNextTrickSeats.includes(seat)) throw new Error('Este jogador deve passar esta vaza.');
   const hands = state.hands.map((hand, i) => i === seat ? hand.filter(id => id !== cardId) : [...hand]) as GameState['hands'];
   const trick = [...state.trick, { seat, cardId }];
-  const nextSeat = [1, 2, 3].map(offset => (seat + offset) % 4)
+  const nextSeat = state.playerIds.slice(1).map((_, index) => (seat + index + 1) % state.playerIds.length)
     .find(candidate => !trick.some(play => play.seat === candidate)
       && !state.skipNextTrickSeats.includes(candidate) && hands[candidate]!.length);
   if (nextSeat !== undefined) return { ...state, hands, trick, turn: nextSeat };

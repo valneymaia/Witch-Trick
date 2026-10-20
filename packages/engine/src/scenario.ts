@@ -3,10 +3,10 @@ import { createGame, reduce, type GameState } from './engine.js';
 import { RITUAL_TEST_DECK, type RitualKind } from './rituals.js';
 
 /** Start a solo test with a chosen playable Ritual in the first player's hand. */
-export function createRitualScenario(playerIds: GameState['playerIds'], kind: RitualKind): GameState {
+export function createRitualScenario(playerIds: GameState['playerIds'], kind: RitualKind, targetScore: 15 | 25 = 15): GameState {
   const chosenId = `${kind}#1`;
   if (!RITUAL_TEST_DECK.includes(chosenId)) throw new Error('Este Ritual ainda não está no baralho de teste.');
-  const state = createGame(playerIds, 123, true);
+  const state = createGame(playerIds, 123, true, targetScore);
   const ritualHands = state.ritualHands.map(hand => [...hand]) as GameState['ritualHands'];
   const ritualDeck = [...state.ritualDeck];
   if (!ritualHands[0]!.includes(chosenId)) {
@@ -20,7 +20,8 @@ export function createRitualScenario(playerIds: GameState['playerIds'], kind: Ri
 }
 
 /** A deterministic teaching scenario available only from the server's solo test mode. */
-export function createAbilityScenario(playerIds: GameState['playerIds'], kind: CreatureKind, mode: 'trick' | 'declined'): GameState {
+export function createAbilityScenario(playerIds: GameState['playerIds'], kind: CreatureKind, mode: 'trick' | 'declined', targetScore: 15 | 25 = 15): GameState {
+  if (playerIds.length !== 4) throw new Error('Este cenário de habilidade requer quatro jogadores.');
   if (!CREATURE_EFFECTS[kind]?.available) throw new Error('Esta habilidade ainda não está disponível.');
   const puppetDeclined = kind === 'puppeteer' && mode === 'declined';
   const firstCards = puppetDeclined
@@ -33,7 +34,7 @@ export function createAbilityScenario(playerIds: GameState['playerIds'], kind: C
   for (let i = 0; i < 8; i++) hands[i % 4]!.push(remaining.shift()!);
   const ritualMode = true;
   let state: GameState = {
-    ...createGame(playerIds, 123, ritualMode), hands, deck: remaining, discard: [], trick: [],
+    ...createGame(playerIds, 123, ritualMode, targetScore), hands, deck: remaining, discard: [], trick: [],
     trickWins: [0, 0], trickWinners: [], roundStarter: puppetDeclined ? 1 : 0, turn: puppetDeclined ? 1 : 0,
     scores: [0, 3], pendingChallenge: null, pendingAbility: null,
     ritualPhase: ritualMode ? 'play' : 'off', ritualChooser: 0,
@@ -42,8 +43,8 @@ export function createAbilityScenario(playerIds: GameState['playerIds'], kind: C
     if (puppetDeclined) {
       for (const seat of [1, 2, 3]) state = reduce(state, { type: 'play', playerId: playerIds[seat]!, cardId: firstCards[seat]! });
     }
-    state = reduce(state, { type: 'raise', playerId: playerIds[0] });
-    return reduce(state, { type: 'respond', playerId: playerIds[1], accept: false });
+    state = reduce(state, { type: 'raise', playerId: playerIds[0]! });
+    return reduce(state, { type: 'respond', playerId: playerIds[1]!, accept: false });
   }
   for (let seat = 0; seat < 4; seat++) state = reduce(state, { type: 'play', playerId: playerIds[seat]!, cardId: firstCards[seat]! });
   return state;

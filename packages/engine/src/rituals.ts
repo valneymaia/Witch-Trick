@@ -10,7 +10,7 @@ export const RITUALS = [
   { kind: 'roubo-arcano', name: 'Roubo Arcano', blind: false, image: '/rituals/roubo-arcano.png', description: 'Escolha um adversário e veja todas as criaturas da mão dele.' },
   { kind: 'espelho-enfeiticado', name: 'Espelho Enfeitiçado', blind: false, image: '/rituals/espelho-enfeiticado.png', description: 'Cada membro da equipe pode trocar toda a própria mão com a de um adversário. Cada rival só pode ser escolhido uma vez.' },
   { kind: 'olho-da-verdade', name: 'Olho da Verdade', blind: false, image: '/rituals/olho-da-verdade.png', description: 'Escolha um adversário. As criaturas da mão dele ficam visíveis a todos nesta rodada.' },
-  { kind: 'acordo-de-sangue', name: 'Acordo de Sangue', blind: false, image: '/rituals/acordo-de-sangue.png', description: 'Os parceiros veem as mãos um do outro e ambos precisam aceitar para jogar por 3 pontos. Se um desistir, o rival ganha 1 ponto.' },
+  { kind: 'acordo-de-sangue', name: 'Acordo de Sangue', blind: false, image: '/rituals/acordo-de-sangue.png', description: 'A equipe vê as mãos dos parceiros e vota. Com maioria favorável, joga por 3 pontos; sem maioria, o rival ganha 1 ponto.' },
   { kind: 'mapa-do-destino', name: 'Mapa do Destino', blind: true, image: undefined, description: 'Antes de ver as três criaturas novas, anuncie 2–0 ou 2–1. Se sua equipe vencer a rodada com esse placar de vazas, ganha 1 ponto extra.' },
   { kind: 'silencio-da-bruxa', name: 'Silêncio da Bruxa', blind: false, description: 'A equipe adversária não pode pedir nem aumentar Trick nesta rodada.' },
 ] as const;

@@ -1,5 +1,5 @@
 import { CARD_BY_ID, type CreatureCard, type CreatureKind } from './cards.js';
-import { abilityAvailableFor, ancientDiscardSeat, isBlindToCreatures, keepsDeclaredRitualMode, mustChooseCreatureBlind, puppeteerChoices, ritualDecisionSeat, teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
+import { abilityAvailableFor, ancientDiscardSeat, isBlindToCreatures, keepsDeclaredRitualMode, mustChooseCreatureBlind, puppeteerChoices, ritualDecisionSeat, teamOf, teamSeats, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
 import { ritualFromId, type RitualCard } from './rituals.js';
 
 export interface PlayerView {
@@ -16,6 +16,7 @@ export interface GameView {
   trickWins: [number, number];
   trickWinners: Team[];
   scores: [number, number];
+  targetScore: 15 | 25;
   roundBaseStake: number;
   roundStake: number;
   acceptedTrickLevel: GameState['acceptedTrickLevel'];
@@ -44,8 +45,12 @@ export interface GameView {
   ritualTargetSeat: number | null;
   ritualDecisionSeat: number | null;
   ritualMirrorTargets: number[];
+  ritualVotesFor: number;
+  ritualVotesCast: number;
+  ritualVotesNeeded: number;
   ritualPeekCards: CreatureCard[];
   ritualTeammateHand: { seat: number; cards: CreatureCard[] } | null;
+  ritualTeammateHands: { seat: number; cards: CreatureCard[] }[];
   blindSeats: number[];
   ancientDiscardSeat: number | null;
   ancientDiscardsLeft: number;
@@ -111,7 +116,7 @@ export function viewFor(state: GameState, playerId: string): GameView {
     })),
     trick: state.trick.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
     trickWins: [...state.trickWins], trickWinners: [...state.trickWinners],
-    scores: [...state.scores], roundBaseStake: state.roundBaseStake,
+    scores: [...state.scores], targetScore: state.targetScore, roundBaseStake: state.roundBaseStake,
     roundStake: state.roundStake, acceptedTrickLevel: state.acceptedTrickLevel,
     lastRaiseTeam: state.lastRaiseTeam,
     pendingChallenge: state.pendingChallenge && { ...state.pendingChallenge },
@@ -137,12 +142,19 @@ export function viewFor(state: GameState, playerId: string): GameView {
     ritualTargetSeat: state.ritualTargetSeat,
     ritualDecisionSeat: ritualDecisionSeat(state),
     ritualMirrorTargets: [...state.ritualMirrorTargets],
+    ritualVotesFor: state.ritualBloodApprovals.length,
+    ritualVotesCast: state.ritualTeamDecisions.length,
+    ritualVotesNeeded: Math.floor(teamSeats(state, teamOf(state.ritualChooser)).length / 2) + 1,
     ritualPeekCards: state.ritualPeek && seat === state.ritualChooser
       ? state.ritualPeek.cardIds.map(id => CARD_BY_ID[id]!) : [],
     ritualTeammateHand: state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'acordo-de-sangue'
       && state.ritualPhase === 'blood-vote' && teamOf(seat) === teamOf(state.ritualChooser)
-      ? { seat: (seat + 2) % 4, cards: state.hands[(seat + 2) % 4]!.map(id => CARD_BY_ID[id]!) } : null,
-    blindSeats: [0, 1, 2, 3].filter(playerSeat => isBlindToCreatures(state, playerSeat)),
+      ? { seat: teamSeats(state, teamOf(seat)).find(member => member !== seat)!, cards: state.hands[teamSeats(state, teamOf(seat)).find(member => member !== seat)!]!.map(id => CARD_BY_ID[id]!) } : null,
+    ritualTeammateHands: state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'acordo-de-sangue'
+      && state.ritualPhase === 'blood-vote' && teamOf(seat) === teamOf(state.ritualChooser)
+      ? teamSeats(state, teamOf(seat)).filter(member => member !== seat)
+        .map(member => ({ seat: member, cards: state.hands[member]!.map(id => CARD_BY_ID[id]!) })) : [],
+    blindSeats: state.playerIds.map((_, playerSeat) => playerSeat).filter(playerSeat => isBlindToCreatures(state, playerSeat)),
     ancientDiscardSeat: state.ritualPhase === 'ancient-discard' ? ancientDiscardSeat(state) : null,
     ancientDiscardsLeft: state.ancientDiscardsLeft[seat]!,
     ritualDiscardOptions: discardOptions,
