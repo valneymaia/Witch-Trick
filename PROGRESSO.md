@@ -60,6 +60,7 @@ Validar no navegador e com jogadores em dispositivos separados os doze Rituais a
 - [x] Quarto conjunto de artes importado: Roubo Arcano, Espelho Enfeitiçado, Olho da Verdade e Acordo de Sangue. Roubo mostra uma fotografia privada da mão adversária; Olho mostra a mão atual a todos; Espelho troca mãos inteiras com decisões individuais e alvos distintos; Acordo exige consentimento dos dois parceiros.
 - [x] 65 testes do motor, 1.000 partidas simuladas com Rituais e teste de sala com quatro conexões. O Espelho faz passar automaticamente jogadores que ficaram sem cartas.
 - [x] Validação visual no navegador local: Espelho impede escolher o mesmo adversário duas vezes; Acordo exige os dois votos e inicia com 3 pontos, permitindo Double Trick por 5.
+- [x] Escolha de Ritual mostra as três cartas juntas. Antes de revelar as criaturas, só Rituais com olhinho podem ser jogados; depois da revelação, eles seguem visíveis para consulta e só os demais ficam jogáveis. Layout conferido no navegador local.
 - [ ] Partida em quatro dispositivos separados.
 
 ## Limitações conhecidas

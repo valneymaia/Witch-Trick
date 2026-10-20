@@ -131,15 +131,19 @@
 .ritual-runa-active{color:#ffe0a1!important;font-weight:700}
 .ritual-choice-heading{display:flex;justify-content:space-between;gap:12px;margin:12px 0 8px;font-size:12px;color:#f0d9ff}
 .ritual-choice-heading small{color:#bfa7cf}
-.ritual-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}
-.ritual-choice{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-height:165px;padding:13px;border:1px solid #8c58b2;border-radius:11px;background:radial-gradient(circle at top,#43214e,#150e1c 75%)}
+.ritual-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ritual-choice{display:grid;grid-template-columns:70px minmax(0,1fr);align-items:start;gap:11px;min-height:150px;padding:12px;border:1px solid #8c58b2;border-radius:11px;background:linear-gradient(130deg,#34203d,#181020 70%)}
+.ritual-choice-body{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;height:100%}
+.ritual-choice-unavailable{border-color:#685376;background:linear-gradient(130deg,#261a30,#17111d 70%)}
+.ritual-choice-unavailable .ritual-choice-body>strong{color:#d8c3df}
+.ritual-choice-lock{margin-top:auto;color:#cfaddd;font-size:11px;font-weight:700;line-height:1.35}
 .ritual-choice .ritual-symbol{font-size:24px;line-height:1;color:#cb83f0}
 .ritual-choice strong{font:700 15px 'Cinzel',serif;color:#fff0ff}
 .ritual-choice small{font-size:10px;color:#e0b9fa}
-.ritual-choice p{font-size:12px;line-height:1.4;color:#f5e9fb;margin:2px 0 auto}
+.ritual-choice p{font-size:12px;line-height:1.4;color:#f5e9fb;margin:2px 0 8px}
 .ritual-choice button,.ritual-discard button{border:1px solid #d6b578;border-radius:8px;background:#875b32;color:#fff6e9;padding:8px 10px;font-size:12px;font-weight:700}
 .ritual-choice button:hover:not(:disabled),.ritual-discard button:hover:not(:disabled){background:#ac7842}
-.ritual-choice .ritual-art-preview{align-self:center;width:64px;aspect-ratio:800/1132;height:auto;padding:0;background:#08040b;border:1px solid #b686d1;overflow:hidden}
+.ritual-choice .ritual-art-preview{width:70px;aspect-ratio:800/1132;height:auto;padding:0;background:#08040b;border:1px solid #b686d1;overflow:hidden}
 .ritual-art-preview img{display:block;width:100%;height:100%;object-fit:contain}
 .ritual-art-preview:focus-visible,.ritual-read:focus-visible{outline:2px solid #ffe1a6;outline-offset:3px}
 .ritual-dialog img{max-height:70vh;object-fit:contain}
@@ -166,6 +170,7 @@
 .ritual-info-cards{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px}
 .ritual-info-card{width:63px;aspect-ratio:800/1250;padding:0;border:1px solid #b686d1;border-radius:6px;background:#09050c;overflow:hidden}
 .ritual-info-card img{display:block;width:100%;height:100%;object-fit:contain}
+@media(max-width:850px){.ritual-choices{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.ritual-panel{padding:11px}.ritual-choice-heading{flex-direction:column;gap:3px}.ritual-choices{grid-template-columns:1fr}.ritual-choice{min-height:0}.ritual-panel-heading{align-items:flex-start}}
 .ritual-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .hidden-creature-card{display:block;border:2px solid #bc8ad4;color:#f3d9ff}
