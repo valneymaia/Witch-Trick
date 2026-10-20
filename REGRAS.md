@@ -27,7 +27,7 @@ Na Fase 1 as criaturas são jogadas sem aplicar nenhum efeito.
 | O Titereiro | 2 | Recupere qualquer carta já jogada nesta rodada, vencedora ou não, exceto outro Titereiro. Se um Trick for recusado no meio de uma vaza, as cartas já postas na mesa também podem ser escolhidas. Troque a carta recuperada por uma da sua mão. Se a rodada acabou, receba três cartas novas junto com a recuperada e descarte uma das três novas. |
 | Lobo | 3 | Até o fim da rodada, a equipe adversária não pode usar os efeitos de criaturas. |
 | Fada | 4 | No início da próxima vaza, veja até 2 cartas da mão de um adversário e escolha uma delas para ser descartada. Esse adversário passa a próxima vaza, mesmo que ainda tenha cartas, e volta a jogar na seguinte, se houver. |
-| Goblin | 5 | Troque uma criatura sua por uma de um adversário, aleatoriamente. Se a recebida valer menos de 5, sua equipe ganha 1 ponto. |
+| Goblin | 5 | Troque uma criatura sua por uma de um adversário, aleatoriamente. Se a recebida valer 5 ou menos, sua equipe ganha 1 ponto. |
 | Grifo | 6 | No início da próxima vaza, compre uma carta e depois coloque uma carta da sua mão na pilha de descarte. |
 | Familiar | 7 | Sua equipe ganha 1 ponto. |
 | O Mago | 8 | Revele uma carta de Ritual aleatória de um adversário. Depois escolha se mantém sua mão ou troca uma carta de Ritual sua pela revelada. |

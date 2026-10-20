@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { randomBytes, randomInt } from 'node:crypto';
 import { Server, type Socket } from 'socket.io';
-import { CARD_BY_ID, CREATURE_EFFECTS, abilityOptionsFor, ancientDiscardSeat, createAbilityScenario, createGame, isBlindToCreatures, reduce, ritualFromId, viewFor, type CreatureKind, type GameState } from '../../engine/src/index.js';
+import { CARD_BY_ID, CREATURE_EFFECTS, abilityOptionsFor, ancientDiscardSeat, createAbilityScenario, createGame, createRitualScenario, isBlindToCreatures, reduce, ritualFromId, viewFor, type CreatureKind, type GameState, type RitualKind } from '../../engine/src/index.js';
 
 type Reply = (result: { ok: true; code: string } | { ok: false; error: string }) => void;
 interface Seat { playerId: string; name: string; bot: boolean }
@@ -265,6 +265,16 @@ io.on('connection', socket => {
       reply({ ok: true, code: room.code });
       emitRoom(room);
     } catch (error) { fail(reply, error instanceof Error ? error.message : 'Cenário inválido.'); }
+  });
+  socket.on('room:testRitual', (request: { kind?: unknown }, reply: Reply) => {
+    const room = rooms.get(socket.data.code);
+    if (!room?.game || !room.testMode || socket.data.playerId !== room.ownerId) return fail(reply, 'Cenários disponíveis apenas no teste solo.');
+    if (typeof request?.kind !== 'string') return fail(reply, 'Escolha um Ritual do baralho de teste.');
+    try {
+      room.game = createRitualScenario(room.seats.map(seat => seat!.playerId) as GameState['playerIds'], request.kind as RitualKind);
+      reply({ ok: true, code: room.code });
+      emitRoom(room);
+    } catch (error) { fail(reply, error instanceof Error ? error.message : 'Ritual inválido.'); }
   });
   socket.on('room:leave', () => {
     const room = rooms.get(socket.data.code);

@@ -39,7 +39,8 @@ export interface PendingAbility {
 }
 export type CreatureReveal =
   | { reason: 'declined'; round: number; seat: number; cardId: string }
-  | { reason: 'goblin'; round: number; seat: number; targetSeat: number; cardId: string; tradedCardId: string; pointAwarded: boolean };
+  | { reason: 'goblin'; round: number; seat: number; targetSeat: number; cardId: string; tradedCardId: string; pointAwarded: boolean }
+  | { reason: 'blind-discard'; source: 'griffin' | 'puppeteer'; round: number; seat: number; cardId: string };
 export interface GameState {
   playerIds: [string, string, string, string];
   hands: [string[], string[], string[], string[]];
@@ -393,7 +394,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     hands[seat]!.push(received);
     hands[targetSeat]!.push(pending.ownCardId!);
     const scores = [...state.scores] as GameState['scores'];
-    const pointAwarded = CARD_BY_ID[received]!.value < 5;
+    const pointAwarded = CARD_BY_ID[received]!.value <= 5;
     if (pointAwarded) scores[teamOf(seat)] = Math.min(TARGET_SCORE, scores[teamOf(seat)] + 1);
     const next = closeAbility({ ...state, rng, hands, scores, lastCreatureReveal: { reason: 'goblin', round: state.round, seat, targetSeat, cardId: received, tradedCardId: pending.ownCardId!, pointAwarded } });
     return scores[teamOf(seat)] >= TARGET_SCORE ? { ...next, winner: teamOf(seat) } : next;
@@ -406,7 +407,8 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     if (!cardId) throw new Error('Escolha uma carta para descartar.');
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
     hands[seat] = hands[seat]!.filter(id => id !== cardId);
-    return closeAbility({ ...state, hands, discard: [...state.discard, cardId] });
+    return closeAbility({ ...state, hands, discard: [...state.discard, cardId], lastCreatureReveal: blind
+      ? { reason: 'blind-discard', source: 'griffin', round: state.round, seat, cardId } : state.lastCreatureReveal });
   }
   if (pending.stage === 'wizard-target') {
     if (choice === 'skip') return closeAbility(state);
@@ -514,7 +516,8 @@ export function reduce(state: GameState, action: GameAction): GameState {
     if (!cardId) throw new Error('Escolha uma das três criaturas novas para descartar.');
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
     hands[seat] = hands[seat]!.filter(id => id !== cardId);
-    return { ...state, hands, discard: [...state.discard, cardId], ritualExchange: null, ritualPhase: blind ? 'blind' : 'revealed' };
+    return { ...state, hands, discard: [...state.discard, cardId], ritualExchange: null, ritualPhase: blind ? 'blind' : 'revealed',
+      lastCreatureReveal: blind ? { reason: 'blind-discard', source: 'puppeteer', round: state.round, seat, cardId } : state.lastCreatureReveal };
   }
   if (state.ritualMode && state.ritualPhase !== 'play') throw new Error('Escolha o Ritual antes de jogar criaturas.');
   const ritualKind: RitualKind | null = state.ritualActiveId ? ritualFromId(state.ritualActiveId).kind : null;

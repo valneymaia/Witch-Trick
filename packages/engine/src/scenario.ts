@@ -1,5 +1,23 @@
 import { CARDS, CREATURE_EFFECTS, type CreatureKind } from './cards.js';
 import { createGame, reduce, type GameState } from './engine.js';
+import { RITUAL_TEST_DECK, type RitualKind } from './rituals.js';
+
+/** Start a solo test with a chosen playable Ritual in the first player's hand. */
+export function createRitualScenario(playerIds: GameState['playerIds'], kind: RitualKind): GameState {
+  const chosenId = `${kind}#1`;
+  if (!RITUAL_TEST_DECK.includes(chosenId)) throw new Error('Este Ritual ainda não está no baralho de teste.');
+  const state = createGame(playerIds, 123, true);
+  const ritualHands = state.ritualHands.map(hand => [...hand]) as GameState['ritualHands'];
+  const ritualDeck = [...state.ritualDeck];
+  if (!ritualHands[0]!.includes(chosenId)) {
+    const replacedId = ritualHands[0]![0]!;
+    const owner = ritualHands.findIndex(hand => hand.includes(chosenId));
+    if (owner >= 0) ritualHands[owner]![ritualHands[owner]!.indexOf(chosenId)] = replacedId;
+    else ritualDeck[ritualDeck.indexOf(chosenId)] = replacedId;
+    ritualHands[0]![0] = chosenId;
+  }
+  return { ...state, ritualHands, ritualDeck, roundStarter: 0, turn: 0, ritualChooser: 0 };
+}
 
 /** A deterministic teaching scenario available only from the server's solo test mode. */
 export function createAbilityScenario(playerIds: GameState['playerIds'], kind: CreatureKind, mode: 'trick' | 'declined'): GameState {

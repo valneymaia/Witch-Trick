@@ -311,6 +311,16 @@ describe('habilidades de criaturas', () => {
     expect(viewFor(noPoint, 'd').lastCreatureReveal).toMatchObject({
       reason: 'goblin', card: { id: 'arcana-full' }, pointAwarded: false,
     });
+    let equalFive = controlledState([
+      ['arcana-full'], ['goblin-new'], ['witch-new'], ['wolf-new'],
+    ]);
+    equalFive = { ...equalFive, pendingAbility: { seat: 0, source: 'trick', stage: 'goblin-own', cardId: 'goblin-full', endRound: null } };
+    equalFive = reduce(equalFive, { type: 'ability', playerId: 'a', choice: 'arcana-full' });
+    equalFive = reduce(equalFive, { type: 'ability', playerId: 'a', choice: '1' });
+    expect(equalFive.scores[0]).toBe(1);
+    expect(viewFor(equalFive, 'b').lastCreatureReveal).toMatchObject({
+      reason: 'goblin', card: { id: 'goblin-new', value: 5 }, pointAwarded: true,
+    });
   });
   it('o vencedor ativa Corvo ou Familiar, ou deixa a habilidade passar', () => {
     let raven = controlledState([['raven-full'], ['raven-new'], ['raven-waning'], ['raven-waxing']]);

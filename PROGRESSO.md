@@ -52,6 +52,10 @@ Validar no navegador e com jogadores em dispositivos separados os oito Rituais a
 - [x] Validação do terceiro lote: 58 testes do motor, 1.000 partidas simuladas com Rituais e compilação.
 - [x] Cartas ocultas exibem a arte oficial `verso.png`. Após Trick recusado, a criatura escolhida é revelada a todos, inclusive Arcana sem poder. A troca do Goblin mostra as duas criaturas e se rendeu ponto.
 - [x] Testes de regressão para revelação pública em quatro visões, Arcana escolhida às cegas e resultado com e sem ponto do Goblin.
+- [x] Descartes cegos do Grifo e do Titereiro revelados para os quatro jogadores após a escolha.
+- [x] Goblin ganha 1 ponto se a criatura recebida valer 5 ou menos, inclusive outro Goblin; regra, texto e teste atualizados.
+- [x] Menu solo permite escolher um dos oito Rituais ativos e reiniciar com ele na mão do Jogador 1 para testar seu efeito.
+- [x] Validação desta etapa: 61 testes do motor, 1.000 partidas simuladas com Rituais, compilação e teste de sala com quatro conexões e seletor de Ritual.
 - [ ] Validação visual no navegador e partida em quatro dispositivos separados.
 
 ## Limitações conhecidas

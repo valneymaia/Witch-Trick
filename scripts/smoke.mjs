@@ -96,7 +96,17 @@ try {
   await emit(returned, 'room:join', { code, playerId: players[1], name: 'Teste 2' });
   await pause();
   assert.equal(states.get(players[1]).game.seat, 1);
-  console.log('Quatro jogadores, Rituais privados, mãos ocultas, Trick, jogada e reconexão: OK.');
+
+  const soloId = 'smoke-solo';
+  const solo = await connect(soloId);
+  await emit(solo, 'room:create', { playerId: soloId, name: 'Teste solo', testMode: true });
+  await emit(solo, 'room:testRitual', { kind: 'veu-da-incerteza' });
+  await pause();
+  const soloState = states.get(soloId);
+  assert.equal(soloState.game.ritualChooser, 0);
+  assert.ok(soloState.allRitualHands[0].some(card => card.kind === 'veu-da-incerteza'));
+  await assert.rejects(emit(solo, 'room:testRitual', { kind: 'ritual-inexistente' }));
+  console.log('Quatro jogadores, mãos privadas, Trick, reconexão e seletor de Ritual no teste solo: OK.');
 } finally {
   for (const socket of clients) socket.disconnect();
 }

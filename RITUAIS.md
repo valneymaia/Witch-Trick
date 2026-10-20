@@ -60,3 +60,4 @@ Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa 
 - O Goblin com olhinho entrega uma posição da própria mão sem ver a carta. Após a troca, a carta entregue e a recebida são reveladas a todos, com indicação de ter ou não recebido o ponto. Sem olhinho, escolhe a carta que entrega após ver a própria mão.
 - Se o Trick for recusado durante uma rodada de criaturas ocultas, quem pediu escolhe uma posição pelo verso. A criatura virada é revelada a todos antes de resolver a habilidade. Se sair Arcana ou outra criatura sem habilidade, a carta é descartada e não ativa poder.
 - O Grifo com olhinho compra e descarta uma posição sem ver as cartas. Sem olhinho, vê a mão e escolhe qual carta descartar.
+- Quando Grifo ou Titereiro descartam uma criatura pelo verso, a criatura descartada é revelada a todos depois da escolha. A própria mão continua oculta conforme a modalidade do Ritual.

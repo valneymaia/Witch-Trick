@@ -23,7 +23,7 @@ export const CREATURE_EFFECTS: Record<CreatureKind, { description: string; avail
   puppeteer: { description: 'Recupere qualquer carta já jogada nesta rodada, inclusive da vaza interrompida por um Trick recusado, exceto outro Titereiro. Ela pode ter vencido ou perdido. Troque-a por uma carta da sua mão. Se a rodada terminou, receba três cartas novas junto com a recuperada e descarte uma das três novas.', available: true },
   wolf: { description: 'Até o fim da rodada, a equipe adversária não pode usar habilidades de criaturas.', available: true },
   fairy: { description: 'No início da próxima vaza, veja até 2 cartas da mão de um adversário e escolha uma para descartar. Ele passa essa vaza e volta a jogar na seguinte, se houver.', available: true },
-  goblin: { description: 'Troque uma criatura sua por uma aleatória de um adversário. Se receber uma carta de valor menor que 5, sua equipe ganha 1 ponto.', available: true },
+  goblin: { description: 'Troque uma criatura sua por uma aleatória de um adversário. Se receber uma carta de valor menor ou igual a 5, sua equipe ganha 1 ponto.', available: true },
   griffin: { description: 'No início da próxima vaza, compre uma carta e depois descarte outra da sua mão.', available: true },
   familiar: { description: 'Sua equipe ganha 1 ponto.', available: true },
   wizard: { description: 'Revele um Ritual aleatório de um adversário. Depois escolha se quer manter sua mão ou trocar um Ritual seu pelo revelado.', available: true },

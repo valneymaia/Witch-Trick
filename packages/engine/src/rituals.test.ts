@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createGame, reduce, viewFor, type GameState } from './index.js';
+import { RITUAL_TEST_DECK, createGame, createRitualScenario, reduce, viewFor, type GameState } from './index.js';
 
 const players: GameState['playerIds'] = ['a', 'b', 'c', 'd'];
 function ritualState(rituals: string[], hands: GameState['hands'] = [
@@ -174,6 +174,9 @@ describe('primeiro lote de Rituais', () => {
     expect(() => reduce(state, { type: 'ritual-discard', playerId: 'a', choice: '1' })).toThrow();
     state = reduce(state, { type: 'ritual-discard', playerId: 'c', choice: '1' });
     expect(state.discard).toContain('wolf-new');
+    for (const playerId of players) expect(viewFor(state, playerId).lastCreatureReveal).toMatchObject({
+      reason: 'blind-discard', source: 'puppeteer', seat: 2, card: { id: 'wolf-new' },
+    });
     expect(state.hands[2]).toEqual(['raven-new', 'fairy-new', 'arcana-full']);
     expect(state.ritualPhase).toBe('blind');
     state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mapa-do-destino#1', prediction: '2-1' });
@@ -285,6 +288,9 @@ describe('primeiro lote de Rituais', () => {
     expect(() => reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mapa-do-destino#1', prediction: '2-0' })).toThrow('habilidade');
     state = reduce(state, { type: 'ability', playerId: 'a', choice: '1' });
     expect(state.discard).toContain('raven-full');
+    for (const playerId of players) expect(viewFor(state, playerId).lastCreatureReveal).toMatchObject({
+      reason: 'blind-discard', source: 'griffin', seat: 0, card: { id: 'raven-full' },
+    });
     state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mapa-do-destino#1', prediction: '2-0' });
     expect(state.ritualPhase).toBe('play');
   });
@@ -391,6 +397,17 @@ describe('primeiro lote de Rituais', () => {
 });
 
 describe('segundo lote de Rituais', () => {
+  it('teste solo prepara o Ritual escolhido na mão do primeiro jogador sem duplicar cartas', () => {
+    for (const kind of ['veu-da-incerteza', 'escolha-da-ancia', 'mao-cega', 'magia-nula'] as const) {
+      const state = createRitualScenario(players, kind);
+      expect(state.ritualChooser).toBe(0);
+      expect(state.ritualPhase).toBe('blind');
+      expect(state.ritualHands[0]!.some(id => id.startsWith(`${kind}#`))).toBe(true);
+      const all = [...state.ritualDeck, ...state.ritualHands.flat()];
+      expect(all).toHaveLength(RITUAL_TEST_DECK.length);
+      expect(new Set(all).size).toBe(all.length);
+    }
+  });
   it('Maldição tira três pontos da equipe derrotada após Trick recusado e respeita o mínimo zero', () => {
     let state = ritualState(['maldicao-da-derrota#1'], [
       ['arcana-full'], ['arcana-new'], ['arcana-waning'], ['arcana-waxing'],

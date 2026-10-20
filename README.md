@@ -36,9 +36,12 @@ Para testar sozinho, use **Testar sozinho: controlar os 4 assentos**. A tela mos
 
 Para testar o Titereiro após Trick recusado, selecione **O Titereiro** e **Simular Trick recusado**. Arcana, Mago e Fada já estarão na mesa. Escolha o Titereiro da mão, recupere uma dessas cartas e descarte uma das três cartas novas da rodada seguinte.
 
+No teste solo, **Testar Ritual → Preparar Ritual** reinicia a partida com o Ritual escolhido na mão do Jogador 1. Assim dá para testar cada um dos oito efeitos sem esperar o sorteio.
+
 Os oito Rituais do baralho de teste incluem Maldição da Derrota, Escolha da Anciã, Véu da Incerteza e Mão Cega. Na Anciã, cada aliado compra três criaturas extras e descarta três antes da primeira vaza. No Véu, todos jogam pelo verso; na Mão Cega, só o adversário escolhido joga pelo verso. A escolha cega vale durante toda a rodada.
 
 As cartas ocultas usam a arte oficial `verso.png`. Quando um Trick é recusado, a criatura escolhida para o poder é revelada a todos, mesmo se não tiver habilidade. A troca do Goblin também revela a carta entregue e a recebida, e informa se o valor recebido deu 1 ponto.
+Descartes feitos pelo verso com Grifo ou Titereiro também são revelados depois da escolha. O Goblin ganha o ponto quando recebe uma criatura de valor **5 ou menos**.
 
 ## Desenvolvimento
 
