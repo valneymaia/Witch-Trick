@@ -40,14 +40,23 @@ Primeiro lote do novo conjunto enviado pelo Valney:
 | Véu da Incerteza | Antes de ver as criaturas | Os quatro jogadores escolhem posições de cartas pelo verso nas três vazas da rodada. A carta jogada se revela na mesa. |
 | Mão Cega | Antes de ver as criaturas | Quem jogou o Ritual escolhe um adversário. Só esse jogador escolhe cartas pelo verso nas três vazas da rodada. |
 
+## Terceiro lote de implementação
+
+| Ritual | Momento | Regra implementada |
+|---|---|---|
+| Roubo Arcano | Depois de ver as criaturas | Quem jogou escolhe um adversário e vê, em privado, todas as criaturas que ele tinha na mão naquele momento. A informação fica consultável até o fim da rodada. |
+| Espelho Enfeitiçado | Depois de ver as criaturas | Cada parceiro decide separadamente se troca toda a própria mão com a de um adversário. O jogador que jogou o Ritual decide primeiro. Cada adversário só pode ser escolhido uma vez. Jogadores sem cartas passam a vez automaticamente. |
+| Olho da Verdade | Depois de ver as criaturas | Quem jogou escolhe um adversário. A mão atual desse jogador fica visível aos quatro participantes durante a rodada e acompanha cartas jogadas ou trocadas. |
+| Acordo de Sangue | Depois de ver as criaturas | Os dois parceiros veem as mãos um do outro. Ambos precisam aceitar para a rodada começar valendo 3 pontos; Double, Hat e Poker aceitos levam a 5, 6 e 7. Se um desistir, a equipe adversária recebe 1 ponto e uma nova rodada é distribuída. Para futuras partidas de 6 ou 8 jogadores, a decisão será por maioria. |
+
 O botão **Ver meus Rituais** mostra a própria mão em tamanho maior, inclusive durante a decisão do Mago. No modo de teste solo, mostra a mão do assento atualmente controlado.
 
-Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa anterior, mas não entram no sorteio do lote atual. As próximas quatro artes recebidas ficam para lotes posteriores: Roubo Arcano, Espelho Enfeitiçado, Olho da Verdade e Acordo de Sangue. O baralho completo entra em jogo quando as 48 regras estiverem prontas.
+Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa anterior, mas não entram no sorteio do lote atual. O sorteio de teste usa quatro cópias de cada um dos doze Rituais com arte e regra ativa. O baralho oficial completo entra em jogo quando as demais artes e regras estiverem prontas.
 
 ## Arquivos de arte
 
 - Exportar **uma frente por arquivo**, em **800 × 1131 ou 1132 px**, conforme o arredondamento do editor para a altura original de 1131,4 px. Manter a mesma medida em todas as cartas, sem margem externa, e enviar PNG ou WebP junto do arquivo editável.
-- As oito artes ativas estão em `packages/web/public/rituals/`. As criaturas ocultas usam `packages/web/public/cards/verso.png`.
+- As doze artes ativas estão em `packages/web/public/rituals/`. As criaturas ocultas usam `packages/web/public/cards/verso.png`.
 - Reservar o centro para ilustração e deixar título, olho cortado e regra com contraste forte. A regra deve ser legível no tamanho físico de celular, mas a interface também mostrará texto ampliável fora da imagem.
 - O layout exibirá a arte na proporção recebida, sem esticá-la. Não é necessário criar outra resolução menor.
 

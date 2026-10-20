@@ -160,6 +160,12 @@
 .ritual-discard-options>div{display:flex;align-items:center;gap:5px}
 .ritual-discard-preview{width:31px;height:44px;padding:0!important;overflow:hidden;background:#160e20!important}
 .ritual-discard-preview img{width:100%;height:100%;object-fit:cover}
+.ritual-decision{display:grid;gap:8px;margin-top:10px;padding:12px;border:1px solid #9b6ec4;border-radius:10px;background:#1a1028;color:#f5dcff;font-size:13px}
+.ritual-decision p{margin:0;color:#d7c2e5;line-height:1.4}
+.ritual-decision small{color:#dfbbef}
+.ritual-info-cards{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px}
+.ritual-info-card{width:63px;aspect-ratio:800/1250;padding:0;border:1px solid #b686d1;border-radius:6px;background:#09050c;overflow:hidden}
+.ritual-info-card img{display:block;width:100%;height:100%;object-fit:contain}
 @media(max-width:600px){.ritual-panel{padding:11px}.ritual-choice-heading{flex-direction:column;gap:3px}.ritual-choices{grid-template-columns:1fr}.ritual-choice{min-height:0}.ritual-panel-heading{align-items:flex-start}}
 .ritual-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .hidden-creature-card{display:block;border:2px solid #bc8ad4;color:#f3d9ff}

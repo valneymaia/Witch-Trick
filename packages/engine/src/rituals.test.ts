@@ -396,6 +396,81 @@ describe('primeiro lote de Rituais', () => {
   });
 });
 
+describe('terceiro lote de Rituais', () => {
+  it('Roubo Arcano mostra uma fotografia da mão adversária somente a quem jogou o Ritual', () => {
+    let state = ritualState(['roubo-arcano#1'], [
+      ['arcana-full'], ['witch-new', 'wolf-new'], ['fairy-new'], ['goblin-new'],
+    ]);
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    expect(() => reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'roubo-arcano#1', targetSeat: 2 })).toThrow('adversário');
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'roubo-arcano#1', targetSeat: 1 });
+    expect(viewFor(state, 'a').ritualPeekCards.map(card => card.id)).toEqual(['witch-new', 'wolf-new']);
+    for (const id of ['b', 'c', 'd']) expect(viewFor(state, id).ritualPeekCards).toEqual([]);
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: 'arcana-full' });
+    state = reduce(state, { type: 'play', playerId: 'b', cardId: 'witch-new' });
+    expect(viewFor(state, 'a').ritualPeekCards.map(card => card.id)).toEqual(['witch-new', 'wolf-new']);
+  });
+
+  it('Olho da Verdade expõe a mão atual do alvo a todos, sem mostrar outras mãos', () => {
+    let state = ritualState(['olho-da-verdade#1'], [
+      ['arcana-full'], ['witch-new', 'wolf-new'], ['fairy-new'], ['goblin-new'],
+    ]);
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'olho-da-verdade#1', targetSeat: 1 });
+    for (const id of players) {
+      const view = viewFor(state, id);
+      expect(view.players[1]?.visibleHand?.map(card => card.id)).toEqual(['witch-new', 'wolf-new']);
+      expect(view.players[2]?.visibleHand).toBeUndefined();
+    }
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: 'arcana-full' });
+    state = reduce(state, { type: 'play', playerId: 'b', cardId: 'witch-new' });
+    expect(viewFor(state, 'd').players[1]?.visibleHand?.map(card => card.id)).toEqual(['wolf-new']);
+  });
+
+  it('Espelho permite decisão individual, troca mãos inteiras e impede repetir adversário', () => {
+    let state = ritualState(['espelho-enfeiticado#1'], [
+      ['arcana-full', 'wolf-full'], ['witch-new'], ['fairy-new'], ['goblin-new', 'raven-new'],
+    ]);
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'espelho-enfeiticado#1' });
+    expect(state.ritualPhase).toBe('mirror');
+    expect(viewFor(state, 'd').ritualDecisionSeat).toBe(0);
+    expect(() => reduce(state, { type: 'ritual-mirror', playerId: 'c', targetSeat: 3 })).toThrow('Não é sua vez');
+    state = reduce(state, { type: 'ritual-mirror', playerId: 'a', targetSeat: 1 });
+    expect(state.hands[0]).toEqual(['witch-new']);
+    expect(state.hands[1]).toEqual(['arcana-full', 'wolf-full']);
+    expect(viewFor(state, 'c').ritualDecisionSeat).toBe(2);
+    expect(() => reduce(state, { type: 'ritual-mirror', playerId: 'c', targetSeat: 1 })).toThrow('já foi escolhido');
+    state = reduce(state, { type: 'ritual-mirror', playerId: 'c', targetSeat: 3 });
+    expect(state.hands[2]).toEqual(['goblin-new', 'raven-new']);
+    expect(state.hands[3]).toEqual(['fairy-new']);
+    expect(state.ritualPhase).toBe('play');
+  });
+
+  it('Acordo revela mãos só aos parceiros; ambos aceitam ou um desiste por 1 ponto rival', () => {
+    let state = ritualState(['acordo-de-sangue#1'], [
+      ['arcana-full'], ['witch-new'], ['fairy-new'], ['goblin-new'],
+    ]);
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'acordo-de-sangue#1' });
+    expect(state.ritualPhase).toBe('blood-vote');
+    expect(viewFor(state, 'a').ritualTeammateHand?.cards.map(card => card.id)).toEqual(['fairy-new']);
+    expect(viewFor(state, 'c').ritualTeammateHand?.cards.map(card => card.id)).toEqual(['arcana-full']);
+    expect(viewFor(state, 'b').ritualTeammateHand).toBeNull();
+    expect(() => reduce(state, { type: 'ritual-blood', playerId: 'c', play: true })).toThrow('Não é sua vez');
+    state = reduce(state, { type: 'ritual-blood', playerId: 'a', play: true });
+    const refused = reduce(state, { type: 'ritual-blood', playerId: 'c', play: false });
+    expect(refused.scores).toEqual([0, 1]);
+    expect(refused.lastRound?.reason).toBe('blood-withdrawal');
+    state = reduce(state, { type: 'ritual-blood', playerId: 'c', play: true });
+    expect(state.ritualPhase).toBe('play');
+    expect(state.roundStake).toBe(3);
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: true });
+    expect(state.roundStake).toBe(5);
+  });
+});
+
 describe('segundo lote de Rituais', () => {
   it('teste solo prepara o Ritual escolhido na mão do primeiro jogador sem duplicar cartas', () => {
     for (const kind of ['veu-da-incerteza', 'escolha-da-ancia', 'mao-cega', 'magia-nula'] as const) {

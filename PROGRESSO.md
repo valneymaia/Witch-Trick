@@ -25,7 +25,7 @@
 
 ## Próximo passo
 
-Validar no navegador e com jogadores em dispositivos separados os oito Rituais ativos. Depois continuar em lotes de quatro até completar as 48 cartas.
+Validar no navegador e com jogadores em dispositivos separados os doze Rituais ativos. Depois continuar em lotes de quatro até completar as 48 cartas.
 
 ## Preparação dos Rituais
 
@@ -57,11 +57,14 @@ Validar no navegador e com jogadores em dispositivos separados os oito Rituais a
 - [x] Menu solo permite escolher um dos oito Rituais ativos e reiniciar com ele na mão do Jogador 1 para testar seu efeito.
 - [x] Validação desta etapa: 61 testes do motor, 1.000 partidas simuladas com Rituais, compilação e teste de sala com quatro conexões e seletor de Ritual.
 - [x] Proxy do Vite aceita WebSocket do Socket.IO. Túnel temporário Cloudflare abriu a página e passou o teste de sala com quatro clientes, mãos privadas, Trick e reconexão por uma URL pública.
-- [ ] Validação visual no navegador e partida em quatro dispositivos separados.
+- [x] Quarto conjunto de artes importado: Roubo Arcano, Espelho Enfeitiçado, Olho da Verdade e Acordo de Sangue. Roubo mostra uma fotografia privada da mão adversária; Olho mostra a mão atual a todos; Espelho troca mãos inteiras com decisões individuais e alvos distintos; Acordo exige consentimento dos dois parceiros.
+- [x] 65 testes do motor, 1.000 partidas simuladas com Rituais e teste de sala com quatro conexões. O Espelho faz passar automaticamente jogadores que ficaram sem cartas.
+- [x] Validação visual no navegador local: Espelho impede escolher o mesmo adversário duas vezes; Acordo exige os dois votos e inicia com 3 pontos, permitindo Double Trick por 5.
+- [ ] Partida em quatro dispositivos separados.
 
 ## Limitações conhecidas
 
 - Salas e placares são perdidos se o servidor reiniciar.
 - O modo de controle dos quatro assentos revela todas as mãos na própria aba e deve ser usado somente para testes. Para testar privacidade e multiplayer, use uma sala normal em quatro abas ou dispositivos.
 - A identidade de uma aba se perde quando ela é encerrada; atualizá-la mantém o assento.
-- O baralho de teste usa quatro cópias de cada um dos oito efeitos com arte. As próximas quatro artes recebidas e os demais Rituais aguardam implementação em lotes de quatro. Partidas com 6 ou 8 pessoas também ficam para depois.
+- O baralho de teste usa quatro cópias de cada um dos doze efeitos com arte. Os demais Rituais aguardam implementação em lotes de quatro. Partidas com 6 ou 8 pessoas também ficam para depois.

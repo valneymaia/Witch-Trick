@@ -57,10 +57,14 @@ try {
     await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: blind.id, prediction: '2-0', targetSeat: (chooser + 1) % 4 });
   }
   await pause();
-  while (states.get(players[0]).game.ritualPhase === 'ancient-discard') {
-    const actor = states.get(players[0]).game.ancientDiscardSeat;
-    const cardId = states.get(players[actor]).game.hand[0].id;
-    await emit(sockets[actor], 'room:ritual', { type: 'ancient-discard', cardId });
+  while (['ancient-discard', 'mirror', 'blood-vote'].includes(states.get(players[0]).game.ritualPhase)) {
+    const phase = states.get(players[0]).game.ritualPhase;
+    const actor = states.get(players[0]).game.ritualDecisionSeat;
+    if (phase === 'ancient-discard') {
+      const cardId = states.get(players[actor]).game.hand[0].id;
+      await emit(sockets[actor], 'room:ritual', { type: 'ancient-discard', cardId });
+    } else if (phase === 'mirror') await emit(sockets[actor], 'room:ritual', { type: 'mirror' });
+    else await emit(sockets[actor], 'room:ritual', { type: 'blood', play: true });
     await pause();
   }
   assert.equal(states.get(players[0]).game.ritualPhase, 'play');
@@ -106,7 +110,31 @@ try {
   assert.equal(soloState.game.ritualChooser, 0);
   assert.ok(soloState.allRitualHands[0].some(card => card.kind === 'veu-da-incerteza'));
   await assert.rejects(emit(solo, 'room:testRitual', { kind: 'ritual-inexistente' }));
-  console.log('Quatro jogadores, mãos privadas, Trick, reconexão e seletor de Ritual no teste solo: OK.');
+  await emit(solo, 'room:testRitual', { kind: 'espelho-enfeiticado' });
+  await emit(solo, 'room:ritual', { type: 'reveal', seat: 0 });
+  await pause();
+  const mirrorId = states.get(soloId).allRitualHands[0].find(card => card.kind === 'espelho-enfeiticado').id;
+  await emit(solo, 'room:ritual', { type: 'play', seat: 0, ritualId: mirrorId });
+  await pause();
+  assert.equal(states.get(soloId).game.ritualPhase, 'mirror');
+  await emit(solo, 'room:ritual', { type: 'mirror', seat: 0, targetSeat: 1 });
+  await assert.rejects(emit(solo, 'room:ritual', { type: 'mirror', seat: 2, targetSeat: 1 }));
+  await emit(solo, 'room:ritual', { type: 'mirror', seat: 2, targetSeat: 3 });
+  await pause();
+  assert.equal(states.get(soloId).game.ritualPhase, 'play');
+
+  await emit(solo, 'room:testRitual', { kind: 'acordo-de-sangue' });
+  await emit(solo, 'room:ritual', { type: 'reveal', seat: 0 });
+  await pause();
+  const bloodId = states.get(soloId).allRitualHands[0].find(card => card.kind === 'acordo-de-sangue').id;
+  await emit(solo, 'room:ritual', { type: 'play', seat: 0, ritualId: bloodId });
+  await pause();
+  assert.equal(states.get(soloId).game.ritualPhase, 'blood-vote');
+  await emit(solo, 'room:ritual', { type: 'blood', seat: 0, play: true });
+  await emit(solo, 'room:ritual', { type: 'blood', seat: 2, play: false });
+  await pause();
+  assert.deepEqual(states.get(soloId).game.scores, [0, 1]);
+  console.log('Quatro jogadores, mãos privadas, Trick, reconexão, Espelho e Acordo: OK.');
 } finally {
   for (const socket of clients) socket.disconnect();
 }

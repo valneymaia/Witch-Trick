@@ -1,4 +1,4 @@
-import { CARD_BY_ID, RITUAL_TEST_DECK, abilityOptionsFor, ancientDiscardSeat, createGame, isBlindToCreatures, reduce, ritualFromId, type GameState } from '../src/index.js';
+import { CARD_BY_ID, RITUAL_TEST_DECK, abilityOptionsFor, createGame, isBlindToCreatures, reduce, ritualDecisionSeat, ritualFromId, type GameState } from '../src/index.js';
 
 const ids: [string, string, string, string] = ['bot-0', 'bot-1', 'bot-2', 'bot-3'];
 const count = Number(process.argv.slice(2).find(arg => !arg.startsWith('--')) ?? 2000);
@@ -17,8 +17,7 @@ for (let seed = 1; seed <= count; seed++) {
       if (!choice) throw new Error('Habilidade sem opção.');
       state = reduce(state, { type: 'ability', playerId: ids[seat]!, choice });
     } else if (state.ritualMode && state.ritualPhase !== 'play') {
-      const seat = state.ritualPhase === 'ancient-discard' ? ancientDiscardSeat(state)!
-        : state.ritualPhase.endsWith('discard') ? state.ritualExchange!.seat : state.ritualChooser;
+      const seat = ritualDecisionSeat(state)!;
       if (state.ritualPhase === 'mode') {
         const blind = state.ritualHands[seat]!.some(id => ritualFromId(id).blind) && (moves % 2 === 0 || !state.ritualHands[seat]!.some(id => !ritualFromId(id).blind));
         state = reduce(state, { type: 'ritual-mode', playerId: ids[seat]!, blind });
@@ -33,8 +32,12 @@ for (let seed = 1; seed <= count; seed++) {
         const ritualId = state.ritualHands[seat]!.find(id => !ritualFromId(id).blind)!;
         state = reduce(state, { type: 'ritual-play', playerId: ids[seat]!, ritualId, creatureKind: CARD_BY_ID[state.hands[seat]![0]!]!.kind, targetSeat: (seat + 1) % 4 });
       } else if (state.ritualPhase === 'ancient-discard') {
-        const actor = ancientDiscardSeat(state)!;
-        state = reduce(state, { type: 'ritual-ancient-discard', playerId: ids[actor]!, cardId: state.hands[actor]![0]! });
+        state = reduce(state, { type: 'ritual-ancient-discard', playerId: ids[seat]!, cardId: state.hands[seat]![0]! });
+      } else if (state.ritualPhase === 'mirror') {
+        const targetSeat = [0, 1, 2, 3].find(target => target % 2 !== seat % 2 && !state.ritualMirrorTargets.includes(target));
+        state = reduce(state, { type: 'ritual-mirror', playerId: ids[seat]!, targetSeat: moves % 2 === 0 ? targetSeat : undefined });
+      } else if (state.ritualPhase === 'blood-vote') {
+        state = reduce(state, { type: 'ritual-blood', playerId: ids[seat]!, play: moves % 3 !== 0 });
       } else if (state.ritualPhase === 'blind-discard' || state.ritualPhase === 'revealed-discard') {
         const choice = state.ritualPhase === 'blind-discard' ? '0' : state.ritualExchange!.newCardIds[0]!;
         state = reduce(state, { type: 'ritual-discard', playerId: ids[seat]!, choice });
@@ -59,5 +62,5 @@ function check(state: GameState) {
     const ritualIds = [...state.ritualDeck, ...state.ritualHands.flat(), ...state.ritualDiscard, ...(state.ritualActiveId ? [state.ritualActiveId] : [])];
     if (ritualIds.length !== RITUAL_TEST_DECK.length || new Set(ritualIds).size !== RITUAL_TEST_DECK.length) throw new Error(`Baralho de Rituais inválido na rodada ${state.round}: ${JSON.stringify({ deck: state.ritualDeck, hands: state.ritualHands, discard: state.ritualDiscard, active: state.ritualActiveId, phase: state.ritualPhase })}`);
   }
-  if (state.winner === null && !state.pendingAbility && (!state.ritualMode || state.ritualPhase === 'play') && state.hands[state.turn]!.length === 0) throw new Error('Jogador sem carta na vez.');
+  if (state.winner === null && !state.pendingAbility && (!state.ritualMode || state.ritualPhase === 'play') && state.hands[state.turn]!.length === 0) throw new Error(`Jogador sem carta na vez: ${JSON.stringify({ round: state.round, turn: state.turn, hands: state.hands.map(hand => hand.length), trick: state.trick, ritual: state.ritualActiveId })}`);
 }

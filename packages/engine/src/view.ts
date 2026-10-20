@@ -1,11 +1,12 @@
 import { CARD_BY_ID, type CreatureCard, type CreatureKind } from './cards.js';
-import { abilityAvailableFor, ancientDiscardSeat, isBlindToCreatures, keepsDeclaredRitualMode, mustChooseCreatureBlind, puppeteerChoices, teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
+import { abilityAvailableFor, ancientDiscardSeat, isBlindToCreatures, keepsDeclaredRitualMode, mustChooseCreatureBlind, puppeteerChoices, ritualDecisionSeat, teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
 import { ritualFromId, type RitualCard } from './rituals.js';
 
 export interface PlayerView {
   seat: number;
   handCount: number;
   skipsNextTrick: boolean;
+  visibleHand?: CreatureCard[];
 }
 export interface GameView {
   seat: number;
@@ -41,6 +42,10 @@ export interface GameView {
   ritualPrediction: '2-0' | '2-1' | null;
   ritualEmpoweredKind: CreatureKind | null;
   ritualTargetSeat: number | null;
+  ritualDecisionSeat: number | null;
+  ritualMirrorTargets: number[];
+  ritualPeekCards: CreatureCard[];
+  ritualTeammateHand: { seat: number; cards: CreatureCard[] } | null;
   blindSeats: number[];
   ancientDiscardSeat: number | null;
   ancientDiscardsLeft: number;
@@ -101,6 +106,8 @@ export function viewFor(state: GameState, playerId: string): GameView {
     players: state.hands.map((hand, playerSeat) => ({
       seat: playerSeat, handCount: hand.length,
       skipsNextTrick: state.skipNextTrickSeats.includes(playerSeat),
+      ...(state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'olho-da-verdade' && state.ritualTargetSeat === playerSeat
+        ? { visibleHand: hand.map(id => CARD_BY_ID[id]!) } : {}),
     })),
     trick: state.trick.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
     trickWins: [...state.trickWins], trickWinners: [...state.trickWinners],
@@ -128,6 +135,13 @@ export function viewFor(state: GameState, playerId: string): GameView {
     ritualPrediction: state.ritualPrediction,
     ritualEmpoweredKind: state.ritualEmpoweredKind,
     ritualTargetSeat: state.ritualTargetSeat,
+    ritualDecisionSeat: ritualDecisionSeat(state),
+    ritualMirrorTargets: [...state.ritualMirrorTargets],
+    ritualPeekCards: state.ritualPeek && seat === state.ritualChooser
+      ? state.ritualPeek.cardIds.map(id => CARD_BY_ID[id]!) : [],
+    ritualTeammateHand: state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'acordo-de-sangue'
+      && state.ritualPhase === 'blood-vote' && teamOf(seat) === teamOf(state.ritualChooser)
+      ? { seat: (seat + 2) % 4, cards: state.hands[(seat + 2) % 4]!.map(id => CARD_BY_ID[id]!) } : null,
     blindSeats: [0, 1, 2, 3].filter(playerSeat => isBlindToCreatures(state, playerSeat)),
     ancientDiscardSeat: state.ritualPhase === 'ancient-discard' ? ancientDiscardSeat(state) : null,
     ancientDiscardsLeft: state.ancientDiscardsLeft[seat]!,
