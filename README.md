@@ -29,12 +29,14 @@ Abra `http://localhost:5173`. O servidor mantém as salas apenas em memória; re
 4. Toque em uma carta da mão para jogar. As três luas no topo mostram quem ganhou cada vaza em ordem: âmbar para a Equipe A, verde de poção para a B.
 5. Ao vencer uma vaza com uma criatura que possui habilidade, escolha **Usar habilidade** ou **Pular habilidade**. O efeito entra antes da vaza seguinte. Se a vaza encerrou a rodada, a decisão é feita agora e o efeito entra na rodada seguinte.
 6. Quando um Trick é recusado, quem pediu escolhe uma carta da própria mão, descarta essa carta e ativa a habilidade na rodada seguinte. Também pode pular.
-7. Use **Ler carta** para ampliar a arte e ver o texto da habilidade em fonte legível no PC ou celular. Mago revela um Ritual aleatório de um adversário e permite escolher se deseja trocar por um da própria mão; Bruxa compra um Ritual e descarta um. Arcana não possui habilidade.
+7. Use **Ler carta** para ampliar a arte e ver o texto da habilidade em fonte legível no PC ou celular. Use **Ver meus Rituais** para consultar sua mão de Rituais, inclusive ao decidir a habilidade do Mago. Mago revela um Ritual aleatório de um adversário e permite escolher se deseja trocar por um da própria mão; Bruxa compra um Ritual e descarta um. Arcana não possui habilidade.
 8. Se a conexão cair, atualize a mesma aba. A identidade guardada no `sessionStorage` recupera o assento enquanto essa aba existir.
 
 Para testar sozinho, use **Testar sozinho: controlar os 4 assentos**. A tela mostra a mão de quem está na vez. Na barra **Testar habilidade**, selecione uma criatura e clique em **Vencer vaza com esta carta** ou **Simular Trick recusado**. Isso reinicia a partida de teste com cartas preparadas, permitindo testar até o Corvo sem depender do sorteio. Também é possível criar uma sala comum e usar **Preencher vagas com bots**.
 
 Para testar o Titereiro após Trick recusado, selecione **O Titereiro** e **Simular Trick recusado**. Arcana, Mago e Fada já estarão na mesa. Escolha o Titereiro da mão, recupere uma dessas cartas e descarte uma das três cartas novas da rodada seguinte.
+
+Os oito Rituais do baralho de teste incluem Maldição da Derrota, Escolha da Anciã, Véu da Incerteza e Mão Cega. Na Anciã, cada aliado compra três criaturas extras e descarta três antes da primeira vaza. No Véu, todos jogam pelo verso; na Mão Cega, só o adversário escolhido joga pelo verso. A escolha cega vale durante toda a rodada.
 
 ## Desenvolvimento
 
@@ -51,4 +53,4 @@ pnpm build
 
 Com `pnpm dev` aberto em outro terminal, `pnpm smoke` verifica quatro jogadores, mãos privadas, Trick com contra-aumento, jogada e reconexão.
 
-As regras de referência ficam em `REGRAS.md`. Estão ativos os poderes de Corvo, Titereiro, Lobo, Fada, Goblin, Grifo, Familiar, Mago e Bruxa. Arcana não tem poder. O baralho oficial de Rituais terá 48 artes diferentes; por enquanto o baralho de teste usa quatro cópias de Runa da Vontade, Magia Nula, Trick Explosivo e Doblete Sombrio. As quatro artes recebidas estão em `packages/web/public/rituals/`, em 800 × 1132 px, e podem ser ampliadas durante o jogo. Veja `RITUAIS.md` para as regras e pendências deste lote.
+As regras de referência ficam em `REGRAS.md`. Estão ativos os poderes de Corvo, Titereiro, Lobo, Fada, Goblin, Grifo, Familiar, Mago e Bruxa. Arcana não tem poder. O baralho oficial de Rituais terá 48 artes diferentes; por enquanto o baralho de teste usa quatro cópias de cada um dos oito efeitos implementados. As artes recebidas estão em `packages/web/public/rituals/` e podem ser ampliadas durante o jogo. Veja `RITUAIS.md` para as regras e pendências deste lote.

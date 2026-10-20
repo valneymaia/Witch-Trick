@@ -25,7 +25,7 @@
 
 ## Próximo passo
 
-Validar no navegador e com jogadores em dispositivos separados as quatro artes e efeitos do primeiro lote recebido. Depois continuar em lotes de quatro até completar as 48 cartas.
+Validar no navegador e com jogadores em dispositivos separados os oito Rituais ativos. Depois continuar em lotes de quatro até completar as 48 cartas.
 
 ## Preparação dos Rituais
 
@@ -45,6 +45,11 @@ Validar no navegador e com jogadores em dispositivos separados as quatro artes e
 - [x] Runa fortalece as quatro Luas da criatura escolhida acima de todas as demais, inclusive Arcana; Magia Nula bloqueia habilidades de criaturas somente na rodada atual.
 - [x] Doblete e Trick Explosivo mantêm o valor inicial e aceitam a sequência completa Double → Hat → Poker. Valores aceitos: 4/5/6 com Doblete e 5/6/7 com Trick Explosivo; recusa entrega o último valor aceito.
 - [x] 46 testes do motor, 1.000 partidas simuladas com Rituais e compilação. Teste de integração local com quatro conexões, escolha de Ritual, mãos privadas, Trick e reconexão realizado na etapa anterior.
+- [x] Terceiro lote: Maldição da Derrota, Escolha da Anciã, Véu da Incerteza e Mão Cega, com as quatro artes recebidas.
+- [x] Anciã compra três criaturas extras para cada jogador de sua equipe; cada um escolhe três descartes antes da primeira vaza.
+- [x] Véu oculta as quatro mãos; Mão Cega oculta só o adversário escolhido. A seleção pelo verso dura as três vazas e é validada no servidor.
+- [x] Botão para consultar a própria mão de Rituais, inclusive durante a habilidade do Mago.
+- [x] Validação do terceiro lote: 58 testes do motor, 1.000 partidas simuladas com Rituais e compilação.
 - [ ] Validação visual no navegador e partida em quatro dispositivos separados.
 
 ## Limitações conhecidas
@@ -52,4 +57,4 @@ Validar no navegador e com jogadores em dispositivos separados as quatro artes e
 - Salas e placares são perdidos se o servidor reiniciar.
 - O modo de controle dos quatro assentos revela todas as mãos na própria aba e deve ser usado somente para testes. Para testar privacidade e multiplayer, use uma sala normal em quatro abas ou dispositivos.
 - A identidade de uma aba se perde quando ela é encerrada; atualizá-la mantém o assento.
-- O baralho de teste usa quatro cópias de cada um dos quatro efeitos do lote com arte. As próximas oito artes recebidas e os demais Rituais aguardam implementação em lotes de quatro. Partidas com 6 ou 8 pessoas também ficam para depois.
+- O baralho de teste usa quatro cópias de cada um dos oito efeitos com arte. As próximas quatro artes recebidas e os demais Rituais aguardam implementação em lotes de quatro. Partidas com 6 ou 8 pessoas também ficam para depois.

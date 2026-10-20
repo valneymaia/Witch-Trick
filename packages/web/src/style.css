@@ -161,3 +161,19 @@
 .ritual-discard-preview{width:31px;height:44px;padding:0!important;overflow:hidden;background:#160e20!important}
 .ritual-discard-preview img{width:100%;height:100%;object-fit:cover}
 @media(max-width:600px){.ritual-panel{padding:11px}.ritual-choice-heading{flex-direction:column;gap:3px}.ritual-choices{grid-template-columns:1fr}.ritual-choice{min-height:0}.ritual-panel-heading{align-items:flex-start}}
+.ritual-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.hidden-creature-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:radial-gradient(circle at 50% 35%,#633885,#1c1029 72%);border:2px solid #bc8ad4;color:#f3d9ff}
+.hidden-creature-card span{font:72px 'Cinzel',serif;line-height:1;text-shadow:0 0 19px #e5b7ff}
+.hidden-creature-card small{font-size:12px;font-weight:700;letter-spacing:.08em}
+.hidden-creature-card:hover:not(:disabled){transform:translateY(-8px);box-shadow:0 0 25px #b977e577}
+.card-discard{max-width:122px;border:1px solid #d6b578;border-radius:8px;background:#875b32;color:#fff6e9;padding:5px;font-size:11px;font-weight:700}
+.card-discard:hover:not(:disabled){background:#ac7842}
+.hand-cards{flex-wrap:wrap}
+.ritual-hand-dialog{position:relative;width:min(900px,100%);max-height:90vh;overflow:auto;padding:25px;border:1px solid #ac7ccd;border-radius:18px;background:#241432;box-shadow:0 25px 80px #000b}
+.ritual-hand-dialog h2{font:700 23px 'Cinzel',serif;margin:6px 0 18px}
+.ritual-hand-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px}
+.ritual-hand-grid article{display:flex;flex-direction:column;gap:7px;padding:13px;border:1px solid #855ba1;border-radius:11px;background:#180e25}
+.ritual-hand-grid img{width:min(100%,170px);max-height:245px;object-fit:contain;align-self:center;border:1px solid #a576be;border-radius:7px}
+.ritual-hand-grid strong{font:700 14px 'Cinzel',serif;color:#f1d3ff}
+.ritual-hand-grid small{font-size:11px;color:#e5c086}
+.ritual-hand-grid p{font-size:12px;line-height:1.4;margin:0;color:#e9d8ee}

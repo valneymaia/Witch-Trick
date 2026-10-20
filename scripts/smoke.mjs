@@ -54,13 +54,19 @@ try {
     await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: regular.id, ...(regular.kind === 'runa-da-vontade' ? { creatureKind: 'raven' } : {}) });
   } else {
     const blind = chooserRituals[0];
-    await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: blind.id, prediction: '2-0' });
+    await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: blind.id, prediction: '2-0', targetSeat: (chooser + 1) % 4 });
   }
   await pause();
+  while (states.get(players[0]).game.ritualPhase === 'ancient-discard') {
+    const actor = states.get(players[0]).game.ancientDiscardSeat;
+    const cardId = states.get(players[actor]).game.hand[0].id;
+    await emit(sockets[actor], 'room:ritual', { type: 'ancient-discard', cardId });
+    await pause();
+  }
   assert.equal(states.get(players[0]).game.ritualPhase, 'play');
   for (const player of players) {
     const view = states.get(player).game;
-    assert.equal(view.hand.length, 3);
+    assert.equal(view.hand.length, view.blindSeats.includes(view.seat) ? 0 : 3);
     for (const other of players.filter(other => other !== player)) {
       assert.ok(!view.hand.some(card => states.get(other).game.hand.some(hidden => hidden.id === card.id)));
     }
@@ -79,7 +85,8 @@ try {
   const accepted = states.get(players[0]).game;
   assert.equal(accepted.roundStake, accepted.roundBaseStake === 1 ? 2 : accepted.roundBaseStake + 2);
   assert.equal(accepted.acceptedTrickLevel, 2);
-  const cardId = states.get(players[turn]).game.hand[0].id;
+  const turnView = states.get(players[turn]).game;
+  const cardId = turnView.blindSeats.includes(turn) ? '0' : turnView.hand[0].id;
   await emit(sockets[turn], 'room:play', { cardId });
   await pause();
   assert.equal(states.get(players[0]).game.trick.length, 1);

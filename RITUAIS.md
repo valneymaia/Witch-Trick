@@ -1,10 +1,10 @@
-# Rituais: primeiro lote jogável
+# Rituais: oito cartas jogáveis
 
-Esta especificação registra as decisões do Valney para o baralho separado de Rituais. O primeiro lote de quatro cartas recebeu artes individuais de `ritual (1).zip`, todas em 800 × 1132 px. O texto jogável também fica disponível na interface.
+Esta especificação registra as decisões do Valney para o baralho separado de Rituais. Dois lotes de quatro cartas receberam artes individuais de `ritual (1).zip`. O texto jogável também fica disponível na interface.
 
 ## Baralho e mãos
 
-- O baralho oficial terá 48 Rituais distintos. Enquanto as regras restantes são implementadas, o baralho de teste usa quatro cópias de cada um dos quatro Rituais do primeiro lote com arte.
+- O baralho oficial terá 48 Rituais distintos. Enquanto as regras restantes são implementadas, o baralho de teste usa quatro cópias de cada um dos oito Rituais com arte e regras completas.
 - Cada jogador recebe três Rituais em uma mão privada.
 - Em cada rodada, exatamente um jogador joga um Ritual. O responsável segue a ordem dos assentos: 1 (Equipe A), 2 (Equipe B), 3 (Equipe A), 4 (Equipe B), repetindo. O primeiro responsável acompanha o assento inicial sorteado da partida.
 - O Ritual usado sai da mão e vai ao descarte de Rituais. Quando a mão de Rituais de um jogador acabar, ele compra três novas cartas, ou as que restarem no baralho.
@@ -31,12 +31,23 @@ Primeiro lote do novo conjunto enviado pelo Valney:
 | Trick Explosivo | Depois de ver as criaturas | A rodada começa valendo 3 pontos. | Double, Hat e Poker aceitos levam a 5, 6 e 7 pontos. Na recusa, ganha-se o último valor aceito. |
 | Doblete Sombrio | Depois de ver as criaturas | A rodada começa valendo 2 pontos. | Double, Hat e Poker aceitos levam a 4, 5 e 6 pontos. Na recusa, ganha-se o último valor aceito. |
 
-Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa anterior, mas não entram no sorteio do lote atual. As próximas oito artes recebidas ficam para lotes posteriores: Maldição da Derrota, Escolha da Anciã, Roubo Arcano, Espelho Enfeitiçado, Olho da Verdade, Véu da Incerteza, Mão Cega e Acordo de Sangue. O baralho completo entra em jogo quando as 48 regras estiverem prontas.
+## Segundo lote de implementação
+
+| Ritual | Momento | Regra implementada |
+|---|---|---|
+| Maldição da Derrota | Depois de ver as criaturas | Ao fim da rodada, a equipe derrotada perde até 3 pontos, sem ficar abaixo de zero. Também vale se o Trick for recusado. |
+| Escolha da Anciã | Depois de ver as criaturas | Cada um dos dois jogadores da equipe que jogou o Ritual compra 3 criaturas extras e escolhe 3 criaturas da própria mão para descartar. A primeira vaza só começa após os dois terminarem. |
+| Véu da Incerteza | Antes de ver as criaturas | Os quatro jogadores escolhem posições de cartas pelo verso nas três vazas da rodada. A carta jogada se revela na mesa. |
+| Mão Cega | Antes de ver as criaturas | Quem jogou o Ritual escolhe um adversário. Só esse jogador escolhe cartas pelo verso nas três vazas da rodada. |
+
+O botão **Ver meus Rituais** mostra a própria mão em tamanho maior, inclusive durante a decisão do Mago. No modo de teste solo, mostra a mão do assento atualmente controlado.
+
+Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa anterior, mas não entram no sorteio do lote atual. As próximas quatro artes recebidas ficam para lotes posteriores: Roubo Arcano, Espelho Enfeitiçado, Olho da Verdade e Acordo de Sangue. O baralho completo entra em jogo quando as 48 regras estiverem prontas.
 
 ## Arquivos de arte
 
 - Exportar **uma frente por arquivo**, em **800 × 1131 ou 1132 px**, conforme o arredondamento do editor para a altura original de 1131,4 px. Manter a mesma medida em todas as cartas, sem margem externa, e enviar PNG ou WebP junto do arquivo editável.
-- As quatro artes do lote atual estão em `packages/web/public/rituals/`: `runa-da-vontade.png`, `magia-nula.png`, `trick-explosivo.png` e `doblete-sombrio.png`. O verso terá seu próprio arquivo quando for enviado.
+- As oito artes ativas estão em `packages/web/public/rituals/`. O verso terá seu próprio arquivo quando for enviado.
 - Reservar o centro para ilustração e deixar título, olho cortado e regra com contraste forte. A regra deve ser legível no tamanho físico de celular, mas a interface também mostrará texto ampliável fora da imagem.
 - O layout exibirá a arte na proporção recebida, sem esticá-la. Não é necessário criar outra resolução menor.
 

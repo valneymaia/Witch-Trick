@@ -388,3 +388,83 @@ describe('primeiro lote de Rituais', () => {
     expect(() => reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'magia-nula#1' })).toThrow('Veja as criaturas');
   });
 });
+
+describe('segundo lote de Rituais', () => {
+  it('Maldição tira três pontos da equipe derrotada após Trick recusado e respeita o mínimo zero', () => {
+    let state = ritualState(['maldicao-da-derrota#1'], [
+      ['arcana-full'], ['arcana-new'], ['arcana-waning'], ['arcana-waxing'],
+    ]);
+    state = { ...state, scores: [4, 5] };
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'maldicao-da-derrota#1' });
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    expect(state.scores).toEqual([5, 2]);
+    expect(state.lastRound?.loserPenalty).toBe(3);
+
+    let floor = ritualState(['maldicao-da-derrota#2'], [
+      ['arcana-full'], ['arcana-new'], ['arcana-waning'], ['arcana-waxing'],
+    ]);
+    floor = { ...floor, scores: [0, 1] };
+    floor = reduce(floor, { type: 'ritual-reveal', playerId: 'a' });
+    floor = reduce(floor, { type: 'ritual-play', playerId: 'a', ritualId: 'maldicao-da-derrota#2' });
+    floor = reduce(floor, { type: 'raise', playerId: 'a' });
+    floor = reduce(floor, { type: 'respond', playerId: 'b', accept: false });
+    expect(floor.scores).toEqual([1, 0]);
+    expect(floor.lastRound?.loserPenalty).toBe(1);
+  });
+
+  it('Anciã dá três criaturas extras a cada aliado e exige três descartes privados de cada um', () => {
+    let state = ritualState(['escolha-da-ancia#1'], [
+      ['arcana-full', 'witch-new', 'wolf-new'], ['arcana-new', 'fairy-new', 'raven-new'],
+      ['arcana-waning', 'goblin-new', 'griffin-new'], ['arcana-waxing', 'familiar-new', 'puppeteer-new'],
+    ]);
+    state = { ...state, deck: ['raven-full', 'wolf-full', 'fairy-full', 'goblin-full', 'griffin-full', 'witch-full'] };
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'escolha-da-ancia#1' });
+    expect(state.hands.map(hand => hand.length)).toEqual([6, 3, 6, 3]);
+    expect(state.ritualPhase).toBe('ancient-discard');
+    expect(viewFor(state, 'a').ancientDiscardSeat).toBe(0);
+    expect(viewFor(state, 'b').hand.map(card => card.id)).toEqual(state.hands[1]);
+    expect(() => reduce(state, { type: 'play', playerId: 'a', cardId: state.hands[0]![0]! })).toThrow('Ritual');
+    expect(() => reduce(state, { type: 'ritual-ancient-discard', playerId: 'c', cardId: state.hands[2]![0]! })).toThrow('Não é sua vez');
+    for (const seat of [0, 2]) for (let i = 0; i < 3; i++) {
+      state = reduce(state, { type: 'ritual-ancient-discard', playerId: players[seat]!, cardId: state.hands[seat]![0]! });
+    }
+    expect(state.hands.map(hand => hand.length)).toEqual([3, 3, 3, 3]);
+    expect(state.discard).toHaveLength(6);
+    expect(state.ritualPhase).toBe('play');
+  });
+
+  it('Véu mantém as quatro mãos ocultas e aceita somente posição de carta na vaza', () => {
+    let state = ritualState(['veu-da-incerteza#1'], [
+      ['arcana-full', 'witch-new'], ['arcana-new', 'fairy-new'],
+      ['arcana-waning', 'goblin-new'], ['arcana-waxing', 'wolf-new'],
+    ]);
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'veu-da-incerteza#1' });
+    for (const id of players) {
+      expect(viewFor(state, id).hand).toEqual([]);
+      expect(viewFor(state, id).blindSeats).toEqual([0, 1, 2, 3]);
+    }
+    expect(() => reduce(state, { type: 'play', playerId: 'a', cardId: 'arcana-full' })).toThrow('pelo verso');
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: '0' });
+    expect(state.trick[0]?.cardId).toBe('arcana-full');
+    expect(viewFor(state, 'a').hand).toEqual([]);
+    expect(viewFor(state, 'a').trick[0]?.card.id).toBe('arcana-full');
+  });
+
+  it('Mão Cega limita a cegueira ao adversário escolhido', () => {
+    let state = ritualState(['mao-cega#1'], [
+      ['arcana-full'], ['arcana-new'], ['arcana-waning'], ['arcana-waxing'],
+    ]);
+    expect(() => reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mao-cega#1', targetSeat: 2 })).toThrow('adversário');
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mao-cega#1', targetSeat: 1 });
+    expect(viewFor(state, 'a').blindSeats).toEqual([1]);
+    expect(viewFor(state, 'a').hand.map(card => card.id)).toEqual(['arcana-full']);
+    expect(viewFor(state, 'b').hand).toEqual([]);
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: 'arcana-full' });
+    expect(() => reduce(state, { type: 'play', playerId: 'b', cardId: 'arcana-new' })).toThrow('pelo verso');
+    state = reduce(state, { type: 'play', playerId: 'b', cardId: '0' });
+    expect(state.trick[1]?.cardId).toBe('arcana-new');
+  });
+});

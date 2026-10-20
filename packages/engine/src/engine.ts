@@ -15,6 +15,7 @@ export interface RoundResult {
   bonusPoints?: number;
   reason: 'tricks' | 'declined';
   trickWinners: Team[];
+  loserPenalty?: number;
 }
 export interface ActiveEffect {
   key: string;
@@ -66,12 +67,14 @@ export interface GameState {
   ritualHands: [string[], string[], string[], string[]];
   ritualDeck: string[];
   ritualDiscard: string[];
-  ritualPhase: 'off' | 'mode' | 'blind' | 'revealed' | 'blind-discard' | 'revealed-discard' | 'play';
+  ritualPhase: 'off' | 'mode' | 'blind' | 'revealed' | 'blind-discard' | 'revealed-discard' | 'ancient-discard' | 'play';
   ritualModeLocked: boolean;
   ritualChooser: number;
   ritualActiveId: string | null;
   ritualPrediction: '2-0' | '2-1' | null;
   ritualEmpoweredKind: CreatureKind | null;
+  ritualTargetSeat: number | null;
+  ancientDiscardsLeft: [number, number, number, number];
   ritualExchange: { seat: number; newCardIds: string[] } | null;
   lastCreatureReveal: { seat: number; cardId: string } | null;
 }
@@ -83,12 +86,27 @@ export type GameAction =
   | { type: 'ability'; playerId: string; choice: string }
   | { type: 'ritual-mode'; playerId: string; blind: boolean }
   | { type: 'ritual-reveal'; playerId: string }
-  | { type: 'ritual-play'; playerId: string; ritualId: string; prediction?: '2-0' | '2-1'; creatureKind?: CreatureKind }
-  | { type: 'ritual-discard'; playerId: string; choice: string };
+  | { type: 'ritual-play'; playerId: string; ritualId: string; prediction?: '2-0' | '2-1'; creatureKind?: CreatureKind; targetSeat?: number }
+  | { type: 'ritual-discard'; playerId: string; choice: string }
+  | { type: 'ritual-ancient-discard'; playerId: string; cardId: string };
 export const TARGET_SCORE = 15;
 export const ROUND_POINTS = 1;
 export const MAX_TRICK_POINTS = 4;
 export const teamOf = (seat: number): Team => (seat % 2) as Team;
+export function isBlindToCreatures(state: GameState, seat: number): boolean {
+  if (!state.ritualActiveId) return false;
+  const kind = ritualFromId(state.ritualActiveId).kind;
+  return kind === 'veu-da-incerteza' || (kind === 'mao-cega' && state.ritualTargetSeat === seat);
+}
+export function mustChooseCreatureBlind(state: GameState, seat: number, pending: PendingAbility): boolean {
+  return (pending.fromPreviousRound === true && state.ritualPhase === 'blind') || isBlindToCreatures(state, seat);
+}
+export function ancientDiscardSeat(state: GameState): number | null {
+  for (const seat of [state.ritualChooser, (state.ritualChooser + 2) % 4]) {
+    if (state.ancientDiscardsLeft[seat]! > 0) return seat;
+  }
+  return null;
+}
 export function trickPoints(baseStake: number, level: TrickLevel): number {
   return baseStake === ROUND_POINTS ? level : baseStake + level;
 }
@@ -131,7 +149,8 @@ function deal(state: GameState, reserved?: { seat: number; cardId: string }): Ga
     roundStake: ROUND_POINTS, acceptedTrickLevel: 0, lastRaiseTeam: null,
     pendingChallenge: null, pendingAbility: null, pendingRoundAbility: null, turn: state.roundStarter, rng: seed, activeEffects: [],
     ritualPhase: state.ritualMode ? 'blind' : 'off', ritualModeLocked: false, ritualChooser: state.roundStarter,
-    ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualExchange: null,
+    ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualTargetSeat: null,
+    ancientDiscardsLeft: [0, 0, 0, 0], ritualExchange: null,
     lastCreatureReveal: null,
   };
 }
@@ -148,7 +167,8 @@ export function createGame(playerIds: [string, string, string, string], seed: nu
     rng, activeEffects: [],
     ritualMode, ritualHands: [[], [], [], []], ritualDeck: [], ritualDiscard: [],
     ritualPhase: ritualMode ? 'blind' : 'off', ritualModeLocked: false, ritualChooser: rng % 4,
-    ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualExchange: null,
+    ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualTargetSeat: null,
+    ancientDiscardsLeft: [0, 0, 0, 0], ritualExchange: null,
     lastCreatureReveal: null,
   };
   if (ritualMode) {
@@ -178,6 +198,10 @@ function refillRitualHand(state: GameState, seat: number): GameState {
 function finishRound(state: GameState, team: Team, reason: RoundResult['reason'], reserved?: { seat: number; cardId: string }): GameState {
   const scores = [...state.scores] as GameState['scores'];
   scores[team] = Math.min(TARGET_SCORE, scores[team] + state.roundStake);
+  const loser = (1 - team) as Team;
+  const curse = state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'maldicao-da-derrota';
+  const loserPenalty = curse ? Math.min(3, scores[loser]) : 0;
+  scores[loser] -= loserPenalty;
   let bonusPoints = 0;
   if (state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'mapa-do-destino'
     && team === teamOf(state.ritualChooser) && reason === 'tricks'
@@ -187,7 +211,7 @@ function finishRound(state: GameState, team: Team, reason: RoundResult['reason']
   }
   const result: RoundResult = {
     winner: team, points: state.roundStake + bonusPoints, ...(bonusPoints ? { bonusPoints } : {}), reason,
-    trickWinners: [...state.trickWinners],
+    trickWinners: [...state.trickWinners], ...(curse ? { loserPenalty } : {}),
   };
   let completed: GameState = {
     ...state, scores, lastRoundWinner: team, lastRound: result, pendingChallenge: null, pendingAbility: null,
@@ -287,11 +311,16 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
   if (!pending || pending.seat !== seat) throw new Error('Este jogador não pode decidir a habilidade.');
   if (pending.stage === 'source') {
     if (choice === 'skip') return closeAbility(state);
-    if (!state.hands[seat]!.includes(choice) || !abilityAvailableFor(state, choice)) throw new Error('Escolha uma carta válida da sua mão.');
+    const blind = mustChooseCreatureBlind(state, seat, pending);
+    const index = Number(choice);
+    const cardId = blind && Number.isInteger(index) && index >= 0 && index < state.hands[seat]!.length
+      ? state.hands[seat]![index]! : !blind && state.hands[seat]!.includes(choice) ? choice : null;
+    if (!cardId || (!blind && !abilityAvailableFor(state, cardId))) throw new Error('Escolha uma carta válida da sua mão.');
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
-    hands[seat] = hands[seat]!.filter(id => id !== choice);
-    const next = { ...state, hands, discard: [...state.discard, choice], pendingAbility: { ...pending, cardId: choice, stage: 'offer' as const } };
-    return CARD_BY_ID[choice]!.kind === 'puppeteer' ? activateAbility(next) : activateInNextRound(next);
+    hands[seat] = hands[seat]!.filter(id => id !== cardId);
+    const next = { ...state, hands, discard: [...state.discard, cardId], pendingAbility: { ...pending, cardId, stage: 'offer' as const } };
+    if (!abilityAvailableFor(next, cardId)) return closeAbility(next);
+    return CARD_BY_ID[cardId]!.kind === 'puppeteer' ? activateAbility(next) : activateInNextRound(next);
   }
   if (pending.stage === 'offer') {
     if (choice === 'skip') return closeAbility(state);
@@ -312,10 +341,14 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     return { ...state, hands, discard: state.discard.filter(id => id !== choice), pendingAbility: { ...pending, stage: 'puppet-exchange', ownCardId: choice } };
   }
   if (pending.stage === 'puppet-exchange') {
-    if (!state.hands[seat]!.includes(choice) || choice === pending.ownCardId) throw new Error('Troque por outra carta da sua mão.');
+    const blind = mustChooseCreatureBlind(state, seat, pending);
+    const index = Number(choice);
+    const cardId = blind && Number.isInteger(index) && index >= 0 && index < state.hands[seat]!.length
+      ? state.hands[seat]![index]! : !blind && state.hands[seat]!.includes(choice) ? choice : null;
+    if (!cardId || cardId === pending.ownCardId) throw new Error('Troque por outra carta da sua mão.');
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
-    hands[seat] = hands[seat]!.filter(id => id !== choice);
-    return closeAbility({ ...state, hands, discard: [...state.discard, choice] });
+    hands[seat] = hands[seat]!.filter(id => id !== cardId);
+    return closeAbility({ ...state, hands, discard: [...state.discard, cardId] });
   }
   if (pending.stage === 'fairy-target') {
     if (choice === 'skip') return closeAbility(state);
@@ -339,7 +372,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
   }
   if (pending.stage === 'goblin-own') {
     if (choice === 'skip') return closeAbility(state);
-    const blind = pending.fromPreviousRound && state.ritualPhase === 'blind';
+    const blind = mustChooseCreatureBlind(state, seat, pending);
     const index = Number(choice);
     const ownCardId = blind && Number.isInteger(index) && index >= 0 && index < state.hands[seat]!.length
       ? state.hands[seat]![index] : !blind && state.hands[seat]!.includes(choice) ? choice : null;
@@ -363,7 +396,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     return scores[teamOf(seat)] >= TARGET_SCORE ? { ...next, winner: teamOf(seat) } : next;
   }
   if (pending.stage === 'griffin-discard') {
-    const blind = pending.fromPreviousRound && state.ritualPhase === 'blind';
+    const blind = mustChooseCreatureBlind(state, seat, pending);
     const index = Number(choice);
     const cardId = blind && Number.isInteger(index) && index >= 0 && index < state.hands[seat]!.length
       ? state.hands[seat]![index] : !blind && state.hands[seat]!.includes(choice) ? choice : null;
@@ -435,17 +468,37 @@ export function reduce(state: GameState, action: GameAction): GameState {
     if (ritual.blind !== (state.ritualPhase === 'blind')) throw new Error(ritual.blind ? 'Este Ritual deve ser escolhido antes de ver as criaturas.' : 'Veja as criaturas antes de escolher este Ritual.');
     if (ritual.kind === 'mapa-do-destino' && action.prediction !== '2-0' && action.prediction !== '2-1') throw new Error('Escolha o placar previsto: 2–0 ou 2–1.');
     if (ritual.kind === 'runa-da-vontade' && !CREATURES.some(creature => creature.kind === action.creatureKind)) throw new Error('Escolha uma criatura para fortalecer nas quatro Luas.');
+    if (ritual.kind === 'mao-cega' && (!Number.isInteger(action.targetSeat) || action.targetSeat! < 0 || action.targetSeat! > 3 || teamOf(action.targetSeat!) === teamOf(seat))) throw new Error('Escolha um adversário para a Mão Cega.');
     const ritualHands = state.ritualHands.map(hand => [...hand]) as GameState['ritualHands'];
     ritualHands[seat] = ritualHands[seat]!.filter(id => id !== action.ritualId);
     const selected: GameState = refillRitualHand({
       ...state, ritualHands, ritualActiveId: action.ritualId,
       ritualPrediction: ritual.kind === 'mapa-do-destino' ? action.prediction! : null,
       ritualEmpoweredKind: ritual.kind === 'runa-da-vontade' ? action.creatureKind! : null,
+      ritualTargetSeat: ritual.kind === 'mao-cega' ? action.targetSeat! : null,
       roundBaseStake: ritual.kind === 'doblete-sombrio' ? 2 : ritual.kind === 'trick-explosivo' ? 3 : state.roundBaseStake,
       roundStake: ritual.kind === 'doblete-sombrio' ? 2 : ritual.kind === 'trick-explosivo' ? 3 : state.roundStake,
-      ritualPhase: 'play',
+      ritualPhase: ritual.kind === 'escolha-da-ancia' ? 'ancient-discard' : 'play',
     }, seat);
+    if (ritual.kind === 'escolha-da-ancia') {
+      if (selected.deck.length < 6) throw new Error('Não há criaturas suficientes no baralho para a Escolha da Anciã.');
+      const hands = selected.hands.map(hand => [...hand]) as GameState['hands'];
+      const deck = [...selected.deck];
+      const teammate = (seat + 2) % 4;
+      for (const member of [seat, teammate]) for (let i = 0; i < 3; i++) hands[member]!.push(deck.pop()!);
+      return { ...selected, hands, deck, ancientDiscardsLeft: [0, 0, 0, 0].map((_, index) => index === seat || index === teammate ? 3 : 0) as GameState['ancientDiscardsLeft'] };
+    }
     return completeRitualPhase(selected);
+  }
+  if (action.type === 'ritual-ancient-discard') {
+    if (state.ritualPhase !== 'ancient-discard' || seat !== ancientDiscardSeat(state)) throw new Error('Não é sua vez de descartar pela Anciã.');
+    if (!state.hands[seat]!.includes(action.cardId)) throw new Error('Escolha uma criatura da sua mão.');
+    const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
+    hands[seat] = hands[seat]!.filter(id => id !== action.cardId);
+    const ancientDiscardsLeft = [...state.ancientDiscardsLeft] as GameState['ancientDiscardsLeft'];
+    ancientDiscardsLeft[seat] = ancientDiscardsLeft[seat]! - 1;
+    const next = { ...state, hands, ancientDiscardsLeft, discard: [...state.discard, action.cardId] };
+    return ancientDiscardSeat(next) === null ? completeRitualPhase(next) : next;
   }
   if (action.type === 'ritual-discard') {
     const exchange = state.ritualExchange;
@@ -513,10 +566,14 @@ export function reduce(state: GameState, action: GameAction): GameState {
       },
     };
   }
-  if (!state.hands[seat]!.includes(action.cardId)) throw new Error('Esta carta não está na sua mão.');
+  const blindPlay = isBlindToCreatures(state, seat);
+  const blindIndex = Number(action.cardId);
+  const cardId = blindPlay && Number.isInteger(blindIndex) && blindIndex >= 0 && blindIndex < state.hands[seat]!.length
+    ? state.hands[seat]![blindIndex]! : !blindPlay && state.hands[seat]!.includes(action.cardId) ? action.cardId : null;
+  if (!cardId) throw new Error(blindPlay ? 'Escolha uma carta pelo verso.' : 'Esta carta não está na sua mão.');
   if (state.skipNextTrickSeats.includes(seat)) throw new Error('Este jogador deve passar esta vaza.');
-  const hands = state.hands.map((hand, i) => i === seat ? hand.filter(id => id !== action.cardId) : [...hand]) as GameState['hands'];
-  const trick = [...state.trick, { seat, cardId: action.cardId }];
+  const hands = state.hands.map((hand, i) => i === seat ? hand.filter(id => id !== cardId) : [...hand]) as GameState['hands'];
+  const trick = [...state.trick, { seat, cardId }];
   const nextSeat = [1, 2, 3].map(offset => (seat + offset) % 4)
     .find(candidate => !trick.some(play => play.seat === candidate)
       && !state.skipNextTrickSeats.includes(candidate) && hands[candidate]!.length);
