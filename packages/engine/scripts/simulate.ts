@@ -18,7 +18,10 @@ for (let seed = 1; seed <= count; seed++) {
       state = reduce(state, { type: 'ability', playerId: ids[seat]!, choice });
     } else if (state.ritualMode && state.ritualPhase !== 'play') {
       const seat = state.ritualPhase.endsWith('discard') ? state.ritualExchange!.seat : state.ritualChooser;
-      if (state.ritualPhase === 'blind') {
+      if (state.ritualPhase === 'mode') {
+        const blind = state.ritualHands[seat]!.some(id => ritualFromId(id).blind) && (moves % 2 === 0 || !state.ritualHands[seat]!.some(id => !ritualFromId(id).blind));
+        state = reduce(state, { type: 'ritual-mode', playerId: ids[seat]!, blind });
+      } else if (state.ritualPhase === 'blind') {
         const blind = state.ritualHands[seat]!.find(id => ritualFromId(id).blind);
         state = blind && moves % 2 === 0
           ? reduce(state, { type: 'ritual-play', playerId: ids[seat]!, ritualId: blind, prediction: moves % 4 === 0 ? '2-0' : '2-1' })

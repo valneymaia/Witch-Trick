@@ -162,9 +162,11 @@ describe('primeiro lote de Rituais', () => {
     let state = ritualState(['mapa-do-destino#1'], [
       ['witch-new'], ['goblin-new'], ['raven-new', 'wolf-new', 'fairy-new', 'arcana-full'], ['griffin-new'],
     ]);
-    state = { ...state, ritualExchange: { seat: 2, newCardIds: ['raven-new', 'wolf-new', 'fairy-new'] } };
+    state = { ...state, ritualPhase: 'mode', ritualExchange: { seat: 2, newCardIds: ['raven-new', 'wolf-new', 'fairy-new'] } };
     expect(viewFor(state, 'c').hand.map(card => card.id)).toEqual(['arcana-full']);
-    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mapa-do-destino#1', prediction: '2-1' });
+    expect(viewFor(state, 'c').ritualDiscardOptions).toEqual([]);
+    expect(JSON.stringify(viewFor(state, 'c'))).not.toContain('wolf-new');
+    state = reduce(state, { type: 'ritual-mode', playerId: 'a', blind: true });
     const privateView = viewFor(state, 'c');
     expect(privateView.ritualDiscardOptions).toEqual([{ value: '0' }, { value: '1' }, { value: '2' }]);
     expect(JSON.stringify(privateView)).not.toContain('wolf-new');
@@ -173,6 +175,8 @@ describe('primeiro lote de Rituais', () => {
     state = reduce(state, { type: 'ritual-discard', playerId: 'c', choice: '1' });
     expect(state.discard).toContain('wolf-new');
     expect(state.hands[2]).toEqual(['raven-new', 'fairy-new', 'arcana-full']);
+    expect(state.ritualPhase).toBe('blind');
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mapa-do-destino#1', prediction: '2-1' });
     expect(state.ritualPhase).toBe('play');
   });
 
@@ -241,10 +245,11 @@ describe('primeiro lote de Rituais', () => {
     state = playFullTrick(state, ['raven-full', 'raven-new', 'raven-waning', 'raven-waxing']);
     expect(state.pendingAbility?.stage).toBe('offer');
     state = reduce(state, { type: 'ability', playerId: 'a', choice: 'use' });
-    expect(state.ritualPhase).toBe('blind');
+    expect(state.ritualPhase).toBe('mode');
     expect(state.ritualChooser).toBe(1);
+    expect(state.scores).toEqual([2, 3]);
+    state = reduce(state, { type: 'ritual-mode', playerId: 'b', blind: false });
     expect(state.scores).toEqual([2, 1]);
-    state = reduce(state, { type: 'ritual-reveal', playerId: 'b' });
     state = reduce(state, { type: 'ritual-play', playerId: 'b', ritualId: 'magia-nula#1' });
     expect(state.pendingAbility).toBeNull();
     expect(state.scores).toEqual([2, 1]);
@@ -257,25 +262,129 @@ describe('primeiro lote de Rituais', () => {
       pendingAbility: { seat: 0, source: 'trick', stage: 'offer', cardId: 'wizard-full', endRound: { team: 0, reason: 'tricks' } },
     };
     state = reduce(state, { type: 'ability', playerId: 'a', choice: 'use' });
-    expect(state.ritualPhase).toBe('blind');
+    expect(state.ritualPhase).toBe('mode');
+    expect(state.pendingAbility).toBeNull();
+    state = reduce(state, { type: 'ritual-mode', playerId: 'b', blind: false });
     expect(state.pendingAbility?.stage).toBe('wizard-target');
     expect(() => reduce(state, { type: 'ritual-reveal', playerId: 'b' })).toThrow('habilidade');
     state = reduce(state, { type: 'ability', playerId: 'a', choice: '1' });
     state = reduce(state, { type: 'ability', playerId: 'a', choice: 'keep' });
     expect(state.pendingAbility).toBeNull();
-    expect(state.ritualPhase).toBe('blind');
+    expect(state.ritualPhase).toBe('revealed');
   });
 
-  it('Grifo resolve antes do Ritual e preserva a opção de olho cortado', () => {
+  it('Grifo resolve às cegas antes do Ritual com olhinho', () => {
     let state = ritualState(['mapa-do-destino#1', 'magia-nula#1']);
-    state = { ...state, deck: ['raven-full'], pendingAbility: { seat: 0, source: 'trick', stage: 'offer', cardId: 'griffin-full', endRound: null } };
-    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'use' });
+    state = { ...state, ritualPhase: 'mode', deck: ['raven-full'], pendingRoundAbility: { seat: 0, source: 'trick', stage: 'offer', cardId: 'griffin-full', endRound: null, fromPreviousRound: true } };
+    state = reduce(state, { type: 'ritual-mode', playerId: 'a', blind: true });
     expect(state.pendingAbility?.stage).toBe('griffin-discard');
     expect(state.ritualPhase).toBe('blind');
-    expect(viewFor(state, 'a').hand.map(card => card.id)).toEqual(['arcana-full', 'raven-full']);
+    expect(viewFor(state, 'a').hand).toEqual([]);
+    expect(viewFor(state, 'a').abilityOptions).toEqual([{ value: '0', label: 'Descartar carta oculta 1' }, { value: '1', label: 'Descartar carta oculta 2' }]);
+    expect(JSON.stringify(viewFor(state, 'a'))).not.toContain('raven-full');
     expect(() => reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mapa-do-destino#1', prediction: '2-0' })).toThrow('habilidade');
-    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'raven-full' });
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: '1' });
+    expect(state.discard).toContain('raven-full');
     state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mapa-do-destino#1', prediction: '2-0' });
     expect(state.ritualPhase).toBe('play');
+  });
+
+  it('Titereiro sem olhinho permite escolher a criatura nova vista antes do Ritual', () => {
+    let state = ritualState(['magia-nula#1'], [
+      ['arcana-full'], ['raven-new'], ['wolf-new', 'fairy-new', 'goblin-new', 'witch-full'], ['griffin-new'],
+    ]);
+    state = { ...state, ritualPhase: 'mode', ritualExchange: { seat: 2, newCardIds: ['wolf-new', 'fairy-new', 'goblin-new'] } };
+    state = reduce(state, { type: 'ritual-mode', playerId: 'a', blind: false });
+    expect(state.ritualPhase).toBe('revealed-discard');
+    expect(viewFor(state, 'c').ritualDiscardOptions.map(option => option.value)).toEqual(['wolf-new', 'fairy-new', 'goblin-new']);
+    expect(() => reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'magia-nula#1' })).toThrow();
+    state = reduce(state, { type: 'ritual-discard', playerId: 'c', choice: 'fairy-new' });
+    expect(state.ritualPhase).toBe('revealed');
+    expect(state.hands[2]).toEqual(['wolf-new', 'goblin-new', 'witch-full']);
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'magia-nula#1' });
+    expect(state.ritualPhase).toBe('play');
+  });
+
+  it('Fada olha duas cartas adversárias antes do Ritual com olhinho sem ver a própria mão', () => {
+    let state = ritualState([], [
+      ['fairy-full', 'arcana-new'], ['wolf-full', 'goblin-full'], ['witch-new'], ['raven-new'],
+    ]);
+    state = {
+      ...state, ritualPhase: 'mode', ritualChooser: 1, ritualHands: [[], ['mapa-do-destino#1'], [], []],
+      pendingRoundAbility: { seat: 0, source: 'trick', stage: 'offer', cardId: 'fairy-full', endRound: null, fromPreviousRound: true },
+    };
+    state = reduce(state, { type: 'ritual-mode', playerId: 'b', blind: true });
+    expect(state.pendingAbility?.stage).toBe('fairy-target');
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: '1' });
+    expect(viewFor(state, 'a').hand).toEqual([]);
+    expect(viewFor(state, 'a').abilityOptions.map(option => option.card?.id)).toEqual(expect.arrayContaining(['wolf-full', 'goblin-full']));
+    expect(viewFor(state, 'c').abilityOptions).toEqual([]);
+    expect(() => reduce(state, { type: 'ritual-play', playerId: 'b', ritualId: 'mapa-do-destino#1', prediction: '2-0' })).toThrow('habilidade');
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'wolf-full' });
+    expect(state.discard).toContain('wolf-full');
+    state = reduce(state, { type: 'ritual-play', playerId: 'b', ritualId: 'mapa-do-destino#1', prediction: '2-0' });
+    expect(state.ritualPhase).toBe('play');
+  });
+
+  it('Goblin com olhinho entrega carta oculta e revela apenas a recebida', () => {
+    let state = ritualState(['mapa-do-destino#1'], [
+      ['arcana-full'], ['raven-new'], ['wolf-new', 'witch-new'], ['griffin-new'],
+    ]);
+    state = {
+      ...state, ritualPhase: 'mode', pendingRoundAbility: { seat: 2, source: 'trick', stage: 'offer', cardId: 'goblin-full', endRound: null, fromPreviousRound: true },
+    };
+    state = reduce(state, { type: 'ritual-mode', playerId: 'a', blind: true });
+    expect(viewFor(state, 'c').abilityOptions.map(option => option.value)).toEqual(['skip', '0', '1']);
+    expect(viewFor(state, 'c').hand).toEqual([]);
+    expect(() => reduce(state, { type: 'ability', playerId: 'c', choice: 'wolf-new' })).toThrow();
+    state = reduce(state, { type: 'ability', playerId: 'c', choice: '0' });
+    state = reduce(state, { type: 'ability', playerId: 'c', choice: '1' });
+    expect(state.scores[0]).toBe(1);
+    expect(viewFor(state, 'c').lastCreatureReveal?.id).toBe('raven-new');
+    expect(viewFor(state, 'a').lastCreatureReveal).toBeNull();
+    expect(viewFor(state, 'c').hand).toEqual([]);
+  });
+
+  it('Goblin e Grifo sem olhinho deixam escolher uma criatura vista', () => {
+    let goblin = ritualState(['magia-nula#1'], [
+      ['arcana-full'], ['raven-new'], ['wolf-new', 'witch-new'], ['griffin-new'],
+    ]);
+    goblin = { ...goblin, ritualPhase: 'mode', pendingRoundAbility: { seat: 2, source: 'trick', stage: 'offer', cardId: 'goblin-full', endRound: null, fromPreviousRound: true } };
+    goblin = reduce(goblin, { type: 'ritual-mode', playerId: 'a', blind: false });
+    expect(viewFor(goblin, 'c').hand.map(card => card.id)).toEqual(['wolf-new', 'witch-new']);
+    goblin = reduce(goblin, { type: 'ability', playerId: 'c', choice: 'witch-new' });
+    expect(goblin.pendingAbility?.stage).toBe('goblin-target');
+
+    let griffin = ritualState(['magia-nula#1']);
+    griffin = { ...griffin, ritualPhase: 'mode', deck: ['raven-full'], pendingRoundAbility: { seat: 0, source: 'trick', stage: 'offer', cardId: 'griffin-full', endRound: null, fromPreviousRound: true } };
+    griffin = reduce(griffin, { type: 'ritual-mode', playerId: 'a', blind: false });
+    expect(viewFor(griffin, 'a').abilityOptions.map(option => option.value)).toEqual(['arcana-full', 'raven-full']);
+    griffin = reduce(griffin, { type: 'ability', playerId: 'a', choice: 'arcana-full' });
+    expect(griffin.discard).toContain('arcana-full');
+    expect(griffin.hands[0]).toEqual(['raven-full']);
+  });
+
+  it('Mago não pode trocar o último Ritual da modalidade declarada', () => {
+    let state = ritualState(['mapa-do-destino#1']);
+    state = {
+      ...state, ritualPhase: 'mode', ritualHands: [['mapa-do-destino#1'], ['magia-nula#1'], [], []],
+      pendingRoundAbility: { seat: 0, source: 'trick', stage: 'offer', cardId: 'wizard-full', endRound: null, fromPreviousRound: true },
+    };
+    state = reduce(state, { type: 'ritual-mode', playerId: 'a', blind: true });
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: '1' });
+    expect(viewFor(state, 'a').abilityOptions.map(option => option.value)).toEqual(['keep']);
+    expect(() => reduce(state, { type: 'ability', playerId: 'a', choice: 'swap' })).toThrow('modalidade declarada');
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'keep' });
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'mapa-do-destino#1', prediction: '2-0' });
+    expect(state.ritualPhase).toBe('play');
+  });
+
+  it('a modalidade declarada não pode ser trocada depois do poder', () => {
+    let state = ritualState(['mapa-do-destino#1', 'magia-nula#1']);
+    state = { ...state, ritualPhase: 'mode', ritualExchange: { seat: 2, newCardIds: state.hands[2]!.slice(0, 1) } };
+    state = reduce(state, { type: 'ritual-mode', playerId: 'a', blind: true });
+    state = reduce(state, { type: 'ritual-discard', playerId: 'c', choice: '0' });
+    expect(() => reduce(state, { type: 'ritual-reveal', playerId: 'a' })).toThrow('Não é hora');
+    expect(() => reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'magia-nula#1' })).toThrow('Veja as criaturas');
   });
 });

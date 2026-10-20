@@ -33,6 +33,8 @@ Na Fase 1 as criaturas são jogadas sem aplicar nenhum efeito.
 | O Mago | 8 | Revele uma carta de Ritual aleatória de um adversário. Depois escolha se mantém sua mão ou troca uma carta de Ritual sua pela revelada. |
 | A Bruxa | 9 | Compre 1 carta extra de ritual e descarte outra da sua mão. Depende dos Rituais (Fase 2). |
 
+Se restar poder de criatura para a rodada seguinte, o responsável pelo Ritual primeiro declara se jogará com ou sem olhinho. O poder é resolvido com as novas criaturas ocultas (com olhinho) ou com a própria mão visível (sem olhinho), antes da escolha e revelação da carta de Ritual. Titereiro, Fada, Goblin e Grifo seguem os detalhes em `RITUAIS.md`.
+
 ## Luas
 
 Da mais forte para a mais fraca:

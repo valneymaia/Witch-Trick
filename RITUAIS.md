@@ -13,10 +13,10 @@ Esta especificação registra as decisões do Valney para o baralho separado de 
 
 ## Escolha antes ou depois das criaturas
 
-1. No começo da rodada, as novas mãos de criaturas ficam ocultas. Habilidades de criatura guardadas da rodada anterior são resolvidas antes da escolha do Ritual. O Titereiro é uma exceção: sua troca da carta guardada é resolvida depois da escolha do Ritual para determinar se o descarte será cego.
-2. O responsável pode jogar um Ritual marcado com **olho cortado** nesse momento. A escolha e os parâmetros do Ritual são confirmados antes de revelar as novas criaturas.
-3. Se preferir ver sua mão de criaturas, o responsável abre a distribuição para todos. Depois disso, só pode escolher um Ritual **sem** olho cortado.
-4. Após a escolha, todos recebem a visão privada normal da própria mão de criaturas e a rodada de vazas começa.
+1. Quando existe poder pendente da rodada anterior, o responsável pelo próximo Ritual informa primeiro se jogará **com olhinho** ou **sem olhinho**. Deve ter pelo menos um Ritual dessa modalidade na mão. Essa escolha fica travada.
+2. Resolva o poder pendente **antes de escolher e revelar a carta de Ritual**. Com olhinho, as três criaturas novas de cada jogador ficam ocultas; sem olhinho, cada jogador pode ver a própria mão. A carta guardada do Titereiro já é conhecida.
+3. O responsável escolhe uma carta de Ritual da modalidade declarada, informa seus parâmetros e aplica seu efeito. Só então a primeira vaza começa.
+4. Quando não há poder pendente, permanece o fluxo simples: jogar um Ritual com olhinho antes de ver criaturas ou revelar a própria mão para escolher um Ritual sem olhinho.
 
 O símbolo do olho cortado deve vir acompanhado do texto “Antes de ver as criaturas” na interface. O servidor valida a fase e não envia cartas de criatura aos clientes antes da hora.
 
@@ -43,6 +43,8 @@ Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa 
 ## Carta guardada pelo Titereiro
 
 - O dono pode escolher um Ritual de olho cortado mesmo conhecendo a criatura que guardou da rodada anterior. A restrição de visão vale para **as três criaturas novas**.
-- Se escolher um Ritual de olho cortado, ele seleciona **uma das três cartas novas pelo verso** para descartar, sem saber qual é. Só então as duas novas restantes são reveladas, junto com a carta guardada.
-- Se escolher ver as criaturas e depois jogar um Ritual sem olho cortado, ele pode ver as três novas e escolher qual delas descartar. A carta guardada pelo Titereiro permanece na mão.
-- Grifo resolve antes da escolha do Ritual. Ver as criaturas durante essa habilidade não elimina a opção de escolher um Ritual de olho cortado.
+- Com olhinho, depois de declarar a modalidade e antes de escolher a carta de Ritual, ele seleciona **uma das três cartas novas pelo verso** para descartar, sem saber qual é.
+- Sem olhinho, pode ver as três novas e escolher qual delas descartar. A carta guardada pelo Titereiro permanece na mão.
+- A Fada vê até duas cartas do adversário e descarta uma antes de conhecer o Ritual atual. Com olhinho, não vê suas próprias criaturas novas.
+- O Goblin com olhinho entrega uma posição da própria mão sem ver a carta. Apenas a carta recebida é revelada a ele para conferir o valor e o ponto. Sem olhinho, escolhe a carta que entrega após ver a própria mão.
+- O Grifo com olhinho compra e descarta uma posição sem ver as cartas. Sem olhinho, vê a mão e escolhe qual carta descartar.

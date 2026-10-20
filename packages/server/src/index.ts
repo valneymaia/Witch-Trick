@@ -51,13 +51,16 @@ function emitRoom(room: Room) {
     if (game && room.testMode && room.ownerId === playerId && room.game?.pendingAbility) {
       game.abilityOptions = abilityOptionsFor(room.game, room.game.pendingAbility.seat);
     }
-    const creaturesVisible = !room.game?.ritualMode || !['blind', 'blind-discard'].includes(room.game.ritualPhase);
+    if (game && room.testMode && room.ownerId === playerId && room.game?.lastCreatureReveal) {
+      game.lastCreatureReveal = CARD_BY_ID[room.game.lastCreatureReveal.cardId]!;
+    }
+    const creaturesVisible = !room.game?.ritualMode || !['mode', 'blind', 'blind-discard'].includes(room.game.ritualPhase);
     const allHands = room.testMode && room.ownerId === playerId && room.game && creaturesVisible
       ? room.game.hands.map(hand => hand.map(id => CARD_BY_ID[id]!))
       : undefined;
     const allRitualHands = room.testMode && room.ownerId === playerId && room.game?.ritualMode
       ? room.game.ritualHands.map(hand => hand.map(ritualFromId)) : undefined;
-    if (game && room.testMode && room.ownerId === playerId && room.game?.ritualExchange) {
+    if (game && room.testMode && room.ownerId === playerId && room.game?.ritualExchange && ['blind-discard', 'revealed-discard'].includes(room.game.ritualPhase)) {
       const exchange = room.game.ritualExchange;
       game.ritualDiscardOptions = exchange.newCardIds.map((id, index) => room.game!.ritualPhase === 'blind-discard'
         ? { value: String(index) } : { value: id, card: CARD_BY_ID[id]! });
@@ -95,7 +98,10 @@ function botTurn(room: Room) {
       room.game = reduce(room.game, { type: 'respond', playerId: room.seats[seat]!.playerId, accept: true });
     } else if (room.game.ritualMode && !['off', 'play'].includes(room.game.ritualPhase)) {
       const playerId = room.seats[seat]!.playerId;
-      if (room.game.ritualPhase === 'blind') {
+      if (room.game.ritualPhase === 'mode') {
+        const blind = room.game.ritualHands[seat]!.some(id => ritualFromId(id).blind);
+        room.game = reduce(room.game, { type: 'ritual-mode', playerId, blind });
+      } else if (room.game.ritualPhase === 'blind') {
         const blind = room.game.ritualHands[seat]!.find(id => ritualFromId(id).blind);
         room.game = blind
           ? reduce(room.game, { type: 'ritual-play', playerId, ritualId: blind, prediction: '2-0' })
@@ -228,7 +234,7 @@ io.on('connection', socket => {
       botTurn(room);
     } catch (error) { fail(reply, error instanceof Error ? error.message : 'Escolha inválida.'); }
   });
-  socket.on('room:ritual', (request: { type?: unknown; ritualId?: unknown; prediction?: unknown; creatureKind?: unknown; choice?: unknown; seat?: unknown }, reply: Reply) => {
+  socket.on('room:ritual', (request: { type?: unknown; blind?: unknown; ritualId?: unknown; prediction?: unknown; creatureKind?: unknown; choice?: unknown; seat?: unknown }, reply: Reply) => {
     const room = rooms.get(socket.data.code);
     if (!room?.game) return fail(reply, 'A partida ainda não começou.');
     const ownerControls = room.testMode && socket.data.playerId === room.ownerId;
@@ -236,7 +242,8 @@ io.on('connection', socket => {
     if (!Number.isInteger(seat) || seat < 0 || seat > 3) return fail(reply, 'Escolha de Ritual inválida.');
     const playerId = room.seats[seat]!.playerId;
     try {
-      if (request.type === 'reveal') room.game = reduce(room.game, { type: 'ritual-reveal', playerId });
+      if (request.type === 'mode' && typeof request.blind === 'boolean') room.game = reduce(room.game, { type: 'ritual-mode', playerId, blind: request.blind });
+      else if (request.type === 'reveal') room.game = reduce(room.game, { type: 'ritual-reveal', playerId });
       else if (request.type === 'play' && typeof request.ritualId === 'string') room.game = reduce(room.game, {
         type: 'ritual-play', playerId, ritualId: request.ritualId,
         prediction: request.prediction === '2-0' || request.prediction === '2-1' ? request.prediction : undefined,

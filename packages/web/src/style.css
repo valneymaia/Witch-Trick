@@ -148,6 +148,13 @@
 .ritual-runa-choice label{display:grid;gap:3px;font-size:11px;color:#f5e9fb}
 .ritual-runa-choice select{min-height:34px;max-width:170px;border:1px solid #ab79c8;border-radius:7px;background:#21132f;color:#fff;padding:5px}
 .ritual-reveal{margin-top:10px!important;padding:8px 12px!important;font-size:12px!important}
+.ritual-mode-choice{margin-top:12px;padding:12px;border:1px solid #8e64b3;border-radius:10px;background:#170d25;color:#f6e7ff}
+.ritual-mode-choice p{font-size:12px;color:#d1bbdf;margin:5px 0 10px}
+.ritual-mode-actions{display:flex;flex-wrap:wrap;gap:8px}
+.ritual-mode-actions button{padding:9px 12px;border:1px solid #c392db;border-radius:8px;background:#3c2352;color:#fff;font-weight:700;cursor:pointer}
+.ritual-mode-actions button:disabled{opacity:.45;cursor:not-allowed}
+.creature-reveal{max-width:1180px;margin:8px auto;padding:10px 14px;border:1px solid #d5a858;border-radius:10px;background:#2c2030;color:#ffdc96;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.creature-reveal button{border:1px solid #d5a858;border-radius:7px;padding:7px 10px;background:#4c3545;color:#fff;cursor:pointer}
 .ritual-discard{margin-top:10px;color:#f5dcff;font-size:13px}
 .ritual-discard-options{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px}
 .ritual-discard-options>div{display:flex;align-items:center;gap:5px}

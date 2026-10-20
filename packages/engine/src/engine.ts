@@ -34,6 +34,7 @@ export interface PendingAbility {
   targetRitualId?: string;
   ownCardId?: string;
   candidates?: string[];
+  fromPreviousRound?: boolean;
 }
 export interface GameState {
   playerIds: [string, string, string, string];
@@ -51,6 +52,7 @@ export interface GameState {
   lastRaiseTeam: Team | null;
   pendingChallenge: PendingChallenge | null;
   pendingAbility: PendingAbility | null;
+  pendingRoundAbility: PendingAbility | null;
   lastRound: RoundResult | null;
   round: number;
   roundStarter: number;
@@ -64,12 +66,14 @@ export interface GameState {
   ritualHands: [string[], string[], string[], string[]];
   ritualDeck: string[];
   ritualDiscard: string[];
-  ritualPhase: 'off' | 'blind' | 'revealed' | 'blind-discard' | 'revealed-discard' | 'play';
+  ritualPhase: 'off' | 'mode' | 'blind' | 'revealed' | 'blind-discard' | 'revealed-discard' | 'play';
+  ritualModeLocked: boolean;
   ritualChooser: number;
   ritualActiveId: string | null;
   ritualPrediction: '2-0' | '2-1' | null;
   ritualEmpoweredKind: CreatureKind | null;
   ritualExchange: { seat: number; newCardIds: string[] } | null;
+  lastCreatureReveal: { seat: number; cardId: string } | null;
 }
 export type GameAction =
   | { type: 'play'; playerId: string; cardId: string }
@@ -77,6 +81,7 @@ export type GameAction =
   | { type: 'counter'; playerId: string }
   | { type: 'respond'; playerId: string; accept: boolean }
   | { type: 'ability'; playerId: string; choice: string }
+  | { type: 'ritual-mode'; playerId: string; blind: boolean }
   | { type: 'ritual-reveal'; playerId: string }
   | { type: 'ritual-play'; playerId: string; ritualId: string; prediction?: '2-0' | '2-1'; creatureKind?: CreatureKind }
   | { type: 'ritual-discard'; playerId: string; choice: string };
@@ -90,6 +95,12 @@ export function trickPoints(baseStake: number, level: TrickLevel): number {
 export function abilityAvailableFor(state: GameState, cardId: string): boolean {
   const kind = CARD_BY_ID[cardId]!.kind;
   return CREATURE_EFFECTS[kind].available && (state.ritualMode || (kind !== 'wizard' && kind !== 'witch'));
+}
+export function keepsDeclaredRitualMode(state: GameState, seat: number, discardedId: string, receivedId?: string): boolean {
+  if (!state.ritualModeLocked || seat !== state.ritualChooser || !['blind', 'revealed'].includes(state.ritualPhase)) return true;
+  const blind = state.ritualPhase === 'blind';
+  return [...state.ritualHands[seat]!.filter(id => id !== discardedId), ...(receivedId ? [receivedId] : [])]
+    .some(id => ritualFromId(id).blind === blind);
 }
 
 function nextRandom(seed: number): number {
@@ -118,9 +129,10 @@ function deal(state: GameState, reserved?: { seat: number; cardId: string }): Ga
     ...state, hands, deck: cards, discard: [], trick: [], trickWins: [0, 0],
     trickWinners: [], skipNextTrickSeats: [], roundBaseStake: ROUND_POINTS,
     roundStake: ROUND_POINTS, acceptedTrickLevel: 0, lastRaiseTeam: null,
-    pendingChallenge: null, pendingAbility: null, turn: state.roundStarter, rng: seed, activeEffects: [],
-    ritualPhase: state.ritualMode ? 'blind' : 'off', ritualChooser: state.roundStarter,
+    pendingChallenge: null, pendingAbility: null, pendingRoundAbility: null, turn: state.roundStarter, rng: seed, activeEffects: [],
+    ritualPhase: state.ritualMode ? 'blind' : 'off', ritualModeLocked: false, ritualChooser: state.roundStarter,
     ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualExchange: null,
+    lastCreatureReveal: null,
   };
 }
 export function createGame(playerIds: [string, string, string, string], seed: number, ritualMode = false): GameState {
@@ -130,13 +142,14 @@ export function createGame(playerIds: [string, string, string, string], seed: nu
     playerIds: [...playerIds], hands: [[], [], [], []], deck: [], discard: [], trick: [],
     trickWins: [0, 0], trickWinners: [], skipNextTrickSeats: [], scores: [0, 0],
     roundBaseStake: ROUND_POINTS, roundStake: ROUND_POINTS, acceptedTrickLevel: 0,
-    lastRaiseTeam: null, pendingChallenge: null, pendingAbility: null, lastRound: null,
+    lastRaiseTeam: null, pendingChallenge: null, pendingAbility: null, pendingRoundAbility: null, lastRound: null,
     round: 1, roundStarter: rng % 4,
     turn: rng % 4, lastTrickWinner: null, lastRoundWinner: null, winner: null,
     rng, activeEffects: [],
     ritualMode, ritualHands: [[], [], [], []], ritualDeck: [], ritualDiscard: [],
-    ritualPhase: ritualMode ? 'blind' : 'off', ritualChooser: rng % 4,
+    ritualPhase: ritualMode ? 'blind' : 'off', ritualModeLocked: false, ritualChooser: rng % 4,
     ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualExchange: null,
+    lastCreatureReveal: null,
   };
   if (ritualMode) {
     const ritualCards = shuffleIds(RITUAL_TEST_DECK, rng);
@@ -263,6 +276,7 @@ function activateInNextRound(state: GameState): GameState {
   if (!pending.endRound) return activateAbility(state);
   const next = finishRound(state, pending.endRound.team, pending.endRound.reason);
   if (next.winner !== null) return next;
+  if (next.ritualMode) return { ...next, ritualPhase: 'mode', pendingRoundAbility: { ...pending, endRound: null, fromPreviousRound: true } };
   return activateAbility({ ...next, pendingAbility: { ...pending, endRound: null } });
 }
 function completeRitualPhase(state: GameState): GameState {
@@ -290,7 +304,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     if (pending.endRound) {
       const next = finishRound(state, pending.endRound.team, pending.endRound.reason, { seat, cardId: choice });
       if (next.winner !== null) return next;
-      if (next.ritualMode) return { ...next, ritualExchange: { seat, newCardIds: next.hands[seat]!.filter(id => id !== choice) } };
+      if (next.ritualMode) return { ...next, ritualPhase: 'mode', ritualExchange: { seat, newCardIds: next.hands[seat]!.filter(id => id !== choice) } };
       return { ...next, pendingAbility: { ...pending, stage: 'puppet-exchange', endRound: null, ownCardId: choice } };
     }
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
@@ -325,8 +339,12 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
   }
   if (pending.stage === 'goblin-own') {
     if (choice === 'skip') return closeAbility(state);
-    if (!state.hands[seat]!.includes(choice)) throw new Error('Escolha uma carta sua.');
-    return { ...state, pendingAbility: { ...pending, stage: 'goblin-target', ownCardId: choice } };
+    const blind = pending.fromPreviousRound && state.ritualPhase === 'blind';
+    const index = Number(choice);
+    const ownCardId = blind && Number.isInteger(index) && index >= 0 && index < state.hands[seat]!.length
+      ? state.hands[seat]![index] : !blind && state.hands[seat]!.includes(choice) ? choice : null;
+    if (!ownCardId) throw new Error('Escolha uma carta sua.');
+    return { ...state, pendingAbility: { ...pending, stage: 'goblin-target', ownCardId } };
   }
   if (pending.stage === 'goblin-target') {
     if (choice === 'skip') return closeAbility(state);
@@ -341,14 +359,18 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     hands[targetSeat]!.push(pending.ownCardId!);
     const scores = [...state.scores] as GameState['scores'];
     if (CARD_BY_ID[received]!.value < 5) scores[teamOf(seat)] = Math.min(TARGET_SCORE, scores[teamOf(seat)] + 1);
-    const next = closeAbility({ ...state, rng, hands, scores });
+    const next = closeAbility({ ...state, rng, hands, scores, lastCreatureReveal: pending.fromPreviousRound && state.ritualPhase === 'blind' ? { seat, cardId: received } : state.lastCreatureReveal });
     return scores[teamOf(seat)] >= TARGET_SCORE ? { ...next, winner: teamOf(seat) } : next;
   }
   if (pending.stage === 'griffin-discard') {
-    if (!state.hands[seat]!.includes(choice)) throw new Error('Escolha uma carta para descartar.');
+    const blind = pending.fromPreviousRound && state.ritualPhase === 'blind';
+    const index = Number(choice);
+    const cardId = blind && Number.isInteger(index) && index >= 0 && index < state.hands[seat]!.length
+      ? state.hands[seat]![index] : !blind && state.hands[seat]!.includes(choice) ? choice : null;
+    if (!cardId) throw new Error('Escolha uma carta para descartar.');
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
-    hands[seat] = hands[seat]!.filter(id => id !== choice);
-    return closeAbility({ ...state, hands, discard: [...state.discard, choice] });
+    hands[seat] = hands[seat]!.filter(id => id !== cardId);
+    return closeAbility({ ...state, hands, discard: [...state.discard, cardId] });
   }
   if (pending.stage === 'wizard-target') {
     if (choice === 'skip') return closeAbility(state);
@@ -361,6 +383,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
   if (pending.stage === 'wizard-decision') {
     if (choice === 'keep') return closeAbility(state);
     if (choice !== 'swap') throw new Error('Escolha trocar ou manter os Rituais.');
+    if (!state.ritualHands[seat]!.some(id => keepsDeclaredRitualMode(state, seat, id, pending.targetRitualId))) throw new Error('A troca deixaria você sem Ritual da modalidade declarada.');
     return { ...state, pendingAbility: { ...pending, stage: 'wizard-own' } };
   }
   if (pending.stage === 'wizard-own') {
@@ -368,6 +391,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     const target = pending.targetSeat;
     const otherId = pending.targetRitualId;
     if (target === undefined || !otherId || !state.ritualHands[target]!.includes(otherId)) throw new Error('O Ritual revelado não está disponível.');
+    if (!keepsDeclaredRitualMode(state, seat, choice, otherId)) throw new Error('A troca deixaria você sem Ritual da modalidade declarada.');
     const ritualHands = state.ritualHands.map(hand => [...hand]) as GameState['ritualHands'];
     ritualHands[seat] = ritualHands[seat]!.filter(id => id !== choice);
     ritualHands[target] = ritualHands[target]!.filter(id => id !== otherId);
@@ -377,6 +401,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
   }
   if (pending.stage === 'witch-discard') {
     if (!state.ritualHands[seat]!.includes(choice)) throw new Error('Escolha um Ritual da sua mão para descartar.');
+    if (!keepsDeclaredRitualMode(state, seat, choice)) throw new Error('O descarte deixaria você sem Ritual da modalidade declarada.');
     const ritualHands = state.ritualHands.map(hand => [...hand]) as GameState['ritualHands'];
     ritualHands[seat] = ritualHands[seat]!.filter(id => id !== choice);
     return closeAbility({ ...state, ritualHands, ritualDiscard: [...state.ritualDiscard, choice] });
@@ -389,8 +414,17 @@ export function reduce(state: GameState, action: GameAction): GameState {
   if (seat < 0) throw new Error('Jogador não pertence à partida.');
   if (action.type === 'ability') return chooseAbility(state, seat, action.choice);
   if (state.pendingAbility) throw new Error('Aguarde a decisão da habilidade.');
+  if (action.type === 'ritual-mode') {
+    if (!state.ritualMode || state.ritualPhase !== 'mode' || seat !== state.ritualChooser) throw new Error('Não é hora de definir a modalidade do Ritual.');
+    if (!state.ritualHands[seat]!.some(id => ritualFromId(id).blind === action.blind)) throw new Error('Você não possui Ritual dessa modalidade.');
+    const ritualPhase = state.ritualExchange
+      ? action.blind ? 'blind-discard' : 'revealed-discard'
+      : action.blind ? 'blind' : 'revealed';
+    const next: GameState = { ...state, ritualPhase, ritualModeLocked: true, pendingRoundAbility: null };
+    return state.pendingRoundAbility ? activateAbility({ ...next, pendingAbility: state.pendingRoundAbility }) : next;
+  }
   if (action.type === 'ritual-reveal') {
-    if (!state.ritualMode || state.ritualPhase !== 'blind' || seat !== state.ritualChooser) throw new Error('Não é hora de revelar as criaturas.');
+    if (!state.ritualMode || state.ritualPhase !== 'blind' || state.ritualModeLocked || seat !== state.ritualChooser) throw new Error('Não é hora de revelar as criaturas.');
     if (!state.ritualHands[seat]!.some(id => !ritualFromId(id).blind)) throw new Error('Você precisa escolher um Ritual antes de ver as criaturas.');
     return { ...state, ritualPhase: 'revealed' };
   }
@@ -409,9 +443,9 @@ export function reduce(state: GameState, action: GameAction): GameState {
       ritualEmpoweredKind: ritual.kind === 'runa-da-vontade' ? action.creatureKind! : null,
       roundBaseStake: ritual.kind === 'doblete-sombrio' ? 2 : ritual.kind === 'trick-explosivo' ? 3 : state.roundBaseStake,
       roundStake: ritual.kind === 'doblete-sombrio' ? 2 : ritual.kind === 'trick-explosivo' ? 3 : state.roundStake,
-      ritualPhase: state.ritualExchange ? (state.ritualPhase === 'blind' ? 'blind-discard' : 'revealed-discard') : 'play',
+      ritualPhase: 'play',
     }, seat);
-    return selected.ritualExchange ? selected : completeRitualPhase(selected);
+    return completeRitualPhase(selected);
   }
   if (action.type === 'ritual-discard') {
     const exchange = state.ritualExchange;
@@ -424,7 +458,7 @@ export function reduce(state: GameState, action: GameAction): GameState {
     if (!cardId) throw new Error('Escolha uma das três criaturas novas para descartar.');
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
     hands[seat] = hands[seat]!.filter(id => id !== cardId);
-    return completeRitualPhase({ ...state, hands, discard: [...state.discard, cardId], ritualExchange: null });
+    return { ...state, hands, discard: [...state.discard, cardId], ritualExchange: null, ritualPhase: blind ? 'blind' : 'revealed' };
   }
   if (state.ritualMode && state.ritualPhase !== 'play') throw new Error('Escolha o Ritual antes de jogar criaturas.');
   const ritualKind: RitualKind | null = state.ritualActiveId ? ritualFromId(state.ritualActiveId).kind : null;

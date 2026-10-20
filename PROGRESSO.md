@@ -38,8 +38,9 @@ Validar no navegador e com jogadores em dispositivos separados as quatro artes e
 - [x] Titereiro com Ritual de olho cortado: carta guardada conhecida; descarte cego de uma das três criaturas novas antes de revelá-las.
 - [x] Fluxo de Rituais no motor, servidor e interface; primeiro lote jogável com arte provisória em texto.
 - [x] Mago revela um Ritual aleatório de um adversário e permite decidir se troca ou mantém a mão; Bruxa compra e descarta um Ritual.
-- [x] Habilidades de criatura pendentes da rodada anterior são resolvidas antes da escolha do próximo Ritual. A troca do Titereiro permanece após a escolha para respeitar o descarte cego do olho cortado.
-- [x] Validação desta correção: 48 testes do motor, compilação dos três pacotes e 500 partidas simuladas com Rituais.
+- [x] Antes de resolver poder pendente, responsável pelo Ritual declara com ou sem olhinho. Titereiro, Fada, Goblin e Grifo usam a visibilidade correspondente; só depois o Ritual é escolhido e aplicado.
+- [x] Goblin com olhinho entrega criatura pelo verso; a carta recebida é mostrada só a ele. Fada age antes de Runa da Vontade ou qualquer outro Ritual atual.
+- [x] Validação desta correção: 54 testes do motor, compilação dos três pacotes, 1.000 partidas simuladas com Rituais e teste de sala com quatro conexões.
 - [x] Segundo lote com arte recebida em 800 × 1132 px: Runa da Vontade, Magia Nula, Trick Explosivo e Doblete Sombrio. Arte ampliável e regra textual na interface.
 - [x] Runa fortalece as quatro Luas da criatura escolhida acima de todas as demais, inclusive Arcana; Magia Nula bloqueia habilidades de criaturas somente na rodada atual.
 - [x] Doblete e Trick Explosivo mantêm o valor inicial e aceitam a sequência completa Double → Hat → Poker. Valores aceitos: 4/5/6 com Doblete e 5/6/7 com Trick Explosivo; recusa entrega o último valor aceito.

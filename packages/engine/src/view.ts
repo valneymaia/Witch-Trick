@@ -1,5 +1,5 @@
 import { CARD_BY_ID, type CreatureCard, type CreatureKind } from './cards.js';
-import { abilityAvailableFor, puppeteerChoices, teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
+import { abilityAvailableFor, keepsDeclaredRitualMode, puppeteerChoices, teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
 import { ritualFromId, type RitualCard } from './rituals.js';
 
 export interface PlayerView {
@@ -32,6 +32,7 @@ export interface GameView {
   winner: Team | null;
   ritualMode: boolean;
   ritualPhase: GameState['ritualPhase'];
+  ritualModeLocked: boolean;
   ritualChooser: number;
   ritualDiscardSeat: number | null;
   ritualHand: RitualCard[];
@@ -40,6 +41,7 @@ export interface GameView {
   ritualPrediction: '2-0' | '2-1' | null;
   ritualEmpoweredKind: CreatureKind | null;
   ritualDiscardOptions: { value: string; card?: CreatureCard }[];
+  lastCreatureReveal: CreatureCard | null;
 }
 export interface AbilityOption { value: string; label: string; card?: CreatureCard; ritual?: RitualCard; seat?: number }
 export function abilityOptionsFor(state: GameState, seat: number): AbilityOption[] {
@@ -56,28 +58,32 @@ export function abilityOptionsFor(state: GameState, seat: number): AbilityOption
     case 'fairy-target':
     case 'goblin-target': return [skip, ...state.hands.flatMap((hand, target): AbilityOption[] => teamOf(target) !== teamOf(seat) && hand.length ? [{ value: String(target), label: `Jogador ${target + 1}`, seat: target }] : [])];
     case 'fairy-card': return (pending.candidates ?? []).map(cardOption);
-    case 'goblin-own': return [skip, ...state.hands[seat]!.map(cardOption)];
-    case 'griffin-discard': return state.hands[seat]!.map(cardOption);
+    case 'goblin-own': return [skip, ...(pending.fromPreviousRound && state.ritualPhase === 'blind'
+      ? state.hands[seat]!.map((_, index) => ({ value: String(index), label: `Entregar carta oculta ${index + 1}` }))
+      : state.hands[seat]!.map(cardOption))];
+    case 'griffin-discard': return pending.fromPreviousRound && state.ritualPhase === 'blind'
+      ? state.hands[seat]!.map((_, index) => ({ value: String(index), label: `Descartar carta oculta ${index + 1}` }))
+      : state.hands[seat]!.map(cardOption);
     case 'wizard-target': return [skip, ...state.ritualHands.flatMap((hand, target): AbilityOption[] => teamOf(target) !== teamOf(seat) && hand.length ? [{ value: String(target), label: `Jogador ${target + 1}`, seat: target }] : [])];
     case 'wizard-decision': return pending.targetRitualId ? [
       { value: 'keep', label: 'Manter seus Rituais; não trocar' },
-      { value: 'swap', label: `Trocar pelo ${ritualFromId(pending.targetRitualId).name}`, ritual: ritualFromId(pending.targetRitualId) },
+      ...(state.ritualHands[seat]!.some(id => keepsDeclaredRitualMode(state, seat, id, pending.targetRitualId))
+        ? [{ value: 'swap', label: `Trocar pelo ${ritualFromId(pending.targetRitualId).name}`, ritual: ritualFromId(pending.targetRitualId) }] : []),
     ] : [];
-    case 'wizard-own': return state.ritualHands[seat]!.map(ritualOption);
-    case 'witch-discard': return state.ritualHands[seat]!.map(ritualOption);
+    case 'wizard-own': return state.ritualHands[seat]!.filter(id => keepsDeclaredRitualMode(state, seat, id, pending.targetRitualId)).map(ritualOption);
+    case 'witch-discard': return state.ritualHands[seat]!.filter(id => keepsDeclaredRitualMode(state, seat, id)).map(ritualOption);
   }
 }
 export function viewFor(state: GameState, playerId: string): GameView {
   const seat = state.playerIds.indexOf(playerId);
   if (seat < 0) throw new Error('Jogador não pertence a esta partida.');
-  const creaturesHidden = state.ritualMode && (state.ritualPhase === 'blind' || state.ritualPhase === 'blind-discard');
+  const creaturesHidden = state.ritualMode && (state.ritualPhase === 'mode' || state.ritualPhase === 'blind' || state.ritualPhase === 'blind-discard');
   const visibleHand = creaturesHidden
     ? state.ritualExchange?.seat === seat ? state.hands[seat]!.filter(id => !state.ritualExchange!.newCardIds.includes(id))
-      : state.pendingAbility?.seat === seat && ['goblin-own', 'griffin-discard'].includes(state.pendingAbility.stage) ? state.hands[seat]!
       : []
     : state.hands[seat]!;
   const exchange = state.ritualExchange;
-  const discardOptions = exchange && exchange.seat === seat
+  const discardOptions = exchange && exchange.seat === seat && ['blind-discard', 'revealed-discard'].includes(state.ritualPhase)
     ? exchange.newCardIds.map((id, index) => state.ritualPhase === 'blind-discard'
       ? { value: String(index) }
       : { value: id, card: CARD_BY_ID[id]! })
@@ -106,7 +112,7 @@ export function viewFor(state: GameState, playerId: string): GameView {
     roundStarter: state.roundStarter, turn: state.turn,
     lastTrickWinner: state.lastTrickWinner, lastRoundWinner: state.lastRoundWinner,
     winner: state.winner,
-    ritualMode: state.ritualMode, ritualPhase: state.ritualPhase, ritualChooser: state.ritualChooser,
+    ritualMode: state.ritualMode, ritualPhase: state.ritualPhase, ritualModeLocked: state.ritualModeLocked, ritualChooser: state.ritualChooser,
     ritualDiscardSeat: state.ritualExchange?.seat ?? null,
     ritualHand: state.ritualHands[seat]!.map(ritualFromId),
     ritualHandCounts: state.ritualHands.map(hand => hand.length),
@@ -114,5 +120,6 @@ export function viewFor(state: GameState, playerId: string): GameView {
     ritualPrediction: state.ritualPrediction,
     ritualEmpoweredKind: state.ritualEmpoweredKind,
     ritualDiscardOptions: discardOptions,
+    lastCreatureReveal: state.lastCreatureReveal?.seat === seat ? CARD_BY_ID[state.lastCreatureReveal.cardId]! : null,
   };
 }
