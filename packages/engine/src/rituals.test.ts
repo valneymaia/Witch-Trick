@@ -326,7 +326,7 @@ describe('primeiro lote de Rituais', () => {
     expect(state.ritualPhase).toBe('play');
   });
 
-  it('Goblin com olhinho entrega carta oculta e revela apenas a recebida', () => {
+  it('Goblin com olhinho entrega carta oculta e revela a troca a todos', () => {
     let state = ritualState(['mapa-do-destino#1'], [
       ['arcana-full'], ['raven-new'], ['wolf-new', 'witch-new'], ['griffin-new'],
     ]);
@@ -340,8 +340,9 @@ describe('primeiro lote de Rituais', () => {
     state = reduce(state, { type: 'ability', playerId: 'c', choice: '0' });
     state = reduce(state, { type: 'ability', playerId: 'c', choice: '1' });
     expect(state.scores[0]).toBe(1);
-    expect(viewFor(state, 'c').lastCreatureReveal?.id).toBe('raven-new');
-    expect(viewFor(state, 'a').lastCreatureReveal).toBeNull();
+    for (const playerId of players) expect(viewFor(state, playerId).lastCreatureReveal).toMatchObject({
+      reason: 'goblin', card: { id: 'raven-new' }, tradedCard: { id: 'wolf-new' }, pointAwarded: true,
+    });
     expect(viewFor(state, 'c').hand).toEqual([]);
   });
 

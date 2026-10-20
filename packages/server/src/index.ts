@@ -51,9 +51,6 @@ function emitRoom(room: Room) {
     if (game && room.testMode && room.ownerId === playerId && room.game?.pendingAbility) {
       game.abilityOptions = abilityOptionsFor(room.game, room.game.pendingAbility.seat);
     }
-    if (game && room.testMode && room.ownerId === playerId && room.game?.lastCreatureReveal) {
-      game.lastCreatureReveal = CARD_BY_ID[room.game.lastCreatureReveal.cardId]!;
-    }
     const creaturesVisible = !room.game?.ritualMode || !['mode', 'blind', 'blind-discard'].includes(room.game.ritualPhase);
     const allHands = room.testMode && room.ownerId === playerId && room.game && creaturesVisible
       ? room.game.hands.map((hand, handSeat) => isBlindToCreatures(room.game!, handSeat) ? [] : hand.map(id => CARD_BY_ID[id]!))

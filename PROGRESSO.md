@@ -39,7 +39,7 @@ Validar no navegador e com jogadores em dispositivos separados os oito Rituais a
 - [x] Fluxo de Rituais no motor, servidor e interface; primeiro lote jogável com arte provisória em texto.
 - [x] Mago revela um Ritual aleatório de um adversário e permite decidir se troca ou mantém a mão; Bruxa compra e descarta um Ritual.
 - [x] Antes de resolver poder pendente, responsável pelo Ritual declara com ou sem olhinho. Titereiro, Fada, Goblin e Grifo usam a visibilidade correspondente; só depois o Ritual é escolhido e aplicado.
-- [x] Goblin com olhinho entrega criatura pelo verso; a carta recebida é mostrada só a ele. Fada age antes de Runa da Vontade ou qualquer outro Ritual atual.
+- [x] Goblin com olhinho entrega criatura pelo verso; a troca e o ponto são revelados a todos. Fada age antes de Runa da Vontade ou qualquer outro Ritual atual.
 - [x] Validação desta correção: 54 testes do motor, compilação dos três pacotes, 1.000 partidas simuladas com Rituais e teste de sala com quatro conexões.
 - [x] Segundo lote com arte recebida em 800 × 1132 px: Runa da Vontade, Magia Nula, Trick Explosivo e Doblete Sombrio. Arte ampliável e regra textual na interface.
 - [x] Runa fortalece as quatro Luas da criatura escolhida acima de todas as demais, inclusive Arcana; Magia Nula bloqueia habilidades de criaturas somente na rodada atual.
@@ -50,6 +50,8 @@ Validar no navegador e com jogadores em dispositivos separados os oito Rituais a
 - [x] Véu oculta as quatro mãos; Mão Cega oculta só o adversário escolhido. A seleção pelo verso dura as três vazas e é validada no servidor.
 - [x] Botão para consultar a própria mão de Rituais, inclusive durante a habilidade do Mago.
 - [x] Validação do terceiro lote: 58 testes do motor, 1.000 partidas simuladas com Rituais e compilação.
+- [x] Cartas ocultas exibem a arte oficial `verso.png`. Após Trick recusado, a criatura escolhida é revelada a todos, inclusive Arcana sem poder. A troca do Goblin mostra as duas criaturas e se rendeu ponto.
+- [x] Testes de regressão para revelação pública em quatro visões, Arcana escolhida às cegas e resultado com e sem ponto do Goblin.
 - [ ] Validação visual no navegador e partida em quatro dispositivos separados.
 
 ## Limitações conhecidas

@@ -271,6 +271,47 @@ describe('habilidades de criaturas', () => {
     expect(state.scores).toEqual([1, 3]);
     expect(state.pendingAbility).toBeNull();
   });
+  it('Trick recusado revela a criatura escolhida a todos, inclusive Arcana virada pelo verso', () => {
+    let state = controlledState([
+      ['arcana-full'], ['witch-new'], ['wolf-new'], ['fairy-new'],
+    ]);
+    state = { ...state, ritualMode: true, ritualPhase: 'play', ritualActiveId: 'veu-da-incerteza#1' };
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    expect(viewFor(state, 'a').hand).toEqual([]);
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: '0' });
+    expect(state.round).toBe(2);
+    for (const playerId of ids) {
+      expect(viewFor(state, playerId).lastCreatureReveal).toMatchObject({
+        reason: 'declined', seat: 0, card: { id: 'arcana-full' },
+      });
+    }
+  });
+  it('Goblin revela a carta entregue e a recebida para todos conferirem o ponto', () => {
+    let state = controlledState([
+      ['arcana-full'], ['raven-new'], ['witch-new'], ['wolf-new'],
+    ]);
+    state = { ...state, pendingAbility: { seat: 0, source: 'trick', stage: 'goblin-own', cardId: 'goblin-full', endRound: null } };
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'arcana-full' });
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: '1' });
+    expect(state.scores[0]).toBe(1);
+    for (const playerId of ids) {
+      expect(viewFor(state, playerId).lastCreatureReveal).toMatchObject({
+        reason: 'goblin', seat: 0, targetSeat: 1, card: { id: 'raven-new' },
+        tradedCard: { id: 'arcana-full' }, pointAwarded: true,
+      });
+    }
+    let noPoint = controlledState([
+      ['raven-new'], ['arcana-full'], ['witch-new'], ['wolf-new'],
+    ]);
+    noPoint = { ...noPoint, pendingAbility: { seat: 0, source: 'trick', stage: 'goblin-own', cardId: 'goblin-full', endRound: null } };
+    noPoint = reduce(noPoint, { type: 'ability', playerId: 'a', choice: 'raven-new' });
+    noPoint = reduce(noPoint, { type: 'ability', playerId: 'a', choice: '1' });
+    expect(noPoint.scores[0]).toBe(0);
+    expect(viewFor(noPoint, 'd').lastCreatureReveal).toMatchObject({
+      reason: 'goblin', card: { id: 'arcana-full' }, pointAwarded: false,
+    });
+  });
   it('o vencedor ativa Corvo ou Familiar, ou deixa a habilidade passar', () => {
     let raven = controlledState([['raven-full'], ['raven-new'], ['raven-waning'], ['raven-waxing']]);
     raven = { ...raven, scores: [0, 4] };

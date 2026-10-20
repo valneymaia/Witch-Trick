@@ -47,7 +47,7 @@ Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa 
 ## Arquivos de arte
 
 - Exportar **uma frente por arquivo**, em **800 × 1131 ou 1132 px**, conforme o arredondamento do editor para a altura original de 1131,4 px. Manter a mesma medida em todas as cartas, sem margem externa, e enviar PNG ou WebP junto do arquivo editável.
-- As oito artes ativas estão em `packages/web/public/rituals/`. O verso terá seu próprio arquivo quando for enviado.
+- As oito artes ativas estão em `packages/web/public/rituals/`. As criaturas ocultas usam `packages/web/public/cards/verso.png`.
 - Reservar o centro para ilustração e deixar título, olho cortado e regra com contraste forte. A regra deve ser legível no tamanho físico de celular, mas a interface também mostrará texto ampliável fora da imagem.
 - O layout exibirá a arte na proporção recebida, sem esticá-la. Não é necessário criar outra resolução menor.
 
@@ -57,5 +57,6 @@ Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa 
 - Com olhinho, depois de declarar a modalidade e antes de escolher a carta de Ritual, ele seleciona **uma das três cartas novas pelo verso** para descartar, sem saber qual é.
 - Sem olhinho, pode ver as três novas e escolher qual delas descartar. A carta guardada pelo Titereiro permanece na mão.
 - A Fada vê até duas cartas do adversário e descarta uma antes de conhecer o Ritual atual. Com olhinho, não vê suas próprias criaturas novas.
-- O Goblin com olhinho entrega uma posição da própria mão sem ver a carta. Apenas a carta recebida é revelada a ele para conferir o valor e o ponto. Sem olhinho, escolhe a carta que entrega após ver a própria mão.
+- O Goblin com olhinho entrega uma posição da própria mão sem ver a carta. Após a troca, a carta entregue e a recebida são reveladas a todos, com indicação de ter ou não recebido o ponto. Sem olhinho, escolhe a carta que entrega após ver a própria mão.
+- Se o Trick for recusado durante uma rodada de criaturas ocultas, quem pediu escolhe uma posição pelo verso. A criatura virada é revelada a todos antes de resolver a habilidade. Se sair Arcana ou outra criatura sem habilidade, a carta é descartada e não ativa poder.
 - O Grifo com olhinho compra e descarta uma posição sem ver as cartas. Sem olhinho, vê a mão e escolhe qual carta descartar.

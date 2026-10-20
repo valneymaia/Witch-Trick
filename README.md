@@ -38,6 +38,8 @@ Para testar o Titereiro após Trick recusado, selecione **O Titereiro** e **Simu
 
 Os oito Rituais do baralho de teste incluem Maldição da Derrota, Escolha da Anciã, Véu da Incerteza e Mão Cega. Na Anciã, cada aliado compra três criaturas extras e descarta três antes da primeira vaza. No Véu, todos jogam pelo verso; na Mão Cega, só o adversário escolhido joga pelo verso. A escolha cega vale durante toda a rodada.
 
+As cartas ocultas usam a arte oficial `verso.png`. Quando um Trick é recusado, a criatura escolhida para o poder é revelada a todos, mesmo se não tiver habilidade. A troca do Goblin também revela a carta entregue e a recebida, e informa se o valor recebido deu 1 ponto.
+
 ## Desenvolvimento
 
 - `packages/engine`: regras puras, baralho, redução de ações e visão privada.

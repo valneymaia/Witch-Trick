@@ -37,6 +37,9 @@ export interface PendingAbility {
   candidates?: string[];
   fromPreviousRound?: boolean;
 }
+export type CreatureReveal =
+  | { reason: 'declined'; round: number; seat: number; cardId: string }
+  | { reason: 'goblin'; round: number; seat: number; targetSeat: number; cardId: string; tradedCardId: string; pointAwarded: boolean };
 export interface GameState {
   playerIds: [string, string, string, string];
   hands: [string[], string[], string[], string[]];
@@ -76,7 +79,7 @@ export interface GameState {
   ritualTargetSeat: number | null;
   ancientDiscardsLeft: [number, number, number, number];
   ritualExchange: { seat: number; newCardIds: string[] } | null;
-  lastCreatureReveal: { seat: number; cardId: string } | null;
+  lastCreatureReveal: CreatureReveal | null;
 }
 export type GameAction =
   | { type: 'play'; playerId: string; cardId: string }
@@ -151,7 +154,6 @@ function deal(state: GameState, reserved?: { seat: number; cardId: string }): Ga
     ritualPhase: state.ritualMode ? 'blind' : 'off', ritualModeLocked: false, ritualChooser: state.roundStarter,
     ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualTargetSeat: null,
     ancientDiscardsLeft: [0, 0, 0, 0], ritualExchange: null,
-    lastCreatureReveal: null,
   };
 }
 export function createGame(playerIds: [string, string, string, string], seed: number, ritualMode = false): GameState {
@@ -318,7 +320,7 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     if (!cardId || (!blind && !abilityAvailableFor(state, cardId))) throw new Error('Escolha uma carta válida da sua mão.');
     const hands = state.hands.map(hand => [...hand]) as GameState['hands'];
     hands[seat] = hands[seat]!.filter(id => id !== cardId);
-    const next = { ...state, hands, discard: [...state.discard, cardId], pendingAbility: { ...pending, cardId, stage: 'offer' as const } };
+    const next = { ...state, hands, discard: [...state.discard, cardId], pendingAbility: { ...pending, cardId, stage: 'offer' as const }, lastCreatureReveal: { reason: 'declined' as const, round: state.round, seat, cardId } };
     if (!abilityAvailableFor(next, cardId)) return closeAbility(next);
     return CARD_BY_ID[cardId]!.kind === 'puppeteer' ? activateAbility(next) : activateInNextRound(next);
   }
@@ -391,8 +393,9 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     hands[seat]!.push(received);
     hands[targetSeat]!.push(pending.ownCardId!);
     const scores = [...state.scores] as GameState['scores'];
-    if (CARD_BY_ID[received]!.value < 5) scores[teamOf(seat)] = Math.min(TARGET_SCORE, scores[teamOf(seat)] + 1);
-    const next = closeAbility({ ...state, rng, hands, scores, lastCreatureReveal: pending.fromPreviousRound && state.ritualPhase === 'blind' ? { seat, cardId: received } : state.lastCreatureReveal });
+    const pointAwarded = CARD_BY_ID[received]!.value < 5;
+    if (pointAwarded) scores[teamOf(seat)] = Math.min(TARGET_SCORE, scores[teamOf(seat)] + 1);
+    const next = closeAbility({ ...state, rng, hands, scores, lastCreatureReveal: { reason: 'goblin', round: state.round, seat, targetSeat, cardId: received, tradedCardId: pending.ownCardId!, pointAwarded } });
     return scores[teamOf(seat)] >= TARGET_SCORE ? { ...next, winner: teamOf(seat) } : next;
   }
   if (pending.stage === 'griffin-discard') {
@@ -520,7 +523,8 @@ export function reduce(state: GameState, action: GameAction): GameState {
     if (!pending || pending.responderSeat !== seat) throw new Error('Este jogador não pode responder ao Trick.');
     if (!action.accept) {
       const next = { ...state, pendingChallenge: null };
-      if (abilityBlocked(next, pending.challengerSeat) || !next.hands[pending.challengerSeat]!.some(id => abilityAvailableFor(next, id))) {
+      if (abilityBlocked(next, pending.challengerSeat) || !next.hands[pending.challengerSeat]!.length
+        || (!isBlindToCreatures(next, pending.challengerSeat) && !next.hands[pending.challengerSeat]!.some(id => abilityAvailableFor(next, id)))) {
         return finishRound(next, teamOf(pending.challengerSeat), 'declined');
       }
       return { ...next, pendingAbility: {
