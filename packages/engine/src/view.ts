@@ -147,11 +147,13 @@ export function viewFor(state: GameState, playerId: string): GameView {
     ritualVotesNeeded: Math.floor(teamSeats(state, teamOf(state.ritualChooser)).length / 2) + 1,
     ritualPeekCards: state.ritualPeek && seat === state.ritualChooser
       ? state.ritualPeek.cardIds.map(id => CARD_BY_ID[id]!) : [],
-    ritualTeammateHand: state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'acordo-de-sangue'
-      && state.ritualPhase === 'blood-vote' && teamOf(seat) === teamOf(state.ritualChooser)
+    ritualTeammateHand: state.ritualActiveId && teamOf(seat) === teamOf(state.ritualChooser)
+      && ((ritualFromId(state.ritualActiveId).kind === 'acordo-de-sangue' && state.ritualPhase === 'blood-vote')
+        || (ritualFromId(state.ritualActiveId).kind === 'visao-compartilhada' && state.ritualPhase === 'play'))
       ? { seat: teamSeats(state, teamOf(seat)).find(member => member !== seat)!, cards: state.hands[teamSeats(state, teamOf(seat)).find(member => member !== seat)!]!.map(id => CARD_BY_ID[id]!) } : null,
-    ritualTeammateHands: state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'acordo-de-sangue'
-      && state.ritualPhase === 'blood-vote' && teamOf(seat) === teamOf(state.ritualChooser)
+    ritualTeammateHands: state.ritualActiveId && teamOf(seat) === teamOf(state.ritualChooser)
+      && ((ritualFromId(state.ritualActiveId).kind === 'acordo-de-sangue' && state.ritualPhase === 'blood-vote')
+        || (ritualFromId(state.ritualActiveId).kind === 'visao-compartilhada' && state.ritualPhase === 'play'))
       ? teamSeats(state, teamOf(seat)).filter(member => member !== seat)
         .map(member => ({ seat: member, cards: state.hands[member]!.map(id => CARD_BY_ID[id]!) })) : [],
     blindSeats: state.playerIds.map((_, playerSeat) => playerSeat).filter(playerSeat => isBlindToCreatures(state, playerSeat)),

@@ -1,10 +1,10 @@
-# Rituais: doze cartas jogáveis
+# Rituais: dezesseis cartas jogáveis
 
-Esta especificação registra as decisões do Valney para o baralho separado de Rituais. Doze cartas receberam artes individuais. O texto jogável também fica disponível na interface.
+Esta especificação registra as decisões do Valney para o baralho separado de Rituais. Dezesseis cartas receberam artes individuais. O texto jogável também fica disponível na interface.
 
 ## Baralho e mãos
 
-- O baralho oficial terá 48 Rituais distintos. Enquanto as regras restantes são implementadas, o baralho de teste usa quatro cópias de cada um dos doze Rituais com arte e regras completas.
+- O baralho oficial terá 48 Rituais distintos. Enquanto as regras restantes são implementadas, o baralho de teste usa quatro cópias de cada um dos dezesseis Rituais com arte e regras completas.
 - Cada jogador recebe três Rituais em uma mão privada.
 - Em cada rodada, exatamente um jogador joga um Ritual. O responsável segue a ordem dos assentos: 1 (Equipe A), 2 (Equipe B), 3 (Equipe A), 4 (Equipe B), repetindo. O primeiro responsável acompanha o assento inicial sorteado da partida.
 - O Ritual usado sai da mão e vai ao descarte de Rituais. Quando a mão de Rituais de um jogador acabar, ele compra três novas cartas, ou as que restarem no baralho.
@@ -49,14 +49,23 @@ Primeiro lote do novo conjunto enviado pelo Valney:
 | Olho da Verdade | Depois de ver as criaturas | Quem jogou escolhe um adversário. A mão atual desse jogador fica visível a todos durante a rodada e acompanha cartas jogadas ou trocadas. |
 | Acordo de Sangue | Depois de ver as criaturas | Os membros da equipe veem as mãos dos parceiros e votam. Com maioria favorável, a rodada começa valendo 3 pontos; Double, Hat e Poker aceitos levam a 5, 6 e 7. Se a maioria não for mais possível, a equipe adversária recebe 1 ponto e uma nova rodada é distribuída. Em quatro jogadores, os dois parceiros precisam concordar. |
 
+## Quarto lote de implementação
+
+| Ritual | Momento | Regra implementada |
+|---|---|---|
+| Escudo Arcano | Depois de ver as criaturas | Se a equipe que jogou o Ritual perder, a equipe vencedora perde 1 ponto após receber os pontos da rodada. O placar não cai abaixo de zero; a vitória da partida considera o placar final. |
+| Zebra Mística | Depois de ver as criaturas | No momento em que o Ritual é jogado, registra-se qual equipe tem menos pontos. Se essa equipe vencer a rodada, ganha mais 1 ponto. Empate na escolha não concede bônus. |
+| Blefe Premiado | Depois de ver as criaturas | A equipe que jogou o Ritual recebe 2 pontos extras se vencer a rodada sem ter jogado nenhuma Arcana nela. Arcanas jogadas pelo rival ou descartadas sem serem jogadas não impedem o bônus. |
+| Visão Compartilhada | Depois de ver as criaturas | Durante toda a rodada, cada membro da equipe que jogou o Ritual vê a mão atual dos parceiros. O outro time não recebe essas cartas na visão enviada pelo servidor. |
+
 O botão **Ver meus Rituais** mostra a própria mão em tamanho maior, inclusive durante a decisão do Mago. No modo de teste solo, mostra a mão do assento atualmente controlado.
 
-Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa anterior, mas não entram no sorteio do lote atual. O sorteio de teste usa quatro cópias de cada um dos doze Rituais com arte e regra ativa. O baralho oficial completo entra em jogo quando as demais artes e regras estiverem prontas.
+Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa anterior, mas não entram no sorteio do lote atual. O sorteio de teste usa quatro cópias de cada um dos dezesseis Rituais com arte e regra ativa. O baralho oficial completo entra em jogo quando as demais artes e regras estiverem prontas.
 
 ## Arquivos de arte
 
 - Exportar **uma frente por arquivo**, em **800 × 1131 ou 1132 px**, conforme o arredondamento do editor para a altura original de 1131,4 px. Manter a mesma medida em todas as cartas, sem margem externa, e enviar PNG ou WebP junto do arquivo editável.
-- As doze artes ativas estão em `packages/web/public/rituals/`. As criaturas ocultas usam `packages/web/public/cards/verso.png`.
+- As dezesseis artes ativas estão em `packages/web/public/rituals/`. As criaturas ocultas usam `packages/web/public/cards/verso.png`.
 - Reservar o centro para ilustração e deixar título, olho cortado e regra com contraste forte. A regra deve ser legível no tamanho físico de celular, mas a interface também mostrará texto ampliável fora da imagem.
 - O layout exibirá a arte na proporção recebida, sem esticá-la. Não é necessário criar outra resolução menor.
 

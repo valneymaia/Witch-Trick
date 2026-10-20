@@ -64,6 +64,8 @@ Validar com amigos em dispositivos e redes separados uma partida de 6 ou 8 pesso
 - [x] Nome do criador Valney Maia Neto na abertura; criação de sala com 4, 6 ou 8 pessoas e alvo de 15 ou 25 pontos.
 - [x] Motor e servidor usam quantidade dinâmica de assentos. Anciã e Espelho percorrem todos os parceiros; Acordo de Sangue exige maioria da equipe. A interface e a documentação mostram as opções escolhidas.
 - [x] 74 testes do motor, 500 partidas simuladas para cada tamanho de sala (incluindo alvo 25), compilação e teste Socket.IO com salas de 4, 6 e 8 conexões; abertura e mesa de 8 conferidas no navegador local.
+- [x] Quatro novos Rituais com as artes recebidas: Escudo Arcano, Zebra Mística, Blefe Premiado e Visão Compartilhada. Escudo desconta 1 ponto de quem venceu contra sua equipe; Zebra registra quem estava atrás na escolha; Blefe conta apenas Arcanas jogadas pela equipe do Ritual; Visão mostra as mãos atuais somente aos parceiros.
+- [x] 81 testes do motor, compilação e 100 partidas simuladas com Rituais para cada tamanho de sala (4, 6 e 8 jogadores, alvo 25).
 - [ ] Partida completa com amigos em dispositivos e redes separados.
 
 ## Limitações conhecidas
@@ -71,4 +73,4 @@ Validar com amigos em dispositivos e redes separados uma partida de 6 ou 8 pesso
 - Salas e placares são perdidos se o servidor reiniciar.
 - O modo de controle de todos os assentos revela todas as mãos na própria aba e deve ser usado somente para testes. Para testar privacidade e multiplayer, use uma sala normal em abas ou dispositivos separados.
 - A identidade de uma aba se perde quando ela é encerrada; atualizá-la mantém o assento.
-- O baralho de teste usa quatro cópias de cada um dos doze efeitos com arte. Os demais Rituais aguardam implementação em lotes de quatro.
+- O baralho de teste usa quatro cópias de cada um dos dezesseis efeitos com arte. Os demais Rituais aguardam implementação em lotes de quatro.

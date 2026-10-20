@@ -89,6 +89,23 @@ describe('salas com 4, 6 ou 8 jogadores', () => {
     expect(rejected.lastRound?.reason).toBe('blood-withdrawal');
   });
 
+  it.each([4, 6, 8])('Visão Compartilhada mostra só os parceiros em %i jogadores', count => {
+    const ids = players(count);
+    let state = createRitualScenario(ids, 'visao-compartilhada');
+    state = reduce(state, { type: 'ritual-reveal', playerId: ids[0]! });
+    state = reduce(state, { type: 'ritual-play', playerId: ids[0]!, ritualId: 'visao-compartilhada#1' });
+    for (let seat = 0; seat < count; seat++) {
+      const view = viewFor(state, ids[seat]!);
+      const expected = seat % 2 === 0
+        ? ids.map((_, partner) => partner).filter(partner => partner % 2 === 0 && partner !== seat) : [];
+      expect(view.ritualTeammateHands.map(hand => hand.seat)).toEqual(expected);
+      for (const partner of expected) {
+        expect(view.ritualTeammateHands.find(hand => hand.seat === partner)?.cards.map(card => card.id))
+          .toEqual(state.hands[partner]);
+      }
+    }
+  });
+
   it('encerra uma partida de oito jogadores no alvo escolhido de 25 pontos', () => {
     const ids = players(8);
     const cards = ['arcana-full', ...CARDS.map(card => card.id).filter(id => !id.startsWith('arcana-')).slice(0, 7)];

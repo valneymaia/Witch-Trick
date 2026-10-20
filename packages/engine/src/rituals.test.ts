@@ -561,3 +561,86 @@ describe('segundo lote de Rituais', () => {
     expect(state.trick[1]?.cardId).toBe('arcana-new');
   });
 });
+
+describe('quarto lote de Rituais', () => {
+  function choose(kind: 'escudo-arcano' | 'zebra-mistica' | 'blefe-premiado' | 'visao-compartilhada', hands?: GameState['hands'], scores?: GameState['scores']): GameState {
+    let state = ritualState([`${kind}#1`], hands);
+    if (scores) state = { ...state, scores };
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    return reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: `${kind}#1` });
+  }
+
+  it('Escudo tira um ponto da equipe que vence contra quem jogou o Ritual, inclusive após Trick recusado', () => {
+    let state = choose('escudo-arcano', [
+      ['witch-new'], ['arcana-full'], ['wolf-new'], ['fairy-new'],
+    ], [4, 14]);
+    state = { ...state, turn: 1 };
+    state = reduce(state, { type: 'raise', playerId: 'b' });
+    state = reduce(state, { type: 'respond', playerId: 'c', accept: false });
+    expect(state.scores).toEqual([4, 14]);
+    expect(state.winner).toBeNull();
+    expect(state.lastRound?.winnerPenalty).toBe(1);
+    expect(state.lastRound?.points).toBe(1);
+  });
+
+  it('Zebra fixa a equipe atrás no instante da escolha; empate não cria bônus', () => {
+    let state = choose('zebra-mistica', [
+      ['arcana-full'], ['witch-new'], ['wolf-new'], ['fairy-new'],
+    ], [2, 4]);
+    expect(state.ritualTrailingTeam).toBe(0);
+    state = { ...state, scores: [5, 4] };
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    expect(state.scores).toEqual([7, 4]);
+    expect(state.lastRound?.bonusPoints).toBe(1);
+
+    state = choose('zebra-mistica', undefined, [3, 3]);
+    expect(state.ritualTrailingTeam).toBeNull();
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    expect(state.lastRound?.bonusPoints).toBeUndefined();
+  });
+
+  it('Blefe dá dois pontos só à equipe do Ritual quando ela não jogou Arcana', () => {
+    let state = choose('blefe-premiado', [
+      ['raven-new'], ['arcana-new'], ['wolf-new'], ['fairy-new'],
+    ]);
+    state = { ...state, arcanaPlayedTeams: [1] };
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'skip' });
+    expect(state.scores).toEqual([3, 0]);
+    expect(state.lastRound?.bonusPoints).toBe(2);
+
+    state = choose('blefe-premiado', [
+      ['arcana-full', 'raven-new'], ['witch-new'], ['wolf-new'], ['fairy-new'],
+    ]);
+    state = playFullTrick(state, ['arcana-full', 'witch-new', 'wolf-new', 'fairy-new']);
+    expect(state.arcanaPlayedTeams).toContain(0);
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    state = reduce(state, { type: 'ability', playerId: 'a', choice: 'skip' });
+    expect(state.scores).toEqual([1, 0]);
+    expect(state.lastRound?.bonusPoints).toBeUndefined();
+
+    state = choose('blefe-premiado', [
+      ['witch-new'], ['arcana-full'], ['wolf-new'], ['fairy-new'],
+    ]);
+    state = { ...state, turn: 1 };
+    state = reduce(state, { type: 'raise', playerId: 'b' });
+    state = reduce(state, { type: 'respond', playerId: 'c', accept: false });
+    expect(state.scores).toEqual([0, 1]);
+  });
+
+  it('Visão revela a mão atual somente à equipe do Ritual e acompanha cartas jogadas', () => {
+    let state = choose('visao-compartilhada', [
+      ['arcana-full'], ['witch-new'], ['wolf-new', 'raven-new'], ['fairy-new'],
+    ]);
+    expect(viewFor(state, 'a').ritualTeammateHands[0]?.cards.map(card => card.id)).toEqual(['wolf-new', 'raven-new']);
+    expect(viewFor(state, 'c').ritualTeammateHands[0]?.cards.map(card => card.id)).toEqual(['arcana-full']);
+    expect(viewFor(state, 'b').ritualTeammateHands).toEqual([]);
+    expect(viewFor(state, 'd').ritualTeammateHands).toEqual([]);
+    state = reduce(state, { type: 'play', playerId: 'a', cardId: 'arcana-full' });
+    expect(viewFor(state, 'c').ritualTeammateHands[0]?.cards).toEqual([]);
+  });
+});

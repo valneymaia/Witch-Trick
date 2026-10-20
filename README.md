@@ -38,9 +38,9 @@ Para testar sozinho, use **Testar sozinho: controlar os assentos**. A tela mostr
 
 Para testar o Titereiro após Trick recusado, selecione **O Titereiro** e **Simular Trick recusado**. Arcana, Mago e Fada já estarão na mesa. Escolha o Titereiro da mão, recupere uma dessas cartas e descarte uma das três cartas novas da rodada seguinte.
 
-No teste solo de 4 pessoas, **Testar Ritual → Preparar Ritual** reinicia a partida com o Ritual escolhido na mão do Jogador 1. Assim dá para testar cada um dos doze efeitos sem esperar o sorteio.
+No teste solo de 4 pessoas, **Testar Ritual → Preparar Ritual** reinicia a partida com o Ritual escolhido na mão do Jogador 1. Assim dá para testar cada um dos dezesseis efeitos sem esperar o sorteio.
 
-Os doze Rituais do baralho de teste incluem Maldição da Derrota, Escolha da Anciã, Véu da Incerteza e Mão Cega. Na Anciã, cada aliado compra três criaturas extras e descarta três antes da primeira vaza. No Véu, todos jogam pelo verso; na Mão Cega, só o adversário escolhido joga pelo verso. A escolha cega vale durante toda a rodada. No Acordo de Sangue, a equipe decide por maioria; com 4 jogadores, ambos os parceiros precisam concordar.
+Os dezesseis Rituais do baralho de teste incluem Maldição da Derrota, Escolha da Anciã, Véu da Incerteza e Mão Cega. Na Anciã, cada aliado compra três criaturas extras e descarta três antes da primeira vaza. No Véu, todos jogam pelo verso; na Mão Cega, só o adversário escolhido joga pelo verso. A escolha cega vale durante toda a rodada. No Acordo de Sangue, a equipe decide por maioria; com 4 jogadores, ambos os parceiros precisam concordar.
 
 As cartas ocultas usam a arte oficial `verso.png`. Quando um Trick é recusado, a criatura escolhida para o poder é revelada a todos, mesmo se não tiver habilidade. A troca do Goblin também revela a carta entregue e a recebida, e informa se o valor recebido deu 1 ponto.
 Descartes feitos pelo verso com Grifo ou Titereiro também são revelados depois da escolha. O Goblin ganha o ponto quando recebe uma criatura de valor **5 ou menos**.
@@ -60,4 +60,4 @@ pnpm build
 
 Com `pnpm dev` aberto em outro terminal, `pnpm smoke` verifica salas de 4, 6 e 8 jogadores, mãos privadas, Trick, jogada e reconexão.
 
-As regras de referência ficam em `REGRAS.md`. Estão ativos os poderes de Corvo, Titereiro, Lobo, Fada, Goblin, Grifo, Familiar, Mago e Bruxa. Arcana não tem poder. O baralho oficial de Rituais terá 48 artes diferentes; por enquanto o baralho de teste usa quatro cópias de cada um dos doze efeitos implementados. As artes recebidas estão em `packages/web/public/rituals/` e podem ser ampliadas durante o jogo. Veja `RITUAIS.md` para as regras e pendências deste lote.
+As regras de referência ficam em `REGRAS.md`. Estão ativos os poderes de Corvo, Titereiro, Lobo, Fada, Goblin, Grifo, Familiar, Mago e Bruxa. Arcana não tem poder. O baralho oficial de Rituais terá 48 artes diferentes; por enquanto o baralho de teste usa quatro cópias de cada um dos dezesseis efeitos implementados. As artes recebidas estão em `packages/web/public/rituals/` e podem ser ampliadas durante o jogo. Veja `RITUAIS.md` para as regras e pendências deste lote.
