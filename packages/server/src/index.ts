@@ -102,7 +102,7 @@ function botTurn(room: Room) {
           : reduce(room.game, { type: 'ritual-reveal', playerId });
       } else if (room.game.ritualPhase === 'revealed') {
         const ritualId = room.game.ritualHands[seat]!.find(id => !ritualFromId(id).blind)!;
-        room.game = reduce(room.game, { type: 'ritual-play', playerId, ritualId });
+        room.game = reduce(room.game, { type: 'ritual-play', playerId, ritualId, creatureKind: CARD_BY_ID[room.game.hands[seat]![0]!]!.kind });
       } else if (room.game.ritualPhase === 'blind-discard' || room.game.ritualPhase === 'revealed-discard') {
         const choice = room.game.ritualPhase === 'blind-discard' ? '0' : room.game.ritualExchange!.newCardIds[0]!;
         room.game = reduce(room.game, { type: 'ritual-discard', playerId, choice });
@@ -228,7 +228,7 @@ io.on('connection', socket => {
       botTurn(room);
     } catch (error) { fail(reply, error instanceof Error ? error.message : 'Escolha inválida.'); }
   });
-  socket.on('room:ritual', (request: { type?: unknown; ritualId?: unknown; prediction?: unknown; choice?: unknown; seat?: unknown }, reply: Reply) => {
+  socket.on('room:ritual', (request: { type?: unknown; ritualId?: unknown; prediction?: unknown; creatureKind?: unknown; choice?: unknown; seat?: unknown }, reply: Reply) => {
     const room = rooms.get(socket.data.code);
     if (!room?.game) return fail(reply, 'A partida ainda não começou.');
     const ownerControls = room.testMode && socket.data.playerId === room.ownerId;
@@ -240,6 +240,7 @@ io.on('connection', socket => {
       else if (request.type === 'play' && typeof request.ritualId === 'string') room.game = reduce(room.game, {
         type: 'ritual-play', playerId, ritualId: request.ritualId,
         prediction: request.prediction === '2-0' || request.prediction === '2-1' ? request.prediction : undefined,
+        creatureKind: typeof request.creatureKind === 'string' ? request.creatureKind as CreatureKind : undefined,
       });
       else if (request.type === 'discard' && typeof request.choice === 'string') room.game = reduce(room.game, { type: 'ritual-discard', playerId, choice: request.choice });
       else return fail(reply, 'Escolha de Ritual inválida.');

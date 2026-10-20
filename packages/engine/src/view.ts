@@ -1,4 +1,4 @@
-import { CARD_BY_ID, type CreatureCard } from './cards.js';
+import { CARD_BY_ID, type CreatureCard, type CreatureKind } from './cards.js';
 import { abilityAvailableFor, puppeteerChoices, teamOf, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
 import { ritualFromId, type RitualCard } from './rituals.js';
 
@@ -36,6 +36,7 @@ export interface GameView {
   ritualHandCounts: number[];
   ritualActive: RitualCard | null;
   ritualPrediction: '2-0' | '2-1' | null;
+  ritualEmpoweredKind: CreatureKind | null;
   ritualDiscardOptions: { value: string; card?: CreatureCard }[];
 }
 export interface AbilityOption { value: string; label: string; card?: CreatureCard; ritual?: RitualCard; seat?: number }
@@ -102,6 +103,7 @@ export function viewFor(state: GameState, playerId: string): GameView {
     ritualHandCounts: state.ritualHands.map(hand => hand.length),
     ritualActive: state.ritualActiveId ? ritualFromId(state.ritualActiveId) : null,
     ritualPrediction: state.ritualPrediction,
+    ritualEmpoweredKind: state.ritualEmpoweredKind,
     ritualDiscardOptions: discardOptions,
   };
 }

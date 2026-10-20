@@ -64,6 +64,38 @@ describe('primeiro lote de Rituais', () => {
     expect(state.scores).toEqual([2, 0]);
   });
 
+  it('Trick Explosivo inicia em três pontos e pode subir para Poker Trick', () => {
+    let state = ritualState(['trick-explosivo#1']);
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'trick-explosivo#1' });
+    expect(state.roundStake).toBe(3);
+    state = reduce(state, { type: 'raise', playerId: 'a' });
+    expect(state.pendingChallenge?.level).toBe(4);
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    expect(state.scores).toEqual([3, 0]);
+  });
+
+  it('Runa da Vontade torna todas as Luas da criatura escolhida superiores à Arcana', () => {
+    let state = ritualState(['runa-da-vontade#1'], [
+      ['raven-new'], ['arcana-full'], ['witch-full'], ['wolf-full'],
+    ]);
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    expect(() => reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'runa-da-vontade#1' })).toThrow('Escolha uma criatura');
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'runa-da-vontade#1', creatureKind: 'raven' });
+    expect(viewFor(state, 'b').ritualEmpoweredKind).toBe('raven');
+    state = playFullTrick(state, ['raven-new', 'arcana-full', 'witch-full', 'wolf-full']);
+    expect(state.lastTrickWinner).toBe(0);
+    expect(state.trickWinners).toEqual([0]);
+
+    state = ritualState(['runa-da-vontade#2'], [
+      ['raven-new'], ['arcana-full'], ['raven-full'], ['witch-full'],
+    ]);
+    state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'runa-da-vontade#2', creatureKind: 'raven' });
+    state = playFullTrick(state, ['raven-new', 'arcana-full', 'raven-full', 'witch-full']);
+    expect(state.lastTrickWinner).toBe(2);
+  });
+
   it('Magia Nula bloqueia habilidade de criatura na vaza e após Trick recusado', () => {
     let state = ritualState(['magia-nula#1'], [
       ['raven-full'], ['raven-new'], ['raven-waning'], ['raven-waxing'],

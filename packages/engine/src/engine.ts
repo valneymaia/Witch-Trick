@@ -1,4 +1,4 @@
-import { CARD_BY_ID, CARDS, CREATURE_EFFECTS, compareCards } from './cards.js';
+import { CARD_BY_ID, CARDS, CREATURES, CREATURE_EFFECTS, compareCards, type CreatureKind } from './cards.js';
 import { RITUAL_TEST_DECK, ritualFromId, type RitualKind } from './rituals.js';
 
 export type Team = 0 | 1;
@@ -65,6 +65,7 @@ export interface GameState {
   ritualChooser: number;
   ritualActiveId: string | null;
   ritualPrediction: '2-0' | '2-1' | null;
+  ritualEmpoweredKind: CreatureKind | null;
   ritualExchange: { seat: number; newCardIds: string[] } | null;
   deferredAbility: PendingAbility | null;
 }
@@ -75,7 +76,7 @@ export type GameAction =
   | { type: 'respond'; playerId: string; accept: boolean }
   | { type: 'ability'; playerId: string; choice: string }
   | { type: 'ritual-reveal'; playerId: string }
-  | { type: 'ritual-play'; playerId: string; ritualId: string; prediction?: '2-0' | '2-1' }
+  | { type: 'ritual-play'; playerId: string; ritualId: string; prediction?: '2-0' | '2-1'; creatureKind?: CreatureKind }
   | { type: 'ritual-discard'; playerId: string; choice: string };
 export const TARGET_SCORE = 15;
 export const ROUND_POINTS = 1;
@@ -113,7 +114,7 @@ function deal(state: GameState, reserved?: { seat: number; cardId: string }): Ga
     trickWinners: [], skipNextTrickSeats: [], roundStake: ROUND_POINTS, lastRaiseTeam: null,
     pendingChallenge: null, pendingAbility: null, turn: state.roundStarter, rng: seed, activeEffects: [],
     ritualPhase: state.ritualMode ? 'blind' : 'off', ritualChooser: state.roundStarter,
-    ritualActiveId: null, ritualPrediction: null, ritualExchange: null,
+    ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualExchange: null,
     deferredAbility: null,
   };
 }
@@ -129,7 +130,7 @@ export function createGame(playerIds: [string, string, string, string], seed: nu
     rng, activeEffects: [],
     ritualMode, ritualHands: [[], [], [], []], ritualDeck: [], ritualDiscard: [],
     ritualPhase: ritualMode ? 'blind' : 'off', ritualChooser: rng % 4,
-    ritualActiveId: null, ritualPrediction: null, ritualExchange: null,
+    ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualExchange: null,
     deferredAbility: null,
   };
   if (ritualMode) {
@@ -173,7 +174,7 @@ function finishRound(state: GameState, team: Team, reason: RoundResult['reason']
   let completed: GameState = {
     ...state, scores, lastRoundWinner: team, lastRound: result, pendingChallenge: null, pendingAbility: null,
     ritualDiscard: state.ritualActiveId ? [...state.ritualDiscard, state.ritualActiveId] : state.ritualDiscard,
-    ritualActiveId: null,
+    ritualActiveId: null, ritualEmpoweredKind: null,
   };
   completed = refillRitualHand(completed, state.ritualChooser);
   if (scores[team] >= TARGET_SCORE) return { ...completed, winner: team, ritualPhase: 'off' };
@@ -390,12 +391,14 @@ export function reduce(state: GameState, action: GameAction): GameState {
     const ritual = ritualFromId(action.ritualId);
     if (ritual.blind !== (state.ritualPhase === 'blind')) throw new Error(ritual.blind ? 'Este Ritual deve ser escolhido antes de ver as criaturas.' : 'Veja as criaturas antes de escolher este Ritual.');
     if (ritual.kind === 'mapa-do-destino' && action.prediction !== '2-0' && action.prediction !== '2-1') throw new Error('Escolha o placar previsto: 2–0 ou 2–1.');
+    if (ritual.kind === 'runa-da-vontade' && !CREATURES.some(creature => creature.kind === action.creatureKind)) throw new Error('Escolha uma criatura para fortalecer nas quatro Luas.');
     const ritualHands = state.ritualHands.map(hand => [...hand]) as GameState['ritualHands'];
     ritualHands[seat] = ritualHands[seat]!.filter(id => id !== action.ritualId);
     const selected: GameState = refillRitualHand({
       ...state, ritualHands, ritualActiveId: action.ritualId,
       ritualPrediction: ritual.kind === 'mapa-do-destino' ? action.prediction! : null,
-      roundStake: ritual.kind === 'doblete-sombrio' ? 2 : state.roundStake,
+      ritualEmpoweredKind: ritual.kind === 'runa-da-vontade' ? action.creatureKind! : null,
+      roundStake: ritual.kind === 'doblete-sombrio' ? 2 : ritual.kind === 'trick-explosivo' ? 3 : state.roundStake,
       ritualPhase: state.ritualExchange ? (state.ritualPhase === 'blind' ? 'blind-discard' : 'revealed-discard') : 'play',
     }, seat);
     return selected.ritualExchange ? selected : completeRitualPhase(selected);
@@ -473,9 +476,15 @@ export function reduce(state: GameState, action: GameAction): GameState {
       && !state.skipNextTrickSeats.includes(candidate) && hands[candidate]!.length);
   if (nextSeat !== undefined) return { ...state, hands, trick, turn: nextSeat };
 
-  const winningPlay = trick.reduce((best, play) =>
-    compareCards(CARD_BY_ID[play.cardId]!, CARD_BY_ID[best.cardId]!) > 0 ? play : best,
-  );
+  const winningPlay = trick.reduce((best, play) => {
+    const playedCard = CARD_BY_ID[play.cardId]!;
+    const bestCard = CARD_BY_ID[best.cardId]!;
+    const empowered = state.ritualEmpoweredKind;
+    const playedWins = empowered && (playedCard.kind === empowered) !== (bestCard.kind === empowered)
+      ? playedCard.kind === empowered
+      : compareCards(playedCard, bestCard) > 0;
+    return playedWins ? play : best;
+  });
   const team = teamOf(winningPlay.seat);
   const trickWins = [...state.trickWins] as GameState['trickWins'];
   trickWins[team]++;

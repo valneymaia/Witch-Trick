@@ -51,7 +51,7 @@ try {
     await emit(sockets[chooser], 'room:ritual', { type: 'reveal' });
     await pause();
     assert.equal(states.get(players[chooser]).game.hand.length, 3);
-    await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: regular.id });
+    await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: regular.id, ...(regular.kind === 'runa-da-vontade' ? { creatureKind: 'raven' } : {}) });
   } else {
     const blind = chooserRituals[0];
     await emit(sockets[chooser], 'room:ritual', { type: 'play', ritualId: blind.id, prediction: '2-0' });

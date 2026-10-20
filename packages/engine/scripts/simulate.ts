@@ -1,4 +1,4 @@
-import { abilityOptionsFor, createGame, reduce, ritualFromId, type GameState } from '../src/index.js';
+import { CARD_BY_ID, abilityOptionsFor, createGame, reduce, ritualFromId, type GameState } from '../src/index.js';
 
 const ids: [string, string, string, string] = ['bot-0', 'bot-1', 'bot-2', 'bot-3'];
 const count = Number(process.argv.slice(2).find(arg => !arg.startsWith('--')) ?? 2000);
@@ -27,7 +27,7 @@ for (let seed = 1; seed <= count; seed++) {
             : reduce(state, { type: 'ritual-play', playerId: ids[seat]!, ritualId: blind!, prediction: '2-0' });
       } else if (state.ritualPhase === 'revealed') {
         const ritualId = state.ritualHands[seat]!.find(id => !ritualFromId(id).blind)!;
-        state = reduce(state, { type: 'ritual-play', playerId: ids[seat]!, ritualId });
+        state = reduce(state, { type: 'ritual-play', playerId: ids[seat]!, ritualId, creatureKind: CARD_BY_ID[state.hands[seat]![0]!]!.kind });
       } else if (state.ritualPhase === 'blind-discard' || state.ritualPhase === 'revealed-discard') {
         const choice = state.ritualPhase === 'blind-discard' ? '0' : state.ritualExchange!.newCardIds[0]!;
         state = reduce(state, { type: 'ritual-discard', playerId: ids[seat]!, choice });

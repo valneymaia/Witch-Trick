@@ -1,10 +1,10 @@
 # Rituais: primeiro lote jogável
 
-Esta especificação registra as decisões do Valney para o baralho separado de Rituais. Os quatro Rituais abaixo já estão ativos na partida digital com cartas provisórias em texto. O PDF `cartas ritual oficial.pdf` é referência visual; o texto jogável também fica disponível na interface.
+Esta especificação registra as decisões do Valney para o baralho separado de Rituais. O primeiro lote de quatro cartas recebeu artes individuais de `ritual (1).zip`, todas em 800 × 1132 px. O texto jogável também fica disponível na interface.
 
 ## Baralho e mãos
 
-- O baralho oficial terá 48 Rituais distintos. Enquanto as regras restantes são implementadas, o baralho de teste usa quatro cópias de cada um dos quatro Rituais ativos.
+- O baralho oficial terá 48 Rituais distintos. Enquanto as regras restantes são implementadas, o baralho de teste usa quatro cópias de cada um dos quatro Rituais do primeiro lote com arte.
 - Cada jogador recebe três Rituais em uma mão privada.
 - Em cada rodada, exatamente um jogador joga um Ritual. O responsável segue a ordem dos assentos: 1 (Equipe A), 2 (Equipe B), 3 (Equipe A), 4 (Equipe B), repetindo. O primeiro responsável acompanha o assento inicial sorteado da partida.
 - O Ritual usado sai da mão e vai ao descarte de Rituais. Quando a mão de Rituais de um jogador acabar, ele compra três novas cartas, ou as que restarem no baralho.
@@ -22,21 +22,21 @@ O símbolo do olho cortado deve vir acompanhado do texto “Antes de ver as cria
 
 ## Primeiro lote de implementação
 
-Primeiro lote confirmado pelo Valney: quatro Rituais para exercitar os principais momentos sem ativar uma carta ainda sem regra:
+Primeiro lote do novo conjunto enviado pelo Valney:
 
 | Ritual | Momento | Regra impressa | Teste principal |
 |---|---|---|---|
-| Mapa do Destino | Antes de ver as criaturas; olho cortado | Anuncie se sua equipe vencerá por 2–0 ou 2–1. Se acertar, +1 ponto bônus. | O palpite é confirmado antes da revelação e pontua só com o resultado anunciado. |
-| Doblete Sombrio | Depois de ver as criaturas | A rodada começa valendo 2 pontos. | Trick parte do valor 2 e a recusa usa o valor já aceito. |
-| Magia Nula | Depois de ver as criaturas | As habilidades das criaturas são desativadas nesta rodada. | Bloqueia poderes de vaza e de Trick recusado durante a rodada. |
-| Silêncio da Bruxa | Depois de ver as criaturas | Os adversários não podem pedir Trick nesta rodada. | Bloqueia pedido e contra-aumento da equipe adversária; a equipe que jogou o Ritual pode pedir. |
+| Runa da Vontade | Depois de ver as criaturas | Escolha qual carta será a mais forte da rodada. | Escolhe-se uma criatura, esteja ela ou não na mão. Suas quatro Luas superam todas as demais cartas, inclusive Arcana. Entre elas e entre as outras cartas, mantém-se a ordem normal. |
+| Magia Nula | Depois de ver as criaturas | As magias estão desativadas nessa partida. | Valney definiu que bloqueia habilidades de criaturas somente na rodada atual, inclusive poderes de Trick recusado. |
+| Trick Explosivo | Depois de ver as criaturas | A rodada começa valendo 3 pontos. | Poker Trick pode subir para 4; recusar rende os 3 pontos já aceitos. |
+| Doblete Sombrio | Depois de ver as criaturas | A rodada começa valendo 2 pontos. | Hat Trick pode subir para 3; recusar rende os 2 pontos já aceitos. |
 
-As outras 44 cartas continuam fora do sorteio jogável até que seu texto seja implementado e testado. O baralho completo entra em jogo quando suas regras estiverem prontas.
+Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa anterior, mas não entram no sorteio do lote atual. As próximas oito artes recebidas ficam para lotes posteriores: Maldição da Derrota, Escolha da Anciã, Roubo Arcano, Espelho Enfeitiçado, Olho da Verdade, Véu da Incerteza, Mão Cega e Acordo de Sangue. O baralho completo entra em jogo quando as 48 regras estiverem prontas.
 
 ## Arquivos de arte
 
 - Exportar **uma frente por arquivo**, em **800 × 1131 ou 1132 px**, conforme o arredondamento do editor para a altura original de 1131,4 px. Manter a mesma medida em todas as cartas, sem margem externa, e enviar PNG ou WebP junto do arquivo editável.
-- Nomes sugeridos: `mapa-do-destino.png`, `doblete-sombrio.png`, `magia-nula.png`, `silencio-da-bruxa.png`. O verso terá seu próprio arquivo.
+- As quatro artes do lote atual estão em `packages/web/public/rituals/`: `runa-da-vontade.png`, `magia-nula.png`, `trick-explosivo.png` e `doblete-sombrio.png`. O verso terá seu próprio arquivo quando for enviado.
 - Reservar o centro para ilustração e deixar título, olho cortado e regra com contraste forte. A regra deve ser legível no tamanho físico de celular, mas a interface também mostrará texto ampliável fora da imagem.
 - O layout exibirá a arte na proporção recebida, sem esticá-la. Não é necessário criar outra resolução menor.
 

@@ -51,4 +51,4 @@ pnpm build
 
 Com `pnpm dev` aberto em outro terminal, `pnpm smoke` verifica quatro jogadores, mãos privadas, Trick com contra-aumento, jogada e reconexão.
 
-As regras de referência ficam em `REGRAS.md`. Estão ativos os poderes de Corvo, Titereiro, Lobo, Fada, Goblin, Grifo, Familiar, Mago e Bruxa. Arcana não tem poder. O baralho oficial de Rituais terá 48 artes diferentes; por enquanto o baralho de teste usa quatro cópias de cada um destes efeitos: Mapa do Destino, Doblete Sombrio, Magia Nula e Silêncio da Bruxa. As artes ainda serão substituídas pelos arquivos individuais de 800 × 1131 ou 1132 px.
+As regras de referência ficam em `REGRAS.md`. Estão ativos os poderes de Corvo, Titereiro, Lobo, Fada, Goblin, Grifo, Familiar, Mago e Bruxa. Arcana não tem poder. O baralho oficial de Rituais terá 48 artes diferentes; por enquanto o baralho de teste usa quatro cópias de Runa da Vontade, Magia Nula, Trick Explosivo e Doblete Sombrio. As quatro artes recebidas estão em `packages/web/public/rituals/`, em 800 × 1132 px, e podem ser ampliadas durante o jogo. Veja `RITUAIS.md` para as regras e pendências deste lote.
