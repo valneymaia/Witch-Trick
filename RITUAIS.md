@@ -28,8 +28,8 @@ Primeiro lote do novo conjunto enviado pelo Valney:
 |---|---|---|---|
 | Runa da Vontade | Depois de ver as criaturas | Escolha qual carta será a mais forte da rodada. | Escolhe-se uma criatura, esteja ela ou não na mão. Suas quatro Luas superam todas as demais cartas, inclusive Arcana. Entre elas e entre as outras cartas, mantém-se a ordem normal. |
 | Magia Nula | Depois de ver as criaturas | As magias estão desativadas nessa partida. | Valney definiu que bloqueia habilidades de criaturas somente na rodada atual, inclusive poderes de Trick recusado. |
-| Trick Explosivo | Depois de ver as criaturas | A rodada começa valendo 3 pontos. | Poker Trick pode subir para 4; recusar rende os 3 pontos já aceitos. |
-| Doblete Sombrio | Depois de ver as criaturas | A rodada começa valendo 2 pontos. | Hat Trick pode subir para 3; recusar rende os 2 pontos já aceitos. |
+| Trick Explosivo | Depois de ver as criaturas | A rodada começa valendo 3 pontos. | Double, Hat e Poker aceitos levam a 5, 6 e 7 pontos. Na recusa, ganha-se o último valor aceito. |
+| Doblete Sombrio | Depois de ver as criaturas | A rodada começa valendo 2 pontos. | Double, Hat e Poker aceitos levam a 4, 5 e 6 pontos. Na recusa, ganha-se o último valor aceito. |
 
 Mapa do Destino e Silêncio da Bruxa continuam no código e nos testes da etapa anterior, mas não entram no sorteio do lote atual. As próximas oito artes recebidas ficam para lotes posteriores: Maldição da Derrota, Escolha da Anciã, Roubo Arcano, Espelho Enfeitiçado, Olho da Verdade, Véu da Incerteza, Mão Cega e Acordo de Sangue. O baralho completo entra em jogo quando as 48 regras estiverem prontas.
 

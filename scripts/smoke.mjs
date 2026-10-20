@@ -72,9 +72,13 @@ try {
   await emit(sockets[turn], 'room:raise', {});
   await pause();
   assert.equal(states.get(players[0]).game.pendingChallenge.responderSeat, responder);
+  assert.equal(states.get(players[0]).game.pendingChallenge.level, 2);
   await assert.rejects(emit(sockets[(turn + 2) % 4], 'room:respond', { accept: true }));
   await emit(sockets[responder], 'room:respond', { accept: true });
   await pause();
+  const accepted = states.get(players[0]).game;
+  assert.equal(accepted.roundStake, accepted.roundBaseStake === 1 ? 2 : accepted.roundBaseStake + 2);
+  assert.equal(accepted.acceptedTrickLevel, 2);
   const cardId = states.get(players[turn]).game.hand[0].id;
   await emit(sockets[turn], 'room:play', { cardId });
   await pause();

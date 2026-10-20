@@ -15,7 +15,9 @@ export interface GameView {
   trickWins: [number, number];
   trickWinners: Team[];
   scores: [number, number];
+  roundBaseStake: number;
   roundStake: number;
+  acceptedTrickLevel: GameState['acceptedTrickLevel'];
   lastRaiseTeam: Team | null;
   pendingChallenge: PendingChallenge | null;
   pendingAbility: { seat: number; source: 'declined' | 'trick'; stage: AbilityStage; card: CreatureCard | null; appliesNextRound: boolean } | null;
@@ -82,7 +84,8 @@ export function viewFor(state: GameState, playerId: string): GameView {
     })),
     trick: state.trick.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
     trickWins: [...state.trickWins], trickWinners: [...state.trickWinners],
-    scores: [...state.scores], roundStake: state.roundStake,
+    scores: [...state.scores], roundBaseStake: state.roundBaseStake,
+    roundStake: state.roundStake, acceptedTrickLevel: state.acceptedTrickLevel,
     lastRaiseTeam: state.lastRaiseTeam,
     pendingChallenge: state.pendingChallenge && { ...state.pendingChallenge },
     pendingAbility: state.pendingAbility && {

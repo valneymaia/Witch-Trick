@@ -10,7 +10,7 @@
 - [x] Salas por código, quatro assentos, servidor autoritativo e reconexão por identidade local.
 - [x] Lobby, mesa, mão, placar, preenchimento com bots e controle dos quatro assentos em uma aba.
 - [x] Três luas sequenciais no topo, com âmbar para a Equipe A e verde de poção para a B; histórico da rodada anterior.
-- [x] Double Trick, Hat Trick e Poker Trick: pedir antes da carta, resposta do próximo assento, aceite/recusa, aumento alternado e pontuação até 4.
+- [x] Double Trick, Hat Trick e Poker Trick: pedir antes da carta, resposta do próximo assento, aceite/recusa, aumento alternado e pontuação até 4 na rodada comum ou até 7 com Ritual de aposta.
 - [x] Resposta com contra-aumento imediato, com turno pausado e decisão devolvida ao jogador que pediu primeiro.
 - [x] Identidade por aba para testar quatro jogadores no mesmo navegador, além de dispositivos separados na mesma rede.
 - [x] Layout de mesa mais compacto no PC e mão do jogador que responde visível no modo de teste.
@@ -40,8 +40,8 @@ Validar no navegador e com jogadores em dispositivos separados as quatro artes e
 - [x] Mago troca um Ritual da mão por um Ritual aleatório de um adversário; Bruxa compra e descarta um Ritual.
 - [x] Segundo lote com arte recebida em 800 × 1132 px: Runa da Vontade, Magia Nula, Trick Explosivo e Doblete Sombrio. Arte ampliável e regra textual na interface.
 - [x] Runa fortalece as quatro Luas da criatura escolhida acima de todas as demais, inclusive Arcana; Magia Nula bloqueia habilidades de criaturas somente na rodada atual.
-- [x] Trick Explosivo inicia em 3 pontos, permite Poker Trick por 4 e rende 3 pontos na recusa.
-- [x] 45 testes do motor, 1.000 partidas simuladas com Rituais, compilação e teste de integração local com quatro conexões, escolha de Ritual, mãos privadas, Trick e reconexão.
+- [x] Doblete e Trick Explosivo mantêm o valor inicial e aceitam a sequência completa Double → Hat → Poker. Valores aceitos: 4/5/6 com Doblete e 5/6/7 com Trick Explosivo; recusa entrega o último valor aceito.
+- [x] 46 testes do motor, 1.000 partidas simuladas com Rituais e compilação. Teste de integração local com quatro conexões, escolha de Ritual, mãos privadas, Trick e reconexão realizado na etapa anterior.
 - [ ] Validação visual no navegador e partida em quatro dispositivos separados.
 
 ## Limitações conhecidas

@@ -68,10 +68,11 @@ Como cada carta é única, nunca há empate total entre duas cartas.
 
 - O jogador da vez pode pedir um Trick **antes de jogar sua carta**, em qualquer momento da rodada. Enquanto o pedido está pendente, ninguém joga carta.
 - O próximo assento na ordem de jogada responde. Se quem pediu é o último a jogar naquela vaza, responde o primeiro jogador daquela mesma vaza.
-- A sequência de valores é: 1 ponto inicial → **Double Trick** (2) → **Hat Trick** (3) → **Poker Trick** (4). Não há aumento acima de 4.
+- Na rodada comum, a sequência é: 1 ponto inicial → **Double Trick** (2) → **Hat Trick** (3) → **Poker Trick** (4). Poker é o último nível de Trick.
+- Doblete Sombrio inicia em 2 pontos e Double, Hat e Poker aceitos levam a 4, 5 e 6. Trick Explosivo inicia em 3 e os mesmos níveis levam a 5, 6 e 7. O valor inicial do Ritual soma-se ao nível aceito; a rodada comum mantém os valores 2, 3 e 4.
 - Aceitar eleva o valor da rodada e mantém a vez com quem pediu, que ainda pode escolher sua carta.
 - Em vez de aceitar ou recusar, quem recebe o pedido pode **contra-aumentar imediatamente** para o próximo nível, se ainda existir. Isso aceita o valor pedido e devolve a decisão a quem acabou de pedir. O turno de jogar carta continua pausado até terminar a sequência. Se o novo pedido for recusado, a equipe que contra-aumentou recebe o valor já aceito.
-- Recusar encerra a rodada imediatamente. A equipe de quem pediu ganha o valor **anterior**: 1 ao recusar Double, 2 ao recusar Hat, 3 ao recusar Poker.
+- Recusar encerra a rodada imediatamente. A equipe de quem pediu ganha o valor **anterior já aceito**. Na rodada comum: 1 ao recusar Double, 2 ao recusar Hat, 3 ao recusar Poker. Em rodada com Doblete ou Trick Explosivo, usa-se o valor inicial ou a soma do último Trick aceito.
 - Depois de um aumento aceito, somente a equipe adversária pode pedir o próximo aumento durante as jogadas. O pedido pode vir de qualquer um dos dois jogadores dessa equipe, desde que seja sua vez antes da carta. O contra-aumento é a resposta imediata ao pedido pendente.
 - A equipe que ganha duas vazas recebe o valor aceito, limitado ao placar alvo de 15. A rodada seguinte recomeça em 1 ponto.
 - A tela mostra três luas na ordem das vazas: âmbar para a Equipe A, verde de poção para a Equipe B. Luas restantes ficam neutras. O resultado da rodada anterior preserva seu histórico de luas.
@@ -81,7 +82,7 @@ Como cada carta é única, nunca há empate total entre duas cartas.
 Valem até o Valney dizer o contrário. Fáceis de trocar, então mantenha isoladas em constantes ou funções pequenas.
 
 1. **Início da próxima rodada.** O PDF diz "o jogador imediatamente à esquerda de quem iniciou a rodada anterior". Assumido: é o próximo na ordem de jogada (assento + 1).
-2. **Pontos por rodada.** Começa em 1 ponto; um Trick aceito eleva até 4.
+2. **Pontos por rodada.** A rodada comum começa em 1 ponto e chega a 4 com Poker. Com os Rituais de aposta, chega a 6 (Doblete) ou 7 (Trick Explosivo).
 3. **Carta que sobra.** Se a rodada acaba em 2 vazas, a terceira carta de cada jogador volta ao baralho sem efeito.
 
 ## Efeitos das criaturas (referência para a Fase 2)

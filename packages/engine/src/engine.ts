@@ -44,7 +44,9 @@ export interface GameState {
   trickWinners: Team[];
   skipNextTrickSeats: number[];
   scores: [number, number];
+  roundBaseStake: number;
   roundStake: number;
+  acceptedTrickLevel: 0 | TrickLevel;
   lastRaiseTeam: Team | null;
   pendingChallenge: PendingChallenge | null;
   pendingAbility: PendingAbility | null;
@@ -82,6 +84,9 @@ export const TARGET_SCORE = 15;
 export const ROUND_POINTS = 1;
 export const MAX_TRICK_POINTS = 4;
 export const teamOf = (seat: number): Team => (seat % 2) as Team;
+export function trickPoints(baseStake: number, level: TrickLevel): number {
+  return baseStake === ROUND_POINTS ? level : baseStake + level;
+}
 export function abilityAvailableFor(state: GameState, cardId: string): boolean {
   const kind = CARD_BY_ID[cardId]!.kind;
   return CREATURE_EFFECTS[kind].available && (state.ritualMode || (kind !== 'wizard' && kind !== 'witch'));
@@ -111,7 +116,8 @@ function deal(state: GameState, reserved?: { seat: number; cardId: string }): Ga
   if (reserved) hands[reserved.seat]!.push(reserved.cardId);
   return {
     ...state, hands, deck: cards, discard: [], trick: [], trickWins: [0, 0],
-    trickWinners: [], skipNextTrickSeats: [], roundStake: ROUND_POINTS, lastRaiseTeam: null,
+    trickWinners: [], skipNextTrickSeats: [], roundBaseStake: ROUND_POINTS,
+    roundStake: ROUND_POINTS, acceptedTrickLevel: 0, lastRaiseTeam: null,
     pendingChallenge: null, pendingAbility: null, turn: state.roundStarter, rng: seed, activeEffects: [],
     ritualPhase: state.ritualMode ? 'blind' : 'off', ritualChooser: state.roundStarter,
     ritualActiveId: null, ritualPrediction: null, ritualEmpoweredKind: null, ritualExchange: null,
@@ -123,7 +129,8 @@ export function createGame(playerIds: [string, string, string, string], seed: nu
   const rng = nextRandom(seed || 0x9e3779b9);
   const state: GameState = {
     playerIds: [...playerIds], hands: [[], [], [], []], deck: [], discard: [], trick: [],
-    trickWins: [0, 0], trickWinners: [], skipNextTrickSeats: [], scores: [0, 0], roundStake: ROUND_POINTS,
+    trickWins: [0, 0], trickWinners: [], skipNextTrickSeats: [], scores: [0, 0],
+    roundBaseStake: ROUND_POINTS, roundStake: ROUND_POINTS, acceptedTrickLevel: 0,
     lastRaiseTeam: null, pendingChallenge: null, pendingAbility: null, lastRound: null,
     round: 1, roundStarter: rng % 4,
     turn: rng % 4, lastTrickWinner: null, lastRoundWinner: null, winner: null,
@@ -398,6 +405,7 @@ export function reduce(state: GameState, action: GameAction): GameState {
       ...state, ritualHands, ritualActiveId: action.ritualId,
       ritualPrediction: ritual.kind === 'mapa-do-destino' ? action.prediction! : null,
       ritualEmpoweredKind: ritual.kind === 'runa-da-vontade' ? action.creatureKind! : null,
+      roundBaseStake: ritual.kind === 'doblete-sombrio' ? 2 : ritual.kind === 'trick-explosivo' ? 3 : state.roundBaseStake,
       roundStake: ritual.kind === 'doblete-sombrio' ? 2 : ritual.kind === 'trick-explosivo' ? 3 : state.roundStake,
       ritualPhase: state.ritualExchange ? (state.ritualPhase === 'blind' ? 'blind-discard' : 'revealed-discard') : 'play',
     }, seat);
@@ -432,7 +440,8 @@ export function reduce(state: GameState, action: GameAction): GameState {
       } };
     }
     return {
-      ...state, roundStake: pending.level, lastRaiseTeam: teamOf(pending.challengerSeat),
+      ...state, roundStake: trickPoints(state.roundBaseStake, pending.level),
+      acceptedTrickLevel: pending.level, lastRaiseTeam: teamOf(pending.challengerSeat),
       pendingChallenge: null,
     };
   }
@@ -443,7 +452,8 @@ export function reduce(state: GameState, action: GameAction): GameState {
     if (pending.level >= MAX_TRICK_POINTS) throw new Error('A aposta já está no máximo.');
     return {
       ...state,
-      roundStake: pending.level,
+      roundStake: trickPoints(state.roundBaseStake, pending.level),
+      acceptedTrickLevel: pending.level,
       lastRaiseTeam: teamOf(pending.challengerSeat),
       pendingChallenge: {
         level: (pending.level + 1) as TrickLevel,
@@ -456,12 +466,12 @@ export function reduce(state: GameState, action: GameAction): GameState {
   if (seat !== state.turn) throw new Error('Não é a vez desse jogador.');
   if (action.type === 'raise') {
     if (ritualKind === 'silencio-da-bruxa' && teamOf(seat) !== teamOf(state.ritualChooser)) throw new Error('Silêncio da Bruxa impede sua equipe de pedir Trick.');
-    if (state.roundStake >= MAX_TRICK_POINTS) throw new Error('A aposta já está no máximo.');
+    if (state.acceptedTrickLevel >= MAX_TRICK_POINTS) throw new Error('A aposta já está no máximo.');
     if (state.lastRaiseTeam === teamOf(seat)) throw new Error('Só a equipe adversária pode aumentar a aposta.');
     return {
       ...state,
       pendingChallenge: {
-        level: (state.roundStake + 1) as TrickLevel,
+        level: (state.acceptedTrickLevel === 0 ? 2 : state.acceptedTrickLevel + 1) as TrickLevel,
         challengerSeat: seat,
         responderSeat: (seat + 1) % 4,
       },

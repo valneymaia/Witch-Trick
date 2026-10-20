@@ -59,20 +59,54 @@ describe('primeiro lote de Rituais', () => {
     state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'doblete-sombrio#1' });
     expect(state.roundStake).toBe(2);
     state = reduce(state, { type: 'raise', playerId: 'a' });
-    expect(state.pendingChallenge?.level).toBe(3);
+    expect(state.pendingChallenge?.level).toBe(2);
     state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
     expect(state.scores).toEqual([2, 0]);
   });
 
-  it('Trick Explosivo inicia em três pontos e pode subir para Poker Trick', () => {
-    let state = ritualState(['trick-explosivo#1']);
+  it.each([
+    ['doblete-sombrio#1', 2, 4, 5, 6],
+    ['trick-explosivo#1', 3, 5, 6, 7],
+  ] as const)('%s soma Double, Hat e Poker à base e paga só o valor aceito na recusa', (ritualId, base, doublePoints, hatPoints, pokerPoints) => {
+    let state = ritualState([ritualId], [
+      ['arcana-new'], ['arcana-waning'], ['arcana-waxing'], ['arcana-full'],
+    ]);
     state = reduce(state, { type: 'ritual-reveal', playerId: 'a' });
-    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'trick-explosivo#1' });
-    expect(state.roundStake).toBe(3);
+    state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId });
+    expect(state.roundBaseStake).toBe(base);
+    expect(state.roundStake).toBe(base);
+    expect(state.acceptedTrickLevel).toBe(0);
     state = reduce(state, { type: 'raise', playerId: 'a' });
+    expect(state.pendingChallenge?.level).toBe(2);
+    expect(state.roundStake).toBe(base);
+    const declinedDouble = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    expect(declinedDouble.scores).toEqual([base, 0]);
+
+    state = reduce(state, { type: 'counter', playerId: 'b' });
+    expect(state.roundStake).toBe(doublePoints);
+    expect(state.acceptedTrickLevel).toBe(2);
+    expect(state.pendingChallenge?.level).toBe(3);
+    const declinedHat = reduce(state, { type: 'respond', playerId: 'a', accept: false });
+    expect(declinedHat.scores).toEqual([0, doublePoints]);
+
+    state = reduce(state, { type: 'counter', playerId: 'a' });
+    expect(state.roundStake).toBe(hatPoints);
+    expect(state.acceptedTrickLevel).toBe(3);
     expect(state.pendingChallenge?.level).toBe(4);
-    state = reduce(state, { type: 'respond', playerId: 'b', accept: false });
-    expect(state.scores).toEqual([3, 0]);
+    const declinedPoker = reduce(state, { type: 'respond', playerId: 'b', accept: false });
+    expect(declinedPoker.scores).toEqual([hatPoints, 0]);
+
+    state = reduce(state, { type: 'respond', playerId: 'b', accept: true });
+    expect(state.roundStake).toBe(pokerPoints);
+    expect(state.acceptedTrickLevel).toBe(4);
+    expect(() => reduce(state, { type: 'raise', playerId: 'a' })).toThrow('máximo');
+    state = {
+      ...state, turn: 0, trickWins: [1, 0], trickWinners: [0],
+      hands: [['arcana-full'], ['arcana-new'], ['arcana-waning'], ['arcana-waxing']],
+    };
+    state = playFullTrick(state, ['arcana-full', 'arcana-new', 'arcana-waning', 'arcana-waxing']);
+    expect(state.lastRound?.points).toBe(pokerPoints);
+    expect(state.scores).toEqual([pokerPoints, 0]);
   });
 
   it('Runa da Vontade torna todas as Luas da criatura escolhida superiores à Arcana', () => {

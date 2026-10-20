@@ -1,8 +1,8 @@
 export const RITUALS = [
   { kind: 'runa-da-vontade', name: 'Runa da Vontade', blind: false, image: '/rituals/runa-da-vontade.png', description: 'Escolha uma criatura. As quatro Luas dela ficam acima de todas as demais cartas, inclusive as Arcanas, nesta rodada. Entre elas, vale a ordem normal das Luas.' },
   { kind: 'magia-nula', name: 'Magia Nula', blind: false, image: '/rituals/magia-nula.png', description: 'As habilidades de criaturas ficam desativadas nesta rodada.' },
-  { kind: 'trick-explosivo', name: 'Trick Explosivo', blind: false, image: '/rituals/trick-explosivo.png', description: 'A rodada começa valendo 3 pontos.' },
-  { kind: 'doblete-sombrio', name: 'Doblete Sombrio', blind: false, image: '/rituals/doblete-sombrio.png', description: 'A rodada começa valendo 2 pontos.' },
+  { kind: 'trick-explosivo', name: 'Trick Explosivo', blind: false, image: '/rituals/trick-explosivo.png', description: 'A rodada começa valendo 3 pontos. Double, Hat e Poker Trick aceitos elevam o valor a 5, 6 e 7 pontos.' },
+  { kind: 'doblete-sombrio', name: 'Doblete Sombrio', blind: false, image: '/rituals/doblete-sombrio.png', description: 'A rodada começa valendo 2 pontos. Double, Hat e Poker Trick aceitos elevam o valor a 4, 5 e 6 pontos.' },
   { kind: 'mapa-do-destino', name: 'Mapa do Destino', blind: true, image: undefined, description: 'Antes de ver as três criaturas novas, anuncie 2–0 ou 2–1. Se sua equipe vencer a rodada com esse placar de vazas, ganha 1 ponto extra.' },
   { kind: 'silencio-da-bruxa', name: 'Silêncio da Bruxa', blind: false, description: 'A equipe adversária não pode pedir nem aumentar Trick nesta rodada.' },
 ] as const;
