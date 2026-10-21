@@ -196,8 +196,8 @@ function App() {
   const nextTrickLevel = (game?.acceptedTrickLevel ? game.acceptedTrickLevel + 1 : 2) as TrickLevel;
   const pendingTrickPoints = game?.pendingChallenge ? trickPoints(game.roundBaseStake, game.pendingChallenge.level) : null;
   const canRaise = myTurn && !silenceBlocks && game!.acceptedTrickLevel < 4 && game!.lastRaiseTeam !== (game!.turn % 2);
-  const visibleTricks = game?.trickHistory.length ? game.trickHistory : game?.lastRoundTricks ?? [];
-  const historyFromPreviousRound = !!game && game.trickHistory.length === 0 && game.lastRoundTricks.length > 0 && game.round > 1;
+  const historyFromPreviousRound = !!game && game.round > 1 && game.trick.length === 0 && game.trickHistory.length === 0 && game.lastRoundTricks.length > 0;
+  const visibleTricks = game?.trickHistory.length ? game.trickHistory : historyFromPreviousRound ? game!.lastRoundTricks : [];
   const canRespond = !!game?.pendingChallenge && game.winner === null && (room?.testMode || game.pendingChallenge.responderSeat === game.seat);
   const canCounter = canRespond && !(game?.ritualActive?.kind === 'silencio-da-bruxa' && game.pendingChallenge!.responderSeat % 2 !== game.ritualChooser % 2);
   const canAbility = !!game?.pendingAbility && game.winner === null && (room?.testMode || game.pendingAbility.seat === game.seat);
