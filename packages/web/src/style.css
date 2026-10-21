@@ -117,6 +117,20 @@
 .scenario-panel select,.scenario-panel button{border:1px solid #8f65a9;border-radius:7px;background:#39214d;color:#f4ddff;padding:6px 9px;font-size:11px}
 .ability-panel .ability-timing{color:#ffd58e;font-weight:700}
 .ability-panel.ability-card-picker{display:block}.ability-card-picker .ability-options{justify-content:flex-start;max-height:195px;overflow:auto;margin-top:9px}
+.ability-panel.ability-ritual-picker{display:block;padding:18px 20px}
+.ability-ritual-picker>div:first-child{max-width:none}
+.ability-ritual-picker .ability-choice-help{margin-top:9px;color:#ffdfa0;font-size:13px;font-weight:700}
+.ability-ritual-picker .ability-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-height:none;overflow:visible;justify-content:stretch;margin-top:16px}
+.ability-ritual-option{display:grid;grid-template-columns:105px minmax(0,1fr);gap:14px;min-width:0;padding:12px;border:1px solid #a27c53;border-radius:11px;background:#1d1325;box-shadow:inset 0 1px #ffffff16}
+.ability-ritual-art{width:105px;aspect-ratio:800/1132;padding:0;border:1px solid #b790d0;border-radius:7px;background:#09050c;overflow:hidden;align-self:start}
+.ability-ritual-art img{display:block;width:100%;height:100%;object-fit:cover}
+.ability-ritual-art span{display:grid;place-items:center;height:100%;padding:8px;color:#f3defa;text-align:center;font:700 12px 'Cinzel',serif}
+.ability-ritual-art:hover,.ability-ritual-art:focus-visible{border-color:#ffe0a0;box-shadow:0 0 0 2px #ffe0a077;outline:none}
+.ability-ritual-details{display:flex;flex-direction:column;align-items:stretch;min-width:0}
+.ability-ritual-details strong{margin:0 0 6px;color:#ffe4ac;font:700 15px 'Cinzel',serif}
+.ability-ritual-details p{margin:0 0 12px;color:#f4e7f8;font-size:13px;line-height:1.4}
+.ability-ritual-details .ability-select{margin-top:auto;min-height:43px;text-align:center;font-size:13px}
+@media(max-width:700px){.ability-panel.ability-ritual-picker{padding:14px}.ability-ritual-picker .ability-options{grid-template-columns:1fr;gap:9px;margin-top:12px}.ability-ritual-option{grid-template-columns:88px minmax(0,1fr);gap:11px;padding:10px}.ability-ritual-art{width:88px}.ability-ritual-details strong{font-size:13px}.ability-ritual-details p{font-size:12px}.ability-ritual-details .ability-select{min-height:42px}}
 .scenario-panel button:hover:not(:disabled){background:#603678}.scenario-panel small{font-size:10px;color:#a88dba}
 @media(max-width:600px){.scenario-panel{gap:6px}.scenario-panel small{width:100%}}
 .table-seat.skipping-seat{border-color:#db9f69;background:#3d261fa8}.table-seat.skipping-seat small{color:#ffd0a4}
