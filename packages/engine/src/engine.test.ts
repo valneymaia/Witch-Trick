@@ -478,7 +478,7 @@ describe('habilidades de criaturas', () => {
     expect(all).toHaveLength(40);
     expect(new Set(all).size).toBe(40);
   });
-  it('Fada revela no máximo duas cartas só ao autor e descarta a escolhida', () => {
+  it('Fada mostra as opções só ao autor e revela a carta descartada a todos', () => {
     let state = controlledState([
       ['fairy-full', 'arcana-new'], ['raven-new', 'wizard-new', 'witch-waning'],
       ['wolf-new', 'witch-new'], ['puppeteer-new', 'goblin-new'],
@@ -492,6 +492,11 @@ describe('habilidades de criaturas', () => {
     expect(viewFor(state, 'c').abilityOptions).toEqual([]);
     state = reduce(state, { type: 'ability', playerId: 'a', choice: choices[0]! });
     expect(state.hands[1]).toHaveLength(1);
+    for (const playerId of ids) {
+      expect(viewFor(state, playerId).lastCreatureReveal).toMatchObject({
+        reason: 'fairy', seat: 0, targetSeat: 1, card: { id: choices[0] },
+      });
+    }
     state = reduce(state, { type: 'play', playerId: 'a', cardId: 'arcana-new' });
     expect(state.turn).toBe(2);
     expect(state.hands[1]).toHaveLength(1);

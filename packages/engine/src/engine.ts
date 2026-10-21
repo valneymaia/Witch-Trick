@@ -41,6 +41,7 @@ export interface PendingAbility {
 }
 export type CreatureReveal =
   | { reason: 'declined'; round: number; seat: number; cardId: string }
+  | { reason: 'fairy'; round: number; seat: number; targetSeat: number; cardId: string }
   | { reason: 'goblin'; round: number; seat: number; targetSeat: number; cardId: string; tradedCardId: string; pointAwarded: boolean }
   | { reason: 'blind-discard'; source: 'griffin' | 'puppeteer'; round: number; seat: number; cardId: string };
 export interface GameState {
@@ -416,7 +417,8 @@ function chooseAbility(state: GameState, seat: number, choice: string): GameStat
     const turn = state.playerIds.map((_, offset) => (state.turn + offset) % state.playerIds.length)
       .find(candidate => !state.trick.some(play => play.seat === candidate)
         && !skipNextTrickSeats.includes(candidate) && hands[candidate]!.length) ?? state.turn;
-    return closeAbility({ ...state, hands, discard: [...state.discard, choice], skipNextTrickSeats, turn });
+    return closeAbility({ ...state, hands, discard: [...state.discard, choice], skipNextTrickSeats, turn,
+      lastCreatureReveal: { reason: 'fairy', round: state.round, seat, targetSeat: pending.targetSeat, cardId: choice } });
   }
   if (pending.stage === 'goblin-own') {
     if (choice === 'skip') return closeAbility(state);

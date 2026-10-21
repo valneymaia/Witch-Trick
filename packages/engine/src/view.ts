@@ -57,7 +57,7 @@ export interface GameView {
   ancientDiscardSeat: number | null;
   ancientDiscardsLeft: number;
   ritualDiscardOptions: { value: string; card?: CreatureCard }[];
-  lastCreatureReveal: { reason: 'declined' | 'goblin' | 'blind-discard'; round: number; seat: number; card: CreatureCard; source?: 'griffin' | 'puppeteer'; targetSeat?: number; tradedCard?: CreatureCard; pointAwarded?: boolean } | null;
+  lastCreatureReveal: { reason: 'declined' | 'fairy' | 'goblin' | 'blind-discard'; round: number; seat: number; card: CreatureCard; source?: 'griffin' | 'puppeteer'; targetSeat?: number; tradedCard?: CreatureCard; pointAwarded?: boolean } | null;
 }
 export interface AbilityOption { value: string; label: string; card?: CreatureCard; ritual?: RitualCard; seat?: number }
 export function abilityOptionsFor(state: GameState, seat: number): AbilityOption[] {
@@ -177,7 +177,8 @@ export function viewFor(state: GameState, playerId: string): GameView {
         targetSeat: state.lastCreatureReveal.targetSeat,
         tradedCard: CARD_BY_ID[state.lastCreatureReveal.tradedCardId]!,
         pointAwarded: state.lastCreatureReveal.pointAwarded,
-      } : state.lastCreatureReveal.reason === 'blind-discard' ? { source: state.lastCreatureReveal.source } : {}),
+      } : state.lastCreatureReveal.reason === 'fairy' ? { targetSeat: state.lastCreatureReveal.targetSeat }
+        : state.lastCreatureReveal.reason === 'blind-discard' ? { source: state.lastCreatureReveal.source } : {}),
     } : null,
   };
 }
