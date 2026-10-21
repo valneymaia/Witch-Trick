@@ -57,6 +57,7 @@ Validar com amigos em dispositivos e redes separados uma partida de 6 ou 8 pesso
 - [x] Menu solo permite escolher um dos oito Rituais ativos e reiniciar com ele na mão do Jogador 1 para testar seu efeito.
 - [x] Validação desta etapa: 61 testes do motor, 1.000 partidas simuladas com Rituais, compilação e teste de sala com quatro conexões e seletor de Ritual.
 - [x] Proxy do Vite aceita WebSocket do Socket.IO. Túnel temporário Cloudflare abriu a página e passou o teste de sala com quatro clientes, mãos privadas, Trick e reconexão por uma URL pública.
+- [x] Vite aceita subdomínios temporários `trycloudflare.com`, permitindo abrir o jogo pelo túnel sem liberar hosts arbitrários.
 - [x] Quarto conjunto de artes importado: Roubo Arcano, Espelho Enfeitiçado, Olho da Verdade e Acordo de Sangue. Roubo mostra uma fotografia privada da mão adversária; Olho mostra a mão atual a todos; Espelho troca mãos inteiras com decisões individuais e alvos distintos; Acordo exige consentimento dos dois parceiros.
 - [x] 65 testes do motor, 1.000 partidas simuladas com Rituais e teste de sala com quatro conexões. O Espelho faz passar automaticamente jogadores que ficaram sem cartas.
 - [x] Validação visual no navegador local: Espelho impede escolher o mesmo adversário duas vezes; Acordo exige os dois votos e inicia com 3 pontos, permitindo Double Trick por 5.
