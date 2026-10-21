@@ -74,6 +74,20 @@ describe('partida', () => {
     expect(next.trickWins).toEqual([1, 0]);
     expect(next.discard).toHaveLength(4);
   });
+  it('guarda a quarta carta no histórico da vaza concluída para todos os jogadores', () => {
+    const cards = ['raven-full', 'wizard-new', 'arcana-new', 'witch-full'];
+    const state = controlledState(cards.map(card => [card]));
+    const completed = playTrick(state, cards);
+    expect(completed.trick).toEqual([]);
+    expect(completed.trickHistory).toEqual([{
+      plays: cards.map((cardId, seat) => ({ seat, cardId })), winnerSeat: 2, winnerTeam: 0,
+    }]);
+    for (const playerId of ids) {
+      const history = viewFor(completed, playerId).trickHistory;
+      expect(history[0]?.plays.map(play => play.card.id)).toEqual(cards);
+      expect(history[0]?.winnerSeat).toBe(2);
+    }
+  });
   it('a primeira equipe com duas vazas ganha um ponto; a próxima rodada muda o inicial', () => {
     let state = controlledState([
       ['arcana-full', 'arcana-waxing', 'raven-new'],
@@ -84,6 +98,10 @@ describe('partida', () => {
     state = playTrick(state, ['arcana-full', 'witch-full', 'raven-full', 'wizard-full']);
     state = playTrick(state, ['arcana-waxing', 'witch-waxing', 'raven-waxing', 'wizard-waxing']);
     expect(state.scores).toEqual([1, 0]);
+    expect(state.lastRoundTricks).toHaveLength(2);
+    expect(state.lastRoundTricks[1]?.plays.map(play => play.cardId)).toEqual(['arcana-waxing', 'witch-waxing', 'raven-waxing', 'wizard-waxing']);
+    expect(viewFor(state, 'b').lastRoundTricks[1]?.plays[3]?.card.id).toBe('wizard-waxing');
+    expect(state.trickHistory).toEqual([]);
     expect(state.round).toBe(2);
     expect(state.roundStarter).toBe(1);
     expect(state.turn).toBe(1);

@@ -13,6 +13,8 @@ export interface GameView {
   hand: CreatureCard[];
   players: PlayerView[];
   trick: { seat: number; card: CreatureCard }[];
+  trickHistory: { plays: { seat: number; card: CreatureCard }[]; winnerSeat: number; winnerTeam: Team }[];
+  lastRoundTricks: { plays: { seat: number; card: CreatureCard }[]; winnerSeat: number; winnerTeam: Team }[];
   trickWins: [number, number];
   trickWinners: Team[];
   scores: [number, number];
@@ -115,6 +117,14 @@ export function viewFor(state: GameState, playerId: string): GameView {
         ? { visibleHand: hand.map(id => CARD_BY_ID[id]!) } : {}),
     })),
     trick: state.trick.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
+    trickHistory: state.trickHistory.map(trick => ({
+      winnerSeat: trick.winnerSeat, winnerTeam: trick.winnerTeam,
+      plays: trick.plays.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
+    })),
+    lastRoundTricks: state.lastRoundTricks.map(trick => ({
+      winnerSeat: trick.winnerSeat, winnerTeam: trick.winnerTeam,
+      plays: trick.plays.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
+    })),
     trickWins: [...state.trickWins], trickWinners: [...state.trickWinners],
     scores: [...state.scores], targetScore: state.targetScore, roundBaseStake: state.roundBaseStake,
     roundStake: state.roundStake, acceptedTrickLevel: state.acceptedTrickLevel,

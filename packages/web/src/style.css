@@ -205,3 +205,44 @@
 .ritual-hand-grid strong{font:700 14px 'Cinzel',serif;color:#f1d3ff}
 .ritual-hand-grid small{font-size:11px;color:#e5c086}
 .ritual-hand-grid p{font-size:12px;line-height:1.4;margin:0;color:#e9d8ee}
+
+/* As cores da mesa seguem as Luas: A em âmbar, B em verde de poção. */
+:root{--team-a:#ffc86e;--team-b:#8de8c3}
+.score-row .team-score:not(.team-b) strong,.score-row .team-score:not(.team-b) span,.score-row .team-score:not(.team-b) small{color:var(--team-a)}
+.score-row .team-score.team-b{border-color:#65d6b288}
+.score-row .team-score.team-b strong,.score-row .team-score.team-b span,.score-row .team-score.team-b small{color:var(--team-b)}
+.waiting-seat.team-a.occupied{border-color:#e6ac52;background:#51351e66}
+.waiting-seat.team-b.occupied{border-color:#65d6b2;background:#1d473c66}
+.waiting-seat.team-a strong,.waiting-seat.team-a small,.table-seat.team-a strong,.table-seat.team-a small{color:var(--team-a)}
+.waiting-seat.team-b strong,.waiting-seat.team-b small,.table-seat.team-b strong,.table-seat.team-b small{color:var(--team-b)}
+.table-seat.team-a{border-color:#e6ac5277}
+.table-seat.team-b{border-color:#65d6b277}
+.table-seat.team-a .seat-token{background:#805421;color:#fff0cf}
+.table-seat.team-b .seat-token{background:#276955;color:#e8fff4}
+.table-seat.active-seat{outline:2px solid #dca1ff;outline-offset:1px}
+.played-card{position:relative;isolation:isolate}
+.played-card::before{content:'';position:absolute;top:18px;width:105px;height:150px;border-radius:50%;filter:blur(24px);z-index:-1;pointer-events:none}
+.played-card.team-a::before{background:#e6a54288}
+.played-card.team-b::before{background:#49c49a88}
+.played-card.team-a .card{border-color:#e6ac52;box-shadow:0 0 20px #e6ac5266}
+.played-card.team-b .card{border-color:#65d6b2;box-shadow:0 0 20px #65d6b266}
+.played-card.team-a small{color:var(--team-a);font-weight:700}
+.played-card.team-b small{color:var(--team-b);font-weight:700}
+.trick-history{max-width:100%;margin-top:6px;padding:8px 0 4px;border-top:1px solid #a570bc44;text-align:left}
+.trick-history-label{display:block;margin:0 0 6px;color:#d8b6ec;font-size:9px;font-weight:700;letter-spacing:.17em}
+.trick-history-list{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-color:#9e6abc #241432}
+.history-trick{flex:none;min-width:max-content;padding:6px 7px;border:1px solid #725380;border-radius:8px;background:#130d20d9}
+.history-trick.team-a{border-color:#e6ac5277}
+.history-trick.team-b{border-color:#65d6b277}
+.history-trick>strong{display:block;margin-bottom:5px;font-size:9px;white-space:nowrap}
+.history-trick.team-a>strong{color:var(--team-a)}
+.history-trick.team-b>strong{color:var(--team-b)}
+.history-cards{display:flex;gap:4px}
+.history-card{display:flex;flex-direction:column;align-items:center;gap:2px;width:34px;padding:2px;border:1px solid transparent;border-radius:4px;background:#21152b;color:#f4eafc}
+.history-card.team-a{border-color:#e6ac5266;color:var(--team-a)}
+.history-card.team-b{border-color:#65d6b266;color:var(--team-b)}
+.history-card.winning-card{box-shadow:0 0 0 1px currentColor,0 0 9px currentColor}
+.history-card img{display:block;width:26px;aspect-ratio:800/1250;object-fit:cover;border-radius:2px}
+.history-card span{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;text-align:center}
+.history-card:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:600px){.trick-history-list{gap:6px}.history-trick{padding:5px}.history-cards{gap:3px}.history-card{width:30px}.history-card img{width:23px}.played-card::before{width:70px;height:110px;filter:blur(17px)}}

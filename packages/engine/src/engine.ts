@@ -3,6 +3,7 @@ import { RITUAL_TEST_DECK, ritualFromId, type RitualKind } from './rituals.js';
 
 export type Team = 0 | 1;
 export interface PlayedCard { seat: number; cardId: string }
+export interface CompletedTrick { plays: PlayedCard[]; winnerSeat: number; winnerTeam: Team }
 export type TrickLevel = 2 | 3 | 4;
 export interface PendingChallenge {
   level: TrickLevel;
@@ -48,6 +49,8 @@ export interface GameState {
   deck: string[];
   discard: string[];
   trick: PlayedCard[];
+  trickHistory: CompletedTrick[];
+  lastRoundTricks: CompletedTrick[];
   trickWins: [number, number];
   trickWinners: Team[];
   arcanaPlayedTeams: Team[];
@@ -171,7 +174,7 @@ function deal(state: GameState, reserved?: { seat: number; cardId: string }): Ga
   for (let i = 0; i < state.playerIds.length * 3; i++) hands[i % state.playerIds.length]!.push(cards.pop()!);
   if (reserved) hands[reserved.seat]!.push(reserved.cardId);
   return {
-    ...state, hands, deck: cards, discard: [], trick: [], trickWins: [0, 0],
+    ...state, hands, deck: cards, discard: [], trick: [], trickHistory: [], trickWins: [0, 0],
     trickWinners: [], arcanaPlayedTeams: [], skipNextTrickSeats: [], roundBaseStake: ROUND_POINTS,
     roundStake: ROUND_POINTS, acceptedTrickLevel: 0, lastRaiseTeam: null,
     pendingChallenge: null, pendingAbility: null, pendingRoundAbility: null, turn: state.roundStarter, rng: seed, activeEffects: [],
@@ -187,7 +190,7 @@ export function createGame(playerIds: string[], seed: number, ritualMode = false
   const rng = nextRandom(seed || 0x9e3779b9);
   const state: GameState = {
     playerIds: [...playerIds], hands: playerIds.map(() => []), deck: [], discard: [], trick: [],
-    trickWins: [0, 0], trickWinners: [], arcanaPlayedTeams: [], skipNextTrickSeats: [], scores: [0, 0], targetScore,
+    trickHistory: [], lastRoundTricks: [], trickWins: [0, 0], trickWinners: [], arcanaPlayedTeams: [], skipNextTrickSeats: [], scores: [0, 0], targetScore,
     roundBaseStake: ROUND_POINTS, roundStake: ROUND_POINTS, acceptedTrickLevel: 0,
     lastRaiseTeam: null, pendingChallenge: null, pendingAbility: null, pendingRoundAbility: null, lastRound: null,
     round: 1, roundStarter: rng % playerIds.length,
@@ -251,7 +254,9 @@ function finishRound(state: GameState, team: Team, reason: RoundResult['reason']
     ...(winnerPenalty ? { winnerPenalty } : {}),
   };
   let completed: GameState = {
-    ...state, scores, lastRoundWinner: team, lastRound: result, pendingChallenge: null, pendingAbility: null,
+    ...state, scores, lastRoundWinner: team, lastRound: result,
+    lastRoundTricks: state.trickHistory.map(completedTrick => ({ ...completedTrick, plays: completedTrick.plays.map(play => ({ ...play })) })),
+    pendingChallenge: null, pendingAbility: null,
     ritualDiscard: state.ritualActiveId ? [...state.ritualDiscard, state.ritualActiveId] : state.ritualDiscard,
     ritualActiveId: null, ritualEmpoweredKind: null,
   };
@@ -679,6 +684,7 @@ export function reduce(state: GameState, action: GameAction): GameState {
   const completed: GameState = {
     ...state, hands, trick: [], discard, trickWins, arcanaPlayedTeams, skipNextTrickSeats: [], turn: winningPlay.seat,
     lastTrickWinner: winningPlay.seat, trickWinners: [...state.trickWinners, team],
+    trickHistory: [...state.trickHistory, { plays: trick.map(play => ({ ...play })), winnerSeat: winningPlay.seat, winnerTeam: team }],
   };
   const roundEnds = trickWins[team] >= 2;
   const winningCard = CARD_BY_ID[winningPlay.cardId]!;

@@ -67,6 +67,7 @@ Validar com amigos em dispositivos e redes separados uma partida de 6 ou 8 pesso
 - [x] 74 testes do motor, 500 partidas simuladas para cada tamanho de sala (incluindo alvo 25), compilação e teste Socket.IO com salas de 4, 6 e 8 conexões; abertura e mesa de 8 conferidas no navegador local.
 - [x] Quatro novos Rituais com as artes recebidas: Escudo Arcano, Zebra Mística, Blefe Premiado e Visão Compartilhada. Escudo desconta 1 ponto de quem venceu contra sua equipe; Zebra registra quem estava atrás na escolha; Blefe conta apenas Arcanas jogadas pela equipe do Ritual; Visão mostra as mãos atuais somente aos parceiros.
 - [x] 81 testes do motor, compilação e 100 partidas simuladas com Rituais para cada tamanho de sala (4, 6 e 8 jogadores, alvo 25).
+- [x] Histórico compacto das cartas de cada vaza concluída na mesa, inclusive a última jogada. A rodada anterior fica consultável até a primeira vaza da próxima. Assentos, nomes e cartas usam as mesmas cores das Luas: Equipe A âmbar e Equipe B verde.
 - [ ] Partida completa com amigos em dispositivos e redes separados.
 
 ## Limitações conhecidas
