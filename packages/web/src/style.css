@@ -260,3 +260,25 @@ button.ability-choice-art:hover,button.ability-choice-art:focus-visible{border-c
 .history-card span{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;text-align:center}
 .history-card:focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media(max-width:600px){.trick-history-list{gap:6px}.history-trick{padding:5px}.history-cards{gap:3px}.history-card{width:30px}.history-card img{width:23px}.played-card::before{width:70px;height:110px;filter:blur(17px)}}
+
+/* O placar acompanha a partida enquanto a mesa e a mão rolam pela página. */
+.app-shell{overflow:visible}
+.score-row{position:sticky;top:0;z-index:12;padding:5px;border:1px solid #7b549388;border-radius:14px;background:#140c22f2;box-shadow:0 9px 24px #07030eb3;backdrop-filter:blur(12px)}
+.table-area.table-empty{min-height:0}
+.table-empty .table-title{margin-bottom:3px}
+.table-empty .played-cards{min-height:64px}
+.table-empty .empty-trick{font-size:39px}
+.table-empty .empty-trick span{margin-top:1px}
+@media(max-width:959px){
+  .score-row .scoreboard{margin:0 auto}
+  .score-row .vaza-progress{min-height:0;margin:4px auto 0;padding:3px 8px;flex-direction:row}
+  .score-row .vaza-heading,.score-row .team-legend{display:none}
+  .score-row .vaza-moon{width:28px;height:28px;font-size:20px}
+  .score-row .vaza-moon small{font-size:8px}
+}
+@media(max-width:600px){
+  .score-row .team-score small,.score-row .round-medallion small{display:none}
+  .score-row .team-score,.score-row .round-medallion{gap:1px;padding:5px 3px}
+  .score-row .team-score strong{font-size:24px}
+  .score-row .round-medallion strong{font-size:19px}
+}

@@ -71,6 +71,7 @@ Validar com amigos em dispositivos e redes separados uma partida de 6 ou 8 pesso
 - [x] Escolha de Ritual nas habilidades da Bruxa e do Mago ampliada em cartões com arte, descrição legível e botão de ação. Layout em duas colunas no computador e uma no celular.
 - [x] Todas as escolhas de cartas nas habilidades usam cartões maiores, incluindo Fada, Titereiro, Goblin, Grifo e a decisão do Mago. Escolhas às cegas exibem apenas o verso; ações sem carta têm botões grandes. Compilação e 82 testes do motor passaram.
 - [x] O descarte da Fada revela publicamente a criatura escolhida, com imagem, nome, Lua e jogador afetado. As opções vistas antes da escolha continuam privadas. Compilação e 82 testes do motor passaram.
+- [x] Placar e Luas permanecem visíveis durante a rolagem da partida. A mesa vazia usa menos altura, aproximando o histórico e a mão; no celular, a faixa fixa mostra placar e Luas em formato compacto.
 - [ ] Partida completa com amigos em dispositivos e redes separados.
 
 ## Limitações conhecidas
