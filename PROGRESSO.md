@@ -69,6 +69,7 @@ Validar com amigos em dispositivos e redes separados uma partida de 6 ou 8 pesso
 - [x] 81 testes do motor, compilação e 100 partidas simuladas com Rituais para cada tamanho de sala (4, 6 e 8 jogadores, alvo 25).
 - [x] Histórico compacto das cartas de cada vaza concluída na mesa, inclusive a última jogada. A rodada anterior fica consultável até a primeira vaza da próxima. Assentos, nomes e cartas usam as mesmas cores das Luas: Equipe A âmbar e Equipe B verde.
 - [x] Escolha de Ritual nas habilidades da Bruxa e do Mago ampliada em cartões com arte, descrição legível e botão de ação. Layout em duas colunas no computador e uma no celular.
+- [x] Todas as escolhas de cartas nas habilidades usam cartões maiores, incluindo Fada, Titereiro, Goblin, Grifo e a decisão do Mago. Escolhas às cegas exibem apenas o verso; ações sem carta têm botões grandes. Compilação e 82 testes do motor passaram.
 - [ ] Partida completa com amigos em dispositivos e redes separados.
 
 ## Limitações conhecidas
