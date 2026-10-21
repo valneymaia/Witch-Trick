@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { io } from 'socket.io-client';
-import { CREATURES, CREATURE_EFFECTS, MOON_NAMES, RITUALS, trickPoints, type AbilityStage, type CreatureCard, type CreatureKind, type GameView, type RitualCard, type RitualKind, type Team, type TrickLevel } from '../../engine/src/index.js';
+import { CREATURES, CREATURE_EFFECTS, MOONS, MOON_NAMES, RITUALS, trickPoints, type AbilityStage, type CreatureCard, type CreatureKind, type GameView, type RitualCard, type RitualKind, type Team, type TrickLevel } from '../../engine/src/index.js';
 import './style.css';
 
 interface SeatInfo { seat: number; name: string; bot: boolean; online: boolean }
@@ -39,6 +39,7 @@ function HiddenCard({ index, onClick, disabled = false, action = 'Jogar' }: { in
   </button>;
 }
 const trickNames = { 2: 'Double Trick', 3: 'Hat Trick', 4: 'Poker Trick' } as const;
+const creatureStrength = [...CREATURES].sort((left, right) => right.value - left.value);
 const abilityCardActions: Partial<Record<AbilityStage, string>> = {
   source: 'Ativar e descartar',
   'puppet-card': 'Recuperar esta criatura',
@@ -68,16 +69,17 @@ function App() {
   const [inspectedCard, setInspectedCard] = React.useState<CreatureCard | null>(null);
   const [inspectedRitual, setInspectedRitual] = React.useState<RitualCard | null>(null);
   const [showRitualHand, setShowRitualHand] = React.useState(false);
+  const [showGuide, setShowGuide] = React.useState(false);
   const [runaCreature, setRunaCreature] = React.useState<CreatureKind>('raven');
   const [scenarioKind, setScenarioKind] = React.useState<CreatureKind>('raven');
   const [scenarioRitual, setScenarioRitual] = React.useState<RitualKind>('veu-da-incerteza');
 
   React.useEffect(() => {
-    if (!inspectedCard && !inspectedRitual && !showRitualHand) return;
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') { setInspectedCard(null); setInspectedRitual(null); setShowRitualHand(false); } };
+    if (!inspectedCard && !inspectedRitual && !showRitualHand && !showGuide) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') { setInspectedCard(null); setInspectedRitual(null); setShowRitualHand(false); setShowGuide(false); } };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [inspectedCard, inspectedRitual, showRitualHand]);
+  }, [inspectedCard, inspectedRitual, showRitualHand, showGuide]);
 
   React.useEffect(() => {
     function onConnect() {
@@ -230,6 +232,7 @@ function App() {
     <header className="site-header">
       <div className="brand-mark">☾</div>
       <div className="brand"><span className="eyebrow">UM JOGO DE VAZAS E LUAS</span><strong>Witch's Trick</strong></div>
+      <button className="guide-trigger" type="button" onClick={() => setShowGuide(true)}>☾ Guia rápido</button>
       <div className={`connection ${connected ? 'connected' : ''}`}><span />{connected ? 'Conectado' : 'Reconectando'}</div>
     </header>
 
@@ -346,6 +349,7 @@ function App() {
       </>}
       {error && <p className="error game-error" role="alert">{error}</p>}
     </main>}
+    {showGuide && <div className="card-dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setShowGuide(false); }}><section className="quick-guide" role="dialog" aria-modal="true" aria-labelledby="quick-guide-title"><button className="card-dialog-close" type="button" aria-label="Fechar guia rápido" onClick={() => setShowGuide(false)}>×</button><span className="eyebrow">PRIMEIROS PASSOS</span><h2 id="quick-guide-title">Guia rápido</h2><p>Jogue uma criatura na sua vez. A mais forte vence a vaza e inicia a próxima. A primeira equipe a vencer duas vazas ganha a rodada.</p><div className="guide-section"><h3>Força das criaturas</h3><p>Da mais forte para a mais fraca:</p><ol className="guide-creatures">{creatureStrength.map(creature => <li key={creature.kind}><strong>{creature.name}</strong><span>{creature.value}</span></li>)}</ol></div><div className="guide-section"><h3>Se a criatura for igual, vence a Lua mais forte</h3><ol className="guide-moons">{[...MOONS].reverse().map(moon => <li key={moon}><span className={`guide-moon guide-moon-${moon}`}>☾</span>{MOON_NAMES[moon]}</li>)}</ol></div><p className="guide-footnote">O Ritual muda a regra da rodada. Antes de jogar, você pode pedir um Trick para aumentar os pontos se o rival aceitar.</p></section></div>}
     {inspectedCard && <div className="card-dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setInspectedCard(null); }}><section className="card-dialog" role="dialog" aria-modal="true" aria-label={`Detalhes de ${inspectedCard.name}`}><button className="card-dialog-close" aria-label="Fechar detalhes da carta" onClick={() => setInspectedCard(null)}>×</button><img src={inspectedCard.image} alt={`${inspectedCard.name}, Lua ${MOON_NAMES[inspectedCard.moon]}`} /><div className="card-dialog-text"><span className="eyebrow">LUA {MOON_NAMES[inspectedCard.moon].toUpperCase()} · VALOR {inspectedCard.value}</span><h2>{inspectedCard.name}</h2><h3>Habilidade</h3><p>{CREATURE_EFFECTS[inspectedCard.kind].description}</p>{!CREATURE_EFFECTS[inspectedCard.kind].available && inspectedCard.kind !== 'arcana' && <strong>Indisponível nesta versão</strong>}<button className="secondary-button" onClick={() => setInspectedCard(null)}>Voltar ao jogo</button></div></section></div>}
     {inspectedRitual && <div className="card-dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setInspectedRitual(null); }}><section className="card-dialog ritual-dialog" role="dialog" aria-modal="true" aria-label={`Detalhes de ${inspectedRitual.name}`}><button className="card-dialog-close" aria-label="Fechar detalhes do Ritual" onClick={() => setInspectedRitual(null)}>×</button>{inspectedRitual.image && <img src={inspectedRitual.image} alt={`Arte do Ritual ${inspectedRitual.name}`} />}<div className="card-dialog-text"><span className="eyebrow">RITUAL · {inspectedRitual.blind ? 'ANTES DE VER AS CRIATURAS' : 'APÓS VER AS CRIATURAS'}</span><h2>{inspectedRitual.name}</h2><h3>Regra</h3><p>{inspectedRitual.description}</p><button className="secondary-button" onClick={() => setInspectedRitual(null)}>Voltar ao jogo</button></div></section></div>}
     {showRitualHand && room?.game && <div className="card-dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setShowRitualHand(false); }}><section className="ritual-hand-dialog" role="dialog" aria-modal="true" aria-label="Meus Rituais"><button className="card-dialog-close" aria-label="Fechar minha mão de Rituais" onClick={() => setShowRitualHand(false)}>×</button><span className="eyebrow">RITUAIS DE {room.seats[controlledSeat ?? room.game.seat]?.name?.toUpperCase()}</span><h2>Minha mão de Rituais</h2><div className="ritual-hand-grid">{displayedRitualHand.map(card => <article key={card.id}>{card.image && <img src={card.image} alt={`Arte de ${card.name}`} />}<strong>{card.name}</strong><small>{card.blind ? 'Com olhinho · antes de ver criaturas' : 'Sem olhinho · após ver criaturas'}</small><p>{card.description}</p></article>)}</div>{!displayedRitualHand.length && <p>Sem Rituais na mão neste momento.</p>}</section></div>}
