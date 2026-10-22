@@ -181,6 +181,60 @@ button.ability-choice-art:hover,button.ability-choice-art:focus-visible{border-c
 .ritual-decision{display:grid;gap:8px;margin-top:10px;padding:12px;border:1px solid #9b6ec4;border-radius:10px;background:#1a1028;color:#f5dcff;font-size:13px}
 .ritual-decision p{margin:0;color:#d7c2e5;line-height:1.4}
 .ritual-decision small{color:#dfbbef}
+.ritual-panel-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+.ritual-panel-actions button,.ritual-decision .ritual-mode-actions button{min-height:44px;padding:10px 18px;border:1px solid #ffd998;border-radius:9px;background:#e8ac55;color:#271421;font-size:14px;font-weight:800;cursor:pointer}
+.ritual-panel-actions button:hover:not(:disabled),.ritual-decision .ritual-mode-actions button:hover:not(:disabled){background:#ffcf7e}
+.ritual-panel-actions button:disabled,.ritual-decision .ritual-mode-actions button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:600px){.ritual-panel-actions button{width:100%}.ritual-decision .ritual-mode-actions button{flex:1}}
+.bond-choice-row{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px 14px}
+.bond-choice-row .ritual-seal-options{min-width:0;margin-top:0}
+.bond-choice-row .ritual-panel-actions{margin-top:0}
+@media(max-width:600px){.bond-choice-row .ritual-panel-actions{width:100%}}
+.todos-por-um-panel{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.todos-copy{display:grid;gap:8px;min-width:0}
+.todos-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-left:auto}
+.todos-actions button{min-width:156px;min-height:42px;padding:9px 14px;border-radius:9px;font-weight:800;cursor:pointer}
+.todos-actions button:disabled{opacity:.55;cursor:not-allowed}
+.todos-actions .todos-save{background:#553b29;border:1px solid #e8ac55;color:#ffdf9f}
+@media(max-width:700px){.todos-por-um-panel{align-items:stretch;flex-direction:column}.todos-actions{justify-content:stretch;margin-left:0}.todos-actions button{flex:1}}
+.ritual-seal-options{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+.ritual-seal-options .card{width:90px;max-width:28vw}
+.ritual-seal-options>button:not(.card){display:grid;justify-items:center;gap:6px;min-width:112px;max-width:150px;padding:10px;border:1px solid #a878cf;border-radius:11px;background:#2a173b;color:#fff4d8;font-weight:700;cursor:pointer}
+.ritual-seal-options>button:not(.card) img{width:82px;max-width:100%;aspect-ratio:800/1131.4;object-fit:contain}
+.ritual-seal-options>button.selected{border-color:#f4c866;background:#5b3d33;box-shadow:0 0 0 2px #f4c86666}
+.genjutsu-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:8px}
+.genjutsu-steps>div{min-width:0;padding:12px;border:1px solid #694985;border-radius:10px;background:#21142f}
+.genjutsu-steps>div>strong{display:block;margin-bottom:8px;color:#ffdf9f}
+.genjutsu-panel .ritual-seal-options>button{min-width:134px;max-width:170px}
+.genjutsu-panel .ritual-seal-options>button img{width:96px}
+.genjutsu-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+.genjutsu-actions button{min-height:44px;padding:10px 18px;border-radius:9px;font-weight:800;font-size:14px;cursor:pointer}
+.genjutsu-actions button:disabled{opacity:.55;cursor:not-allowed}
+.genjutsu-actions .genjutsu-skip{background:#a87635;border:1px solid #f8cf84;color:#fff7e4}
+.genjutsu-actions .genjutsu-skip:hover:not(:disabled){background:#c08b47}
+.moon-choice-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.moon-choice{display:flex;align-items:center;gap:9px;min-height:62px;padding:7px 12px;border:1px solid #a878cf;border-radius:10px;background:#2a173b;color:#fff4d8;font-weight:800;cursor:pointer}
+.moon-choice img{width:50px;height:50px;object-fit:contain}
+.moon-choice:hover:not(:disabled){border-color:#f4c866;background:#45304d}
+.moon-choice:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:700px){.genjutsu-steps{grid-template-columns:1fr}}
+.ritual-fortune-cards{display:flex;flex-wrap:wrap;gap:12px}
+.ritual-fortune-own{display:grid;gap:5px;justify-items:center;width:105px;padding:6px;border:2px solid #765491;border-radius:9px;background:#251633;color:#f8edff;font-size:11px;font-weight:700}
+.ritual-fortune-own.selected{border-color:#ffd070;box-shadow:0 0 14px #ffd07088}
+.ritual-fortune-own img{display:block;width:80px;aspect-ratio:800/1250;object-fit:cover;border-radius:5px}
+.ritual-fortune-own span{text-align:center;line-height:1.25}
+.ritual-fortune-opponents{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:12px}
+.ritual-fortune-opponent{min-width:0;padding:12px;border:1px solid #765491;border-radius:10px;background:#251633}
+.ritual-fortune-opponent>strong{display:block;margin-bottom:10px;color:#ffe1ad;font-size:14px}
+.ritual-fortune-opponent-cards{display:flex;flex-wrap:wrap;gap:8px}
+.ritual-fortune-opponent-cards .hidden-creature-card{width:min(82px,22vw)}
+.weakening-panel{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:12px 0;padding:13px 16px;border:1px solid #d5a461;border-radius:11px;background:#37241d;color:#ffe4b8}
+.weakening-panel strong{font:700 15px 'Cinzel',serif}
+.weakening-panel p{margin:4px 0 0;font-size:12px;line-height:1.4;color:#ecd6c0}
+.weakening-options{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.weakening-options button{padding:8px 11px;border:1px solid #e5b973;border-radius:7px;background:#79522b;color:#fff;font-size:12px;font-weight:700}
+.weakening-options button:hover:not(:disabled){background:#a47338}
+@media(max-width:700px){.weakening-panel{flex-direction:column;align-items:stretch}.weakening-options{justify-content:flex-start}}
 .ritual-info-cards{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px}
 .ritual-info-card{width:63px;aspect-ratio:800/1250;padding:0;border:1px solid #b686d1;border-radius:6px;background:#09050c;overflow:hidden}
 .ritual-info-card img{display:block;width:100%;height:100%;object-fit:contain}
@@ -269,6 +323,26 @@ button.ability-choice-art:hover,button.ability-choice-art:focus-visible{border-c
 .table-empty .played-cards{min-height:64px}
 .table-empty .empty-trick{font-size:39px}
 .table-empty .empty-trick span{margin-top:1px}
+.table-area.dice-active{min-height:270px}
+.dice-active .played-cards{min-height:0}
+.dice-stage{display:grid;justify-items:center;gap:9px;padding:6px 8px 10px;color:#f6e7fb}
+.dice-matchup{display:flex;align-items:center;justify-content:center;gap:22px}
+.dice-team{display:grid;justify-items:center;gap:5px;min-width:100px}
+.dice-team strong{font-size:13px;color:var(--team-a)}
+.dice-team.team-b strong{color:var(--team-b)}
+.die-face{width:76px;height:76px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);place-items:center;padding:12px;border-radius:15px;background:#f8ecdc;border:2px solid #ffe5be;box-shadow:0 8px 18px #0008,0 0 18px #efc87977;transform:rotate(-6deg)}
+.dice-team.team-b .die-face{box-shadow:0 8px 18px #0008,0 0 18px #68d3b977;transform:rotate(6deg)}
+.die-face.die-rolled{animation:dice-tumble .65s ease-out both}
+.die-pip{width:13px;height:13px;border-radius:50%;background:#361b42;box-shadow:inset 1px 1px 2px #0008}
+.die-question{grid-area:1/1/4/4;color:#755385;font:700 40px 'Cinzel',serif}
+.dice-number{font-weight:700;font-size:13px}
+.dice-versus{font:700 32px 'Cinzel',serif;color:#d6adee}
+.dice-stage-result{font-size:13px;color:#ffe2a9}
+.dice-roll-button{min-height:38px;padding:5px 15px;border:1px solid #ffd179;border-radius:8px;background:#986b30;color:#fff;font-weight:700}
+.dice-roll-button:hover:not(:disabled){background:#b58340}
+@keyframes dice-tumble{0%{opacity:.35;transform:translateY(-22px) rotate(-120deg) scale(.65)}55%{opacity:1;transform:translateY(5px) rotate(20deg) scale(1.14)}100%{transform:translateY(0) rotate(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.die-face.die-rolled{animation:none}}
+@media(max-width:600px){.dice-matchup{gap:12px}.dice-team{min-width:78px}.die-face{width:63px;height:63px;padding:10px}.die-pip{width:11px;height:11px}.dice-versus{font-size:25px}}
 @media(max-width:959px){
   .score-row .scoreboard{margin:0 auto}
   .score-row .vaza-progress{min-height:0;margin:4px auto 0;padding:3px 8px;flex-direction:row}
@@ -302,3 +376,5 @@ button.ability-choice-art:hover,button.ability-choice-art:focus-visible{border-c
 .guide-moon-full{color:#cb8bf4}.guide-moon-waxing{color:#ffd36d}.guide-moon-waning{color:#c6c8d6}.guide-moon-new{color:#ed827d}
 .quick-guide .guide-footnote{margin-top:18px;padding:10px 12px;border-radius:9px;background:#372244;color:#f6e1ff}
 @media(max-width:600px){.site-header{gap:7px;padding:12px 10px}.brand strong{font-size:15px}.brand .eyebrow{font-size:6px;letter-spacing:.12em}.guide-trigger{margin-left:2px;padding:7px 8px;font-size:11px}.quick-guide{padding:20px 16px}.quick-guide h2{font-size:22px}.guide-creatures{gap:5px}.guide-creatures li{padding:6px;font-size:11px}}
+.mind-control-action{max-width:530px;margin:18px auto 0;text-align:center;color:#d9c6e7;font-size:13px;line-height:1.5}.mind-control-action .secondary-button{max-width:330px;margin:12px auto 0}
+.ritual-pact-choice{display:flex;flex-wrap:wrap;align-items:end;gap:10px}.ritual-pact-choice label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#e4c7f3}.ritual-pact-choice select{min-height:38px;background:#1c102b;color:#f5e8fc;border:1px solid #8c58a7;border-radius:8px;padding:0 8px}.sealed-card-label{display:block;margin-top:7px;text-align:center;color:#d8b5e7;font-size:11px}

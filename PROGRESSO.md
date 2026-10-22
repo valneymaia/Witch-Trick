@@ -25,7 +25,13 @@
 
 ## Próximo passo
 
-Validar com amigos em dispositivos e redes separados uma partida de 6 ou 8 pessoas até 25 pontos. Depois continuar os Rituais em lotes de quatro até completar as 48 cartas.
+O baralho de 48 Rituais está completo. O próximo marco é uma partida completa com amigos em dispositivos e redes separados, até 15 ou 25 pontos. Antes da sessão, conferir em sala normal a entrada, a privacidade das mãos, a reconexão na mesma aba e a continuidade após decisões de Ritual, Trick e habilidade.
+
+- [ ] Concluir uma partida remota e confirmar placar final, histórico das vazas e anúncio da equipe vencedora em todos os dispositivos.
+- [ ] Reproduzir os problemas encontrados na sessão e corrigir primeiro os que impedem a partida de avançar; depois revisar dúvidas de regra e usabilidade.
+- [ ] Após a validação com amigos, decidir se a próxima etapa será hospedagem estável, persistência das salas ou melhorias de apresentação.
+
+O roteiro de teste está no `README.md`; `CONTEXTO.md` resume o estado atual para retomar o trabalho.
 
 ## Preparação dos Rituais
 
@@ -73,11 +79,20 @@ Validar com amigos em dispositivos e redes separados uma partida de 6 ou 8 pesso
 - [x] O descarte da Fada revela publicamente a criatura escolhida, com imagem, nome, Lua e jogador afetado. As opções vistas antes da escolha continuam privadas. Compilação e 82 testes do motor passaram.
 - [x] Placar e Luas permanecem visíveis durante a rolagem da partida. A mesa vazia usa menos altura, aproximando o histórico e a mão; no celular, a faixa fixa mostra placar e Luas em formato compacto.
 - [x] Botão “Guia rápido” ao lado do nome do jogo, com objetivo da vaza, ordem de força das dez criaturas e das quatro Luas, além de uma explicação breve de Ritual e Trick. Disponível na abertura e durante a partida.
-- [ ] Partida completa com amigos em dispositivos e redes separados.
-
+- [x] Rituais 33–36 com artes: Silêncio da Bruxa bloqueia Trick rival; Permuta Profana recolhe uma criatura escolhida por cada pessoa e passa todas ao assento seguinte; Ciclo da Lua inverte apenas as Luas; Caldeirão Bipolar enfraquece na vaza seguinte todas as Luas da criatura vencedora, inclusive Arcana. Disponíveis no baralho e no menu de teste.
+- [x] Validação do nono lote: 117 testes do motor, compilação TypeScript de engine, servidor e interface, build Vite. Permuta testada em 4, 6 e 8 assentos sem revelar escolhas privadas.
+- [x] Rituais 37–40 com as artes recebidas: Campeões Ocultos escolhe uma criatura pelo verso de cada pessoa e disputa uma vaza; Força Oculta escolhe criatura 1–6 e lança D6; Turbilhão descarta uma criatura aleatória por aliado, revela as cartas no histórico e concede a primeira vaza; Profecia Maia anuncia 1–9 às cegas e dá +2 às cartas correspondentes de toda a equipe.
+- [x] Validação do décimo lote: 122 testes do motor e compilação TypeScript de engine, servidor e interface, incluindo o Turbilhão em oito assentos.
+- [x] Força Oculta reutiliza na mesa o dado animado do X1 no Dado. O autor lança no centro da mesa e o resultado fica visível até a primeira criatura ser jogada. Compilação da interface e build Vite passaram.
+- [x] Rituais 41–48 com artes: Névoa, Todos por Um, Vínculo às Cegas, Genjutso, Vaza Premiada, Eco Temporal, Mapa do Destino e Bênção das Runas. O baralho oficial usa uma cópia de cada uma das 48 artes; o menu de teste inclui todas. A arte corrigida da Vaza Premiada foi recebida e substituída.
+- [x] Validação final do baralho: 129 testes do motor, compilação TypeScript do motor, servidor e interface, e build Vite.
+- [x] Genjutso agora permite recuperar qualquer criatura própria ainda no descarte desta rodada, inclusive da primeira vaza após a segunda, com escolha visual separada da carta descartada. O botão “Não usar agora” foi ampliado em amarelo. Bênção das Runas anuncia só o tipo da criatura e preserva a Lua privada até a carta mudar de dono. Névoa de Sussurros usa os quatro ícones de Lua enviados por Valney. 130 testes do motor e compilação TypeScript passaram.
+- [x] Os quatro ícones de Lua da Névoa de Sussurros foram substituídos pelas novas versões PNG com fundo transparente enviadas por Valney.
+- [x] Todos por Um: ação “Usar nesta vaza” movida para a direita do texto e destacada em amarelo; em telas estreitas, os botões ficam abaixo da explicação.
+- [x] Vínculo às Cegas: as duas confirmações agora são botões amarelos maiores, alinhados à direita e com largura total no celular. O mesmo destaque foi aplicado ao lançamento da Bênção das Runas e às decisões de outros Rituais. Compilação TypeScript e build Vite passaram.
+- [x] Vínculo às Cegas: confirmação ao lado das cartas em ambas as etapas da troca, eliminando uma linha vazia no computador; em telas estreitas, o botão fica logo abaixo das cartas. Compilação TypeScript e build Vite passaram.
 ## Limitações conhecidas
 
 - Salas e placares são perdidos se o servidor reiniciar.
 - O modo de controle de todos os assentos revela todas as mãos na própria aba e deve ser usado somente para testes. Para testar privacidade e multiplayer, use uma sala normal em abas ou dispositivos separados.
 - A identidade de uma aba se perde quando ela é encerrada; atualizá-la mantém o assento.
-- O baralho de teste usa quatro cópias de cada um dos dezesseis efeitos com arte. Os demais Rituais aguardam implementação em lotes de quatro.

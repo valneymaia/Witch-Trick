@@ -1,10 +1,11 @@
-import { CARD_BY_ID, type CreatureCard, type CreatureKind } from './cards.js';
-import { abilityAvailableFor, ancientDiscardSeat, isBlindToCreatures, keepsDeclaredRitualMode, mustChooseCreatureBlind, puppeteerChoices, ritualDecisionSeat, teamOf, teamSeats, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
+import { CARD_BY_ID, type CreatureCard, type CreatureKind, type Moon } from './cards.js';
+import { abilityAvailableFor, ancientDiscardSeat, championTargetSeat, genjutsuChoices, isBlindToCreatures, isMindControlled, keepsDeclaredRitualMode, mustChooseCreatureBlind, puppeteerChoices, ritualDecisionSeat, teamOf, teamSeats, type AbilityStage, type GameState, type PendingChallenge, type RoundResult, type Team } from './engine.js';
 import { ritualFromId, type RitualCard } from './rituals.js';
 
 export interface PlayerView {
   seat: number;
   handCount: number;
+  sealedCount: number;
   skipsNextTrick: boolean;
   visibleHand?: CreatureCard[];
 }
@@ -12,9 +13,9 @@ export interface GameView {
   seat: number;
   hand: CreatureCard[];
   players: PlayerView[];
-  trick: { seat: number; card: CreatureCard }[];
-  trickHistory: { plays: { seat: number; card: CreatureCard }[]; winnerSeat: number; winnerTeam: Team }[];
-  lastRoundTricks: { plays: { seat: number; card: CreatureCard }[]; winnerSeat: number; winnerTeam: Team }[];
+  trick: { seat: number; card: CreatureCard | null }[];
+  trickHistory: { plays: { seat: number; card: CreatureCard }[]; winnerSeat: number; winnerTeam: Team; weakenedSeat?: number; synthetic?: boolean }[];
+  lastRoundTricks: { plays: { seat: number; card: CreatureCard }[]; winnerSeat: number; winnerTeam: Team; weakenedSeat?: number; synthetic?: boolean }[];
   trickWins: [number, number];
   trickWinners: Team[];
   scores: [number, number];
@@ -24,7 +25,8 @@ export interface GameView {
   acceptedTrickLevel: GameState['acceptedTrickLevel'];
   lastRaiseTeam: Team | null;
   pendingChallenge: PendingChallenge | null;
-  pendingAbility: { seat: number; source: 'declined' | 'trick'; stage: AbilityStage; card: CreatureCard | null; appliesNextRound: boolean } | null;
+  mindControlReady: boolean;
+  pendingAbility: { seat: number; source: 'declined' | 'trick' | 'ritual'; stage: AbilityStage; card: CreatureCard | null; appliesNextRound: boolean; repeatsLeft: number } | null;
   abilityOptions: AbilityOption[];
   wolfTeam: Team | null;
   lastRound: RoundResult | null;
@@ -46,7 +48,36 @@ export interface GameView {
   ritualEmpoweredKind: CreatureKind | null;
   ritualTargetSeat: number | null;
   ritualDecisionSeat: number | null;
+  ritualChampionTargetSeat: number | null;
+  ritualChampionChosenSeats: number[];
+  ritualTurbulentDiscards: { seat: number; card: CreatureCard }[];
+  ritualForceKind: CreatureKind | null;
+  ritualForceRoll: number | null;
+  ritualProphecyNumber: number | null;
   ritualMirrorTargets: number[];
+  ritualPermutationChosenSeats: number[];
+  ritualBipolarWeakKind: CreatureKind | null;
+  ritualDuelSeats: [number, number] | null;
+  ritualDiceRolls: GameState['ritualDiceRolls'];
+  lastDiceResult: GameState['lastDiceResult'];
+  ritualStarAwardedTeam: Team | null;
+  ritualWeakenedSeat: number | null;
+  ritualWeakeningUsed: boolean;
+  ritualWeakeningDecision: boolean;
+  ritualMist: { moon: Moon; trickIndex: number } | null;
+  ritualSumTrickIndex: number | null;
+  ritualSumDecision: boolean;
+  ritualGenjutsuUsed: boolean;
+  ritualGenjutsuDecision: boolean;
+  ritualGenjutsuChoices: CreatureCard[];
+  ritualWagerTrickIndex: number | null;
+  ritualWagerAwarded: boolean;
+  ritualRuneRoll: number | null;
+  ritualRuneKind: CreatureKind | null;
+  ritualRuneCard: CreatureCard | null;
+  ritualBondDrawCount: number;
+  ritualBondTargetSeat: number | null;
+  ritualBondDiscards: { seat: number; card: CreatureCard }[];
   ritualVotesFor: number;
   ritualVotesCast: number;
   ritualVotesNeeded: number;
@@ -54,10 +85,11 @@ export interface GameView {
   ritualTeammateHand: { seat: number; cards: CreatureCard[] } | null;
   ritualTeammateHands: { seat: number; cards: CreatureCard[] }[];
   blindSeats: number[];
+  mindControlledSeats: number[];
   ancientDiscardSeat: number | null;
   ancientDiscardsLeft: number;
   ritualDiscardOptions: { value: string; card?: CreatureCard }[];
-  lastCreatureReveal: { reason: 'declined' | 'fairy' | 'goblin' | 'blind-discard'; round: number; seat: number; card: CreatureCard; source?: 'griffin' | 'puppeteer'; targetSeat?: number; tradedCard?: CreatureCard; pointAwarded?: boolean } | null;
+  lastCreatureReveal: { reason: 'declined' | 'accelerated' | 'fairy' | 'goblin' | 'blind-discard'; round: number; seat: number; card: CreatureCard; source?: 'griffin' | 'puppeteer'; targetSeat?: number; tradedCard?: CreatureCard; pointAwarded?: boolean } | null;
 }
 export interface AbilityOption { value: string; label: string; card?: CreatureCard; ritual?: RitualCard; seat?: number }
 export function abilityOptionsFor(state: GameState, seat: number): AbilityOption[] {
@@ -71,7 +103,7 @@ export function abilityOptionsFor(state: GameState, seat: number): AbilityOption
       ? state.hands[seat]!.map((_, index) => ({ value: String(index), label: `Ativar carta oculta ${index + 1}` }))
       : state.hands[seat]!.filter(id => abilityAvailableFor(state, id)).map(cardOption))];
     case 'offer': return [{ value: 'use', label: 'Usar habilidade' }, skip];
-    case 'puppet-card': return [skip, ...puppeteerChoices(state).map(cardOption)];
+    case 'puppet-card': return [skip, ...puppeteerChoices(state).filter(id => !pending.recoveredIds?.includes(id)).map(cardOption)];
     case 'puppet-exchange': return mustChooseCreatureBlind(state, seat, pending)
       ? state.hands[seat]!.flatMap((id, index) => id === pending.ownCardId ? [] : [{ value: String(index), label: `Descartar carta oculta ${index + 1}` }])
       : state.hands[seat]!.filter(id => id !== pending.ownCardId).map(cardOption);
@@ -97,7 +129,7 @@ export function abilityOptionsFor(state: GameState, seat: number): AbilityOption
 export function viewFor(state: GameState, playerId: string): GameView {
   const seat = state.playerIds.indexOf(playerId);
   if (seat < 0) throw new Error('Jogador não pertence a esta partida.');
-  const creaturesHidden = state.ritualMode && (state.ritualPhase === 'mode' || state.ritualPhase === 'blind' || state.ritualPhase === 'blind-discard' || isBlindToCreatures(state, seat));
+  const creaturesHidden = state.ritualMode && (state.ritualPhase === 'mode' || state.ritualPhase === 'blind' || state.ritualPhase === 'blind-discard' || state.ritualPhase === 'seal' || state.ritualPhase === 'champions' || (state.ritualPhase === 'bond-rival' && seat === state.ritualBondTargetSeat) || isBlindToCreatures(state, seat));
   const visibleHand = creaturesHidden
     ? state.ritualExchange?.seat === seat ? state.hands[seat]!.filter(id => !state.ritualExchange!.newCardIds.includes(id))
       : []
@@ -111,18 +143,23 @@ export function viewFor(state: GameState, playerId: string): GameView {
   return {
     seat, hand: visibleHand.map(id => CARD_BY_ID[id]!),
     players: state.hands.map((hand, playerSeat) => ({
-      seat: playerSeat, handCount: hand.length,
+      seat: playerSeat, handCount: hand.length + (state.sealedCardIds[playerSeat] ? 1 : 0),
+      sealedCount: state.sealedCardIds[playerSeat] ? 1 : 0,
       skipsNextTrick: state.skipNextTrickSeats.includes(playerSeat),
       ...(state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'olho-da-verdade' && state.ritualTargetSeat === playerSeat
         ? { visibleHand: hand.map(id => CARD_BY_ID[id]!) } : {}),
     })),
-    trick: state.trick.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
+    trick: state.trick.map(play => ({ seat: play.seat, card: state.ritualActiveId && ritualFromId(state.ritualActiveId).kind === 'ritual-oculto' ? null : CARD_BY_ID[play.cardId]! })),
     trickHistory: state.trickHistory.map(trick => ({
       winnerSeat: trick.winnerSeat, winnerTeam: trick.winnerTeam,
+      ...(trick.weakenedSeat !== undefined ? { weakenedSeat: trick.weakenedSeat } : {}),
+      ...(trick.synthetic ? { synthetic: true } : {}),
       plays: trick.plays.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
     })),
     lastRoundTricks: state.lastRoundTricks.map(trick => ({
       winnerSeat: trick.winnerSeat, winnerTeam: trick.winnerTeam,
+      ...(trick.weakenedSeat !== undefined ? { weakenedSeat: trick.weakenedSeat } : {}),
+      ...(trick.synthetic ? { synthetic: true } : {}),
       plays: trick.plays.map(play => ({ seat: play.seat, card: CARD_BY_ID[play.cardId]! })),
     })),
     trickWins: [...state.trickWins], trickWinners: [...state.trickWinners],
@@ -130,10 +167,12 @@ export function viewFor(state: GameState, playerId: string): GameView {
     roundStake: state.roundStake, acceptedTrickLevel: state.acceptedTrickLevel,
     lastRaiseTeam: state.lastRaiseTeam,
     pendingChallenge: state.pendingChallenge && { ...state.pendingChallenge },
+    mindControlReady: state.mindControlReady,
     pendingAbility: state.pendingAbility && {
       seat: state.pendingAbility.seat, source: state.pendingAbility.source,
       stage: state.pendingAbility.stage, card: state.pendingAbility.cardId ? CARD_BY_ID[state.pendingAbility.cardId]! : null,
       appliesNextRound: state.pendingAbility.endRound !== null,
+      repeatsLeft: state.pendingAbility.repeatsLeft ?? 1,
     },
     abilityOptions: abilityOptionsFor(state, seat),
     wolfTeam: state.activeEffects.find(effect => effect.key === 'wolf') ? teamOf(state.activeEffects.find(effect => effect.key === 'wolf')!.ownerSeat) : null,
@@ -151,10 +190,41 @@ export function viewFor(state: GameState, playerId: string): GameView {
     ritualEmpoweredKind: state.ritualEmpoweredKind,
     ritualTargetSeat: state.ritualTargetSeat,
     ritualDecisionSeat: ritualDecisionSeat(state),
+    ritualChampionTargetSeat: championTargetSeat(state),
+    ritualChampionChosenSeats: state.ritualChampionCards.flatMap((id, playerSeat) => id === null ? [] : [playerSeat]),
+    ritualTurbulentDiscards: state.ritualTurbulentDiscards.map(item => ({ seat: item.seat, card: CARD_BY_ID[item.cardId]! })),
+    ritualForceKind: state.ritualForceKind, ritualForceRoll: state.ritualForceRoll,
+    ritualProphecyNumber: state.ritualProphecyNumber,
     ritualMirrorTargets: [...state.ritualMirrorTargets],
-    ritualVotesFor: state.ritualBloodApprovals.length,
+    ritualPermutationChosenSeats: state.ritualPermutationCards.flatMap((id, playerSeat) => id === null ? [] : [playerSeat]),
+    ritualBipolarWeakKind: state.ritualBipolarWeakKind,
+    ritualDuelSeats: state.ritualDuelSeats && [...state.ritualDuelSeats] as [number, number],
+    ritualDiceRolls: [...state.ritualDiceRolls] as GameState['ritualDiceRolls'],
+    lastDiceResult: state.lastDiceResult && { ...state.lastDiceResult, rolls: [...state.lastDiceResult.rolls] as [number, number] },
+    ritualStarAwardedTeam: state.ritualStarAwardedTeam,
+    ritualWeakenedSeat: state.ritualWeakenedSeat,
+    ritualWeakeningUsed: state.ritualWeakeningUsed,
+    ritualWeakeningDecision: state.ritualWeakeningDecision,
+    ritualMist: state.ritualMist && { ...state.ritualMist },
+    ritualSumTrickIndex: state.ritualSumTrickIndex,
+    ritualSumDecision: state.ritualSumDecision,
+    ritualGenjutsuUsed: state.ritualGenjutsuUsed,
+    ritualGenjutsuDecision: state.ritualGenjutsuDecision,
+    ritualGenjutsuChoices: state.ritualGenjutsuDecision ? genjutsuChoices(state).map(id => CARD_BY_ID[id]!) : [],
+    ritualWagerTrickIndex: state.ritualWagerTrickIndex,
+    ritualWagerAwarded: state.ritualWagerAwarded,
+    ritualRuneRoll: state.ritualRuneRoll,
+    ritualRuneKind: state.ritualRuneCardId ? CARD_BY_ID[state.ritualRuneCardId]!.kind : null,
+    ritualRuneCard: state.ritualRuneCardId && (seat === state.ritualChooser || state.hands[seat]!.includes(state.ritualRuneCardId))
+      ? CARD_BY_ID[state.ritualRuneCardId]! : null,
+    ritualBondDrawCount: state.ritualBondDrawn.length,
+    ritualBondTargetSeat: state.ritualBondTargetSeat,
+    ritualBondDiscards: state.ritualBondDiscards.map(item => ({ seat: item.seat, card: CARD_BY_ID[item.cardId]! })),
+    ritualVotesFor: state.ritualPhase === 'destiny-vote' ? state.ritualDestinyApprovals.length : state.ritualBloodApprovals.length,
     ritualVotesCast: state.ritualTeamDecisions.length,
-    ritualVotesNeeded: Math.floor(teamSeats(state, teamOf(state.ritualChooser)).length / 2) + 1,
+    ritualVotesNeeded: state.ritualPhase === 'destiny-vote'
+      ? teamSeats(state, teamOf(state.ritualChooser)).length
+      : Math.floor(teamSeats(state, teamOf(state.ritualChooser)).length / 2) + 1,
     ritualPeekCards: state.ritualPeek && seat === state.ritualChooser
       ? state.ritualPeek.cardIds.map(id => CARD_BY_ID[id]!) : [],
     ritualTeammateHand: state.ritualActiveId && teamOf(seat) === teamOf(state.ritualChooser)
@@ -167,6 +237,7 @@ export function viewFor(state: GameState, playerId: string): GameView {
       ? teamSeats(state, teamOf(seat)).filter(member => member !== seat)
         .map(member => ({ seat: member, cards: state.hands[member]!.map(id => CARD_BY_ID[id]!) })) : [],
     blindSeats: state.playerIds.map((_, playerSeat) => playerSeat).filter(playerSeat => isBlindToCreatures(state, playerSeat)),
+    mindControlledSeats: state.playerIds.map((_, playerSeat) => playerSeat).filter(playerSeat => isMindControlled(state, playerSeat)),
     ancientDiscardSeat: state.ritualPhase === 'ancient-discard' ? ancientDiscardSeat(state) : null,
     ancientDiscardsLeft: state.ancientDiscardsLeft[seat]!,
     ritualDiscardOptions: discardOptions,
