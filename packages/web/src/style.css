@@ -393,3 +393,149 @@ button.ability-choice-art:hover,button.ability-choice-art:focus-visible{border-c
 @media(max-width:600px){.site-header{gap:7px;padding:12px 10px}.brand strong{font-size:15px}.brand .eyebrow{font-size:6px;letter-spacing:.12em}.guide-trigger{margin-left:2px;padding:7px 8px;font-size:11px}.quick-guide{padding:20px 16px}.quick-guide h2{font-size:22px}.guide-creatures{gap:5px}.guide-creatures li{padding:6px;font-size:11px}}
 .mind-control-action{max-width:530px;margin:18px auto 0;text-align:center;color:#d9c6e7;font-size:13px;line-height:1.5}.mind-control-action .secondary-button{max-width:330px;margin:12px auto 0}
 .ritual-pact-choice{display:flex;flex-wrap:wrap;align-items:end;gap:10px}.ritual-pact-choice label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#e4c7f3}.ritual-pact-choice select{min-height:38px;background:#1c102b;color:#f5e8fc;border:1px solid #8c58a7;border-radius:8px;padding:0 8px}.sealed-card-label{display:block;margin-top:7px;text-align:center;color:#d8b5e7;font-size:11px}
+
+.ritual-summary{max-width:1180px;min-height:52px;margin:8px auto;padding:7px 12px;border:1px solid #8f68ad;border-radius:12px;background:linear-gradient(110deg,#291936,#1b1129);display:flex;align-items:center;justify-content:space-between;gap:14px}
+.ritual-summary>div{min-width:0;display:flex;align-items:baseline;gap:10px}
+.ritual-summary strong{color:#f1d6ff;font:700 14px 'Cinzel',serif;white-space:nowrap}
+.ritual-summary small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d5bedf;font-size:11px}
+.ritual-summary button,.ritual-dialog-close{flex:none;min-height:35px;padding:7px 12px;border:1px solid #d7b574;border-radius:8px;background:#80562d;color:#fff4e3;font-size:12px;font-weight:800}
+.ritual-summary button:hover,.ritual-dialog-close:hover,.ritual-summary button:focus-visible,.ritual-dialog-close:focus-visible{background:#a67539;outline:2px solid #ffe4a4;outline-offset:2px}
+.ritual-dialog-backdrop{position:fixed;inset:0;z-index:18;display:grid;place-items:center;padding:16px;background:#090412e8}
+.ritual-panel.ritual-dialog-panel{width:min(1180px,100%);max-width:none;max-height:calc(100dvh - 32px);margin:0;overflow-y:auto;overscroll-behavior:contain;box-shadow:0 28px 90px #000d}
+.ritual-dialog-panel:focus{outline:none}
+@media(min-width:960px) and (max-height:850px){
+  .game-layout{padding-bottom:10px}.game-topbar{margin-bottom:6px}
+  .score-row .vaza-progress{min-height:62px;padding:5px 8px}.score-row .team-score,.score-row .round-medallion{padding:6px}
+  .ritual-summary{min-height:42px;margin:5px auto;padding:4px 9px}.ritual-summary button{min-height:32px}
+  .turn-banner{margin:5px 0;font-size:12px}.turn-banner small{margin-top:2px}
+  .trick-panel{min-height:47px;margin-bottom:7px;padding:6px 10px}.trick-panel strong{font-size:16px}.trick-panel button{padding:6px 9px}
+  .table-area{min-height:158px}.played-cards{min-height:116px}.played-card .card{width:62px}.table-title{margin-bottom:3px}
+  .hand-area{margin-top:6px}.hand-heading h2{font-size:16px;margin-top:2px}.hand-cards{margin-top:4px;gap:9px}.hand-cards .card{width:87px}
+  .last-round-note{margin-top:3px;padding:3px 8px}.app-shell footer{padding:5px}
+}
+@media(max-width:700px){.ritual-summary>div{display:block}.ritual-summary strong,.ritual-summary small{display:block}.ritual-dialog-backdrop{padding:10px}.ritual-panel.ritual-dialog-panel{max-height:calc(100dvh - 20px)}}
+.game-topbar-actions{display:flex;align-items:center;gap:14px}
+.test-tools-trigger{min-height:30px;padding:5px 10px;border:1px solid #a878cf;border-radius:7px;background:#2a173b;color:#f2dcff;font-size:11px;font-weight:800}
+.test-tools-backdrop{position:fixed;inset:0;z-index:18;display:grid;place-items:center;padding:16px;background:#090412e8}
+.scenario-panel.test-tools-dialog{width:min(900px,100%);max-width:none;max-height:calc(100dvh - 32px);margin:0;overflow-y:auto;padding:18px;box-shadow:0 28px 90px #000d}
+.test-tools-heading{width:100%;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.test-tools-heading strong{font:700 17px 'Cinzel',serif;color:#ffe0a1}
+.test-tools-heading button{padding:7px 12px;border:1px solid #d7b574;border-radius:8px;background:#80562d;color:#fff4e3;font-weight:800}
+@media(min-width:960px){.app-shell .game-footer{display:none}}
+@media(min-width:960px) and (max-height:850px){.site-header{padding-top:6px;padding-bottom:6px}.game-layout{padding-top:6px;padding-bottom:4px}.table-area{min-height:140px}.played-cards{min-height:100px}.hand-cards .card{width:84px}}
+@media(min-width:960px){
+  .table-area.has-history .table-center{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,38%);grid-template-rows:auto 1fr;align-items:center;column-gap:12px;min-width:0}
+  .table-area.has-history .table-title{grid-column:1/-1}
+  .table-area.has-history .played-cards{grid-column:1;grid-row:2;min-width:0}
+  .table-area.has-history .trick-history{grid-column:2;grid-row:2;min-width:0;max-width:100%;margin:0;padding:0;border-top:0}
+  .table-area.has-history .trick-history-list{max-width:100%;padding-bottom:5px}
+}
+@media(min-width:960px) and (max-height:850px){.game-topbar{margin-bottom:3px}.turn-banner{margin:3px 0}.hand-area{margin-top:3px}.table-area{padding:8px 14px 9px}}
+
+@media(min-width:960px) and (max-height:850px){
+  .table-area.players-6{grid-template-columns:minmax(0,1fr) 330px}
+  .table-area.players-8{grid-template-columns:minmax(0,1fr) 440px}
+  .table-area.players-6 .table-seats{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  .table-area.players-8 .table-seats{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+  .table-area.players-6 .table-seat,.table-area.players-8 .table-seat{gap:4px;padding:4px}
+  .table-area.players-6 .seat-token,.table-area.players-8 .seat-token{width:22px;height:22px;flex-basis:22px;font-size:10px}
+  .table-area.players-6 .table-seat strong,.table-area.players-8 .table-seat strong{font-size:9px}
+  .table-area.players-6 .table-seat small,.table-area.players-8 .table-seat small{font-size:7px;margin-top:1px}
+  .table-area.players-6 .played-card .card{width:52px}
+  .table-area.players-8 .played-card .card{width:44px}
+  .table-area.players-6 .played-cards,.table-area.players-8 .played-cards{gap:5px;min-height:100px}
+  .table-area.players-6 .played-card small,.table-area.players-8 .played-card small{max-width:65px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}
+  .table-area.players-6.has-history .table-center,.table-area.players-8.has-history .table-center{grid-template-columns:minmax(0,1fr) minmax(190px,34%);column-gap:5px}
+}
+/* Ritual choice stays on the table so the player can compare the creature hand. */
+.game-layout.choosing-ritual .turn-banner,.game-layout.choosing-ritual .trick-panel,.game-layout.choosing-ritual .table-area{display:none}
+.ritual-panel.ritual-selection-panel{margin:6px auto;padding:10px 14px}
+.ritual-selection-panel .ritual-choice-heading{margin:7px 0 6px}
+.ritual-selection-panel .ritual-choice{min-height:126px;padding:9px}
+.ritual-selection-panel .ritual-choice p{margin-bottom:4px}
+.game-layout.choosing-ritual .hand-area{margin-top:8px}
+@media(max-width:700px){.ritual-panel.ritual-selection-panel{padding:10px}.ritual-selection-panel .ritual-choices{grid-template-columns:1fr}}
+
+/* Música opcional, acionada pelo jogador no cabeçalho. */
+.music-control{display:flex;align-items:center;gap:9px;margin-left:2px;min-width:0}
+.music-control audio{display:none}
+.music-toggle{flex:none;min-height:32px;padding:6px 11px;border:1px solid #a977c4;border-radius:999px;background:#362047;color:#f4dfff;font-size:12px;font-weight:700;white-space:nowrap}
+.music-toggle[aria-pressed="true"]{border-color:#e9b968;background:#624329;color:#ffe8b8}
+.music-toggle:hover,.music-toggle:focus-visible{outline:2px solid #d5a1f3;outline-offset:2px}
+.music-volume{display:flex;align-items:center;gap:6px;color:#cdb2de;font-size:10px;font-weight:700;white-space:nowrap}
+.music-volume input{width:78px;accent-color:#d9a4f1;cursor:pointer}
+
+/* Placar e histórico mais finos, com os nomes das cores no lugar dos assentos. */
+.score-row{gap:8px;padding:3px}
+.score-row .scoreboard{grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);gap:5px}
+.score-row .team-score,.score-row .round-medallion{min-height:55px;padding:5px 6px;gap:0;justify-content:center}
+.score-row .team-score strong{font-size:25px;line-height:1}
+.score-row .round-medallion strong{font-size:19px}
+.score-row .team-score span{font-size:9px;letter-spacing:.06em}
+.score-row .round-medallion span{font-size:7px}
+.score-row .round-medallion small{font-size:8px}
+.score-row .vaza-progress{min-height:55px;padding:4px 9px;gap:6px;justify-content:space-between}
+.score-row .vaza-heading .eyebrow{font-size:8px;letter-spacing:.13em}
+.score-row .vaza-moon{width:31px;height:31px;font-size:22px}
+.score-row .moon-track{gap:6px}
+.score-row .team-legend{gap:3px;font-size:9px}
+.score-row .team-legend i{width:7px;height:7px}
+@media(max-width:959px){
+  .score-row .scoreboard{grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr)}
+  .score-row .vaza-progress{min-height:0}
+  .score-row .vaza-moon{width:27px;height:27px;font-size:19px}
+}
+@media(max-width:600px){
+  .site-header{flex-wrap:wrap}
+  .music-control{order:3;width:100%;margin-left:0;justify-content:flex-start}
+  .connection{margin-left:auto}
+  .score-row .team-score,.score-row .round-medallion{min-height:45px;padding:3px}
+  .score-row .team-score strong{font-size:23px}
+  .score-row .team-score span{font-size:8px}
+}
+/* O efeito em jogo é legível na mesa; a arte abre em tamanho de leitura. */
+.ritual-summary.ritual-summary-active{min-height:76px;padding:8px 12px;gap:12px;border-color:#bf8bd5;background:linear-gradient(105deg,#362043,#22152f 72%);box-shadow:inset 3px 0 #d5a5ef,0 4px 18px #07030e55}
+.ritual-summary .ritual-summary-card{width:45px;height:62px;min-height:0;padding:0;overflow:hidden;border:1px solid #b985d5;border-radius:5px;background:#09060d}
+.ritual-summary-card img{display:block;width:100%;height:100%;object-fit:cover}
+.ritual-summary .ritual-summary-copy{min-width:0;display:flex;flex:1;flex-direction:column;align-items:flex-start;gap:2px}
+.ritual-summary .ritual-summary-copy .eyebrow{font-size:9px}
+.ritual-summary .ritual-summary-title{min-height:0;padding:0;border:0;border-radius:0;background:none;color:#f3d2ff;font:700 18px 'Cinzel',serif;text-align:left;white-space:normal}
+.ritual-summary .ritual-summary-title:hover{background:none;text-decoration:underline}
+.ritual-summary .ritual-summary-copy p{margin:0;color:#f3e9fa;font-size:14px;line-height:1.35}
+.ritual-summary .ritual-summary-actions{display:flex;flex:none;align-items:center;justify-content:flex-end;gap:7px}
+.ritual-summary-actions button{white-space:nowrap}
+@media(min-width:960px) and (max-height:850px){.ritual-summary.ritual-summary-active{min-height:66px;padding:5px 9px}.ritual-summary .ritual-summary-card{width:39px;height:54px}.ritual-summary .ritual-summary-title{font-size:16px}.ritual-summary .ritual-summary-copy p{font-size:13px}}
+@media(max-width:700px){.ritual-summary.ritual-summary-active{flex-wrap:wrap}.ritual-summary .ritual-summary-copy{flex-basis:calc(100% - 60px)}.ritual-summary .ritual-summary-actions{width:100%;justify-content:flex-start}.ritual-summary .ritual-summary-copy p{font-size:13px}}
+
+/* A revelação atual fica maior; a anterior ocupa uma linha recolhida. */
+.creature-reveal-copy strong{font-size:17px;line-height:1.3}
+.creature-reveal-copy p{font-size:14px;line-height:1.45}
+.creature-reveal-cards button{width:61px;height:89px}
+.creature-reveal.creature-reveal-previous{display:block;padding:7px 11px;border-color:#725380;background:#21152c}
+.creature-reveal-previous summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;color:#e3c6f1;font-size:12px;font-weight:700}
+.creature-reveal-previous summary small{flex:none;color:#eac894;font-size:11px}
+.creature-reveal-previous-body{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px 2px}
+.creature-reveal-previous-body p{margin:0;color:#f4e9fb;font-size:13px}
+.creature-reveal-previous .creature-reveal-cards button{width:43px;height:62px}
+@media(max-width:600px){.creature-reveal-copy strong{font-size:15px}.creature-reveal-copy p{font-size:13px}.creature-reveal-previous summary{align-items:flex-start;flex-direction:column;gap:2px}}
+
+/* Vazas atuais ampliadas; a rodada anterior pode ser consultada até o fim desta. */
+.trick-history-label{font-size:10px}
+.history-trick>strong{font-size:11px}
+.history-card{width:42px;padding:3px}
+.history-card img{width:33px}
+.history-card span{font-size:9px}
+.trick-history-previous{margin-top:5px;padding-top:5px;border-top:1px solid #a570bc33;text-align:left}
+.trick-history-previous summary{cursor:pointer;color:#d4b5e6;font-size:11px;font-weight:700}
+.trick-history-previous[open] .trick-history-list{margin-top:7px}
+.trick-history-previous .history-card{width:32px}
+.trick-history-previous .history-card img{width:25px}
+.trick-history-previous .history-trick>strong{font-size:9px}
+@media(max-width:600px){.history-card{width:36px}.history-card img{width:28px}.history-trick>strong{font-size:10px}}
+/* As mãos reveladas pelo Ritual ficam consultáveis sem expor as cartas a outros jogadores. */
+.ritual-summary .ritual-info-trigger{border-color:#ffe1a6;background:#e8ac55;color:#271421}
+.ritual-summary .ritual-info-trigger:hover,.ritual-summary .ritual-info-trigger:focus-visible{background:#ffcf7e}
+.ritual-info-card.informative-hand-card{width:100px;aspect-ratio:auto;display:flex;flex-direction:column;gap:4px;padding:5px;align-items:center;text-align:center}
+.ritual-info-card.informative-hand-card img{width:84px;height:auto;aspect-ratio:800/1250;object-fit:cover}
+.informative-hand-card span{color:#f2defb;font-size:10px;font-weight:700;line-height:1.25}
+@media(max-width:600px){.ritual-info-card.informative-hand-card{width:82px}.ritual-info-card.informative-hand-card img{width:68px}.informative-hand-card span{font-size:9px}}.mirror-hand-preview{display:grid;gap:3px;padding:8px 10px;border:1px solid #78589a;border-radius:8px;background:#251633}.mirror-hand-preview>strong{color:#ffe1a6;font-size:12px}.mirror-hand-preview .ritual-info-cards{margin-top:2px}
