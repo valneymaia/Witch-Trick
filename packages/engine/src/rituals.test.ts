@@ -854,6 +854,8 @@ describe('décimo lote de Rituais', () => {
     expect(() => reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'forca-oculta#1', creatureKind: 'arcana' })).toThrow('valor 1 a 6');
     state = reduce(state, { type: 'ritual-play', playerId: 'a', ritualId: 'forca-oculta#1', creatureKind: 'griffin' });
     expect(state.ritualPhase).toBe('force-roll');
+    expect(viewFor(state, 'a').ritualDecisionSeat).toBe(0);
+    expect(viewFor(state, 'b').ritualDecisionSeat).toBe(0);
     expect(() => reduce(state, { type: 'ritual-force-roll', playerId: 'b' })).toThrow('vez');
     state = reduce(state, { type: 'ritual-force-roll', playerId: 'a' });
     expect(state.ritualForceRoll).toBeGreaterThanOrEqual(1);
