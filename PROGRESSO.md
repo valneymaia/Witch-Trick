@@ -91,6 +91,7 @@ O roteiro de teste está no `README.md`; `CONTEXTO.md` resume o estado atual par
 - [x] Todos por Um: ação “Usar nesta vaza” movida para a direita do texto e destacada em amarelo; em telas estreitas, os botões ficam abaixo da explicação.
 - [x] Vínculo às Cegas: as duas confirmações agora são botões amarelos maiores, alinhados à direita e com largura total no celular. O mesmo destaque foi aplicado ao lançamento da Bênção das Runas e às decisões de outros Rituais. Compilação TypeScript e build Vite passaram.
 - [x] Vínculo às Cegas: confirmação ao lado das cartas em ambas as etapas da troca, eliminando uma linha vazia no computador; em telas estreitas, o botão fica logo abaixo das cartas. Compilação TypeScript e build Vite passaram.
+- [x] Decisões das habilidades de criaturas agora abrem em janela central para o jogador da vez, sem empurrar a mesa para baixo. As cartas e ações ficam em grade compacta no computador, com adaptação ao celular; a carta reservada do Feitiço Oculto continua acessível. Compilação TypeScript e build Vite passaram.
 ## Limitações conhecidas
 
 - Salas e placares são perdidos se o servidor reiniciar.

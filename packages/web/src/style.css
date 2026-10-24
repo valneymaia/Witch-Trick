@@ -127,6 +127,21 @@ button.ability-choice-art:hover,button.ability-choice-art:focus-visible{border-c
 .ability-select:disabled,.ability-plain-choice:disabled{cursor:wait;opacity:.65}
 @media(max-width:700px){.ability-panel.ability-choice-panel{padding:14px}.ability-choice-panel .ability-options{grid-template-columns:1fr;gap:9px;margin-top:12px}.ability-choice-card{grid-template-columns:88px minmax(0,1fr);gap:11px;padding:10px}.ability-choice-art{width:88px}.ability-choice-details strong{font-size:13px}.ability-choice-details p{font-size:12px}.ability-choice-details .ability-select{min-height:44px}}
 @media(max-width:390px){.ability-choice-card{grid-template-columns:74px minmax(0,1fr)}.ability-choice-art{width:74px}}
+.ability-dialog-backdrop{position:fixed;inset:0;z-index:18;display:grid;place-items:center;padding:16px;background:#090412e8}
+.ability-panel.ability-choice-panel.ability-dialog{width:min(1080px,100%);max-width:none;max-height:calc(100dvh - 32px);margin:0;overflow-y:auto;overscroll-behavior:contain;box-shadow:0 28px 90px #000d}
+.ability-dialog:focus{outline:none}
+.ability-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ability-ritual-link{min-height:38px;padding:7px 12px;border:1px solid #d7b574;border-radius:8px;background:#5b3b27;color:#ffe3a8;font-size:12px;font-weight:800}
+.ability-ritual-link:hover,.ability-ritual-link:focus-visible{background:#80562d;outline:2px solid #ffe4a4;outline-offset:2px}
+.ability-dialog .ability-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ability-dialog .ability-choice-card{grid-template-columns:82px minmax(0,1fr);gap:10px;padding:10px}
+.ability-dialog .ability-choice-art{width:82px}
+.ability-dialog .ability-choice-details p{font-size:12px}
+.ability-sealed-option{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #a27c53;border-radius:11px;background:#1d1325;color:#ffe4ac}
+.ability-sealed-option .hidden-creature-card{width:82px}
+@media(max-width:920px){.ability-dialog .ability-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.ability-dialog-backdrop{padding:10px}.ability-panel.ability-choice-panel.ability-dialog{max-height:calc(100dvh - 20px)}.ability-dialog .ability-options{grid-template-columns:1fr}.ability-dialog-header{align-items:flex-start}.ability-ritual-link{flex:none}}
+@media(max-width:390px){.ability-dialog .ability-choice-card{grid-template-columns:74px minmax(0,1fr)}.ability-dialog .ability-choice-art{width:74px}}
 .wolf-notice{max-width:1180px;margin:8px auto;padding:8px 12px;border:1px solid #8ac6ad;border-radius:9px;background:#1c3b32;color:#d9fff1;text-align:center;font-size:12px;font-weight:700}
 .scenario-panel{max-width:1180px;margin:0 auto 10px;padding:7px 10px;border:1px solid #765591;border-radius:10px;background:#1d122aa8;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .scenario-panel label{font-size:9px;letter-spacing:.14em;color:#cda4e8;font-weight:700;display:flex;align-items:center;gap:8px}
